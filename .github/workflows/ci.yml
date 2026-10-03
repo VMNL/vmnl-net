@@ -13,6 +13,7 @@ concurrency:
 
 jobs:
   build:
+    name: Build (${{ matrix.os }}, ${{ matrix.type }})
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
