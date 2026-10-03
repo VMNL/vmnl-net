@@ -1,7 +1,12 @@
 /**
- * @file
- * @brief Public API of vmnl_net.
+ * \file net.h
+ *
+ * \defgroup Net Network
+ * \addtogroup Net
+ * \brief Public API of vmnl_net.
+ * @{
  */
+
 #ifndef VMNL_NET_H
 #define VMNL_NET_H
 
@@ -14,15 +19,14 @@ extern "C" {
 #endif
 
 /**
- * @brief Returns the version of the library as a number.
- * @return The version encoded as `(MAJOR << 16) | (MINOR << 8) | PATCH`,
- * so that two versions compare with the usual operators.
+ * \brief Gets the version of the library as an unsigned 32-bit integer.
+ * \return The version encoded as `(MAJOR << 16) | (MINOR << 8) | PATCH`, so that two versions compare with the usual operators.
  */
 VMNL_NET_API uint32_t vmnl_net_version(void);
 
 /**
- * @brief Returns the version of the library as a string.
- * @return The version as a static "MAJOR.MINOR.PATCH" string, never NULL.
+ * \brief Gets the version of the library as a string.
+ * \return The version as a static "MAJOR.MINOR.PATCH" string, never NULL.
  */
 VMNL_NET_API const char *vmnl_net_version_string(void);
 
@@ -30,4 +34,6 @@ VMNL_NET_API const char *vmnl_net_version_string(void);
 }
 #endif
 
-#endif
+#endif /* !VMNL_NET_H */
+
+/** @} */
