@@ -83,7 +83,10 @@ You need CMake 3.28 or later and one of these compilers:
 - Clang 3.3 or later, or Apple Clang;
 - MSVC from Visual Studio 2019 version 16.8 or later, with the Windows SDK 10.0.20348.0 or later.
 
-These are the first versions with C11 support, so their support is theoretical: the CI only builds and tests with the compilers of the latest GitHub runners.
+These are the first versions with C11 support.
+
+> [!NOTE]
+> Their support is theoretical: the CI only builds and tests with the compilers of the latest GitHub runners.
 
 ```sh
 git clone https://github.com/VMNL/vmnl-net.git
@@ -107,9 +110,6 @@ The tests are built with the library when it is built on its own, and run with:
 ```sh
 ctest --test-dir build --build-config Release
 ```
-
-Each build installs a single library, static or shared.
-Install them into different directories if you need both.
 
 
 ## Technical Documentation
