@@ -1,4 +1,5 @@
 # Builds and tests the static and the shared library on Linux, macOS and Windows.
+# Also checks that the sources follow .clang-format.
 name: CI
 
 on:
@@ -11,7 +12,26 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  CLANG_FORMAT_VERSION: 22.1.8
+
 jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+        timeout-minutes: 5
+
+      - name: Check the formatting
+        run: find src include tests \( -name '*.[ch]' -o -name '*.cpp' \) -exec pipx run "clang-format==$CLANG_FORMAT_VERSION" --dry-run --Werror {} +
+        timeout-minutes: 10
+
   build:
     name: Build (${{ matrix.os }}, ${{ matrix.type }})
     runs-on: ${{ matrix.os }}
