@@ -1,0 +1,15 @@
+#!/bin/sh
+# Checks the commit message with the convention checker of VMNL
+
+set -eu
+
+checker=$(mktemp)
+
+trap 'rm -f "$checker"' EXIT
+
+if ! curl -fsSL --max-time 5 -o "$checker" https://raw.githubusercontent.com/VMNL/vmnl/main/tools/commit_message.py; then
+    echo "commit-msg: cannot fetch the convention checker" >&2
+    exit 1
+fi
+
+python3 "$checker" file "$1"
