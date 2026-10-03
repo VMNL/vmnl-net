@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "vmnl/net.h"
+#include "vmnl/net/core.h"
 
 TEST(VmnlNetVersion, ProjectVersion)
 {

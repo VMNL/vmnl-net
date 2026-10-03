@@ -23,8 +23,9 @@ add_executable(vmnl_net_tests)
 
 target_sources(vmnl_net_tests
   PRIVATE
-    version/vmnl_net_version_tests.cpp
-    version/vmnl_net_version_string_tests.cpp
+    core/vmnl_net_error_string_tests.cpp
+    core/vmnl_net_version_tests.cpp
+    core/vmnl_net_version_string_tests.cpp
 )
 
 target_link_libraries(vmnl_net_tests

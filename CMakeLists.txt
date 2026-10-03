@@ -43,12 +43,13 @@ generate_export_header(vmnl_net
 
 target_sources(vmnl_net
   PRIVATE
-    src/version/vmnl_net_version.c
-    src/version/vmnl_net_version_string.c
+    src/core/vmnl_net_error_string.c
+    src/core/vmnl_net_version.c
+    src/core/vmnl_net_version_string.c
   PUBLIC
     FILE_SET HEADERS
     BASE_DIRS include ${PROJECT_BINARY_DIR}/include
-    FILES include/vmnl/net.h ${PROJECT_BINARY_DIR}/include/vmnl/net_export.h
+    FILES include/vmnl/net.h include/vmnl/net/core.h ${PROJECT_BINARY_DIR}/include/vmnl/net_export.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
