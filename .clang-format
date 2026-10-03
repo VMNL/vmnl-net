@@ -1,0 +1,14 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+ColumnLimit: 0
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+IndentCaseLabels: true
+SpaceAfterCStyleCast: true
+AlignConsecutiveAssignments:
+  Enabled: true
+AlignTrailingComments:
+  Kind: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortEnumsOnASingleLine: false
