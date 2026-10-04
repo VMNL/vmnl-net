@@ -6,6 +6,7 @@
 #ifndef VMNL_NET_H
 #define VMNL_NET_H
 
-#include "vmnl/net/core.h"
+#include <vmnl/net/context.h>
+#include <vmnl/net/core.h>
 
 #endif /* !VMNL_NET_H */
