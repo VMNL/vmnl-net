@@ -1,4 +1,4 @@
-#include "vmnl/net/core.h"
+#include <vmnl/net/core.h>
 
 const char *vmnl_net_version_string(void)
 {

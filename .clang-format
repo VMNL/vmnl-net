@@ -6,6 +6,7 @@ BraceWrapping:
   AfterFunction: true
 IndentCaseLabels: true
 SpaceAfterCStyleCast: true
+SpaceBeforeCpp11BracedList: true
 AlignConsecutiveAssignments:
   Enabled: true
 AlignTrailingComments:

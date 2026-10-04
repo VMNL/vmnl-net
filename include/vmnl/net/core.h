@@ -3,16 +3,17 @@
  *
  * \defgroup Core Core
  * \addtogroup Core
- * \brief Version and error codes of vmnl_net.
+ * \brief Version, error codes and allocator of vmnl_net.
  * @{
  */
 
 #ifndef VMNL_NET_CORE_H
 #define VMNL_NET_CORE_H
 
-#include <stdint.h>
+#include <vmnl/net_export.h>
 
-#include "vmnl/net_export.h"
+#include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +54,33 @@ VMNL_NET_API uint32_t vmnl_net_version(void);
  * \return Static "MAJOR.MINOR.PATCH" string, never NULL.
  */
 VMNL_NET_API const char *vmnl_net_version_string(void);
+
+/**
+ * \brief Function that allocates memory, same contract as malloc.
+ */
+typedef void *(*VmnlNetAllocate)(size_t size);
+
+/**
+ * \brief Function that reallocates memory, same contract as realloc.
+ */
+typedef void *(*VmnlNetReallocate)(void *pointer, size_t size);
+
+/**
+ * \brief Function that releases memory, same contract as free.
+ */
+typedef void (*VmnlNetDeallocate)(void *pointer);
+
+/**
+ * \brief Sets the functions used by the library to allocate memory.
+ * \param allocate Allocates memory.
+ * \param reallocate Reallocates memory.
+ * \param deallocate Releases memory.
+ * \return VMNL_NET_SUCCESS, or VMNL_NET_EINVAL if a function is NULL.
+ * \note The standard malloc, realloc and free are used by default.
+ * \warning Must be called while no memory allocated by the library is alive.
+ * Calling it otherwise is undefined behavior: memory allocated by the previous functions would be released by the new *deallocate*.
+ */
+VMNL_NET_API VmnlNetError vmnl_net_set_allocator(VmnlNetAllocate allocate, VmnlNetReallocate reallocate, VmnlNetDeallocate deallocate);
 
 #ifdef __cplusplus
 }
