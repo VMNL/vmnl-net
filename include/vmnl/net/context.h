@@ -18,6 +18,7 @@ extern "C" {
 
 /**
  * \brief Opaque context of the library.
+ * \note A context is not thread-safe: use it from one thread at a time.
  */
 typedef struct VmnlNetContext VmnlNetContext;
 

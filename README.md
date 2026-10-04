@@ -132,9 +132,9 @@ A version is *Planned* until work starts, *In progress* while it is built, and *
 
 | Version | Content | Target | Status |
 | --- | --- | --- | --- |
-| `0.1.0` | Build system, CI and packaging; core: library context, error codes, custom allocator and logging hooks | October 2026 | In progress |
+| `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | In progress |
 | `0.2.0` | Dynamic and circular byte buffers; monotonic clock and application-driven timers | November 2026 | Planned |
-| `0.3.0` | Non-blocking socket wrapper over BSD sockets and Winsock2, TCP stream sockets and raw UDP datagram sockets | December 2026 | Planned |
+| `0.3.0` | Non-blocking socket wrapper over BSD sockets and Winsock2, TCP stream sockets and raw UDP datagram sockets; logging hooks | December 2026 | Planned |
 | `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 | Planned |
 | `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgements and retransmission, round-trip time and packet loss statistics | March 2027 | Planned |
 | `0.6.0` | Polling for many sockets with epoll, kqueue or WSAPoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 | Planned |
