@@ -98,10 +98,8 @@ flowchart LR
 
 ### From GitHub releases
 
-Each release will ship two prebuilt archives for Linux, macOS and Windows: one with the static library and one with the shared library, both with the headers.
-They will be on the [releases page](https://github.com/VMNL/vmnl-net/releases).
-
-There is no release yet.
+Each release ships two prebuilt archives for Linux, macOS and Windows: one with the static library and one with the shared library, both with the headers.
+They are on the [releases page](https://github.com/VMNL/vmnl-net/releases).
 
 ### From sources
 
