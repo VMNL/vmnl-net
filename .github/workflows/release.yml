@@ -40,8 +40,9 @@ jobs:
           cmake --build build --config Release
         timeout-minutes: 30
 
+      # The cache may have CRLF line endings on Windows.
       - name: Check that the tag matches the project version
-        run: grep -Fxq "CMAKE_PROJECT_VERSION:STATIC=${GITHUB_REF_NAME#v}" build/CMakeCache.txt
+        run: tr -d '\r' < build/CMakeCache.txt | grep -Fx "CMAKE_PROJECT_VERSION:STATIC=${GITHUB_REF_NAME#v}" > /dev/null
         timeout-minutes: 5
 
       - name: Package the library
