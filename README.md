@@ -4,7 +4,7 @@
 
 **Networking library in C**
 
-TCP, raw UDP, reliable UDP and socket polling for games and real-time applications.
+TCP, UDP, reliable UDP (RUDP) and socket polling for games and real-time applications.
 
 <br>
 
@@ -26,11 +26,7 @@ TCP, raw UDP, reliable UDP and socket polling for games and real-time applicatio
 ---
 
 > [!WARNING]
-> **In early development.**
-> Most features are still planned and the API can change anytime until `1.0.0`.
->
-> **Do not** use it in production yet.
-
+> **Work in progress.** Anything can change without notice until `1.0.0`, use it at your own risk.
 
 ## Table of Contents
 
@@ -43,141 +39,204 @@ TCP, raw UDP, reliable UDP and socket polling for games and real-time applicatio
 - [Author](#author)
 - [License](#license)
 
-
 ## Overview
 
 `vmnl_net` is a cross-platform networking library written in C11.
-It exposes a single non-blocking API over the native socket interfaces of Linux, macOS and Windows, and builds higher-level protocols on top of it.
-It is developed as the networking module of [VMNL](https://github.com/VMNL/vmnl) and can be used on its own from any C or C++ project.
+It exposes a single non-blocking API over the native socket interfaces of Linux, macOS and Windows, and builds higher-level protocols and services on top of it.
+It is developed as the networking module of the [VMNL](https://github.com/VMNL/vmnl) project and can be used on its own from any C or C++ application.
 
 Feature highlights:
 
-- TCP, raw UDP and a reliable UDP protocol with connections and channels
+- TCP, UDP and RUDP, a reliable UDP protocol with connections and channels
 - Native readiness polling: epoll on Linux, kqueue on macOS and BSD, WSAPoll on Windows
 - IPv4 and IPv6
 - No background threads: the application drives the library from its own loop
 - Explicit resource management: opaque handles, custom allocator and logging hooks, errors returned as codes
-- An ABI designed to be wrapped from other languages, with fixed-size types and versioned structures
-
+- An ABI easy to wrap from other languages: opaque handles and fixed-size integer types, the same on every platform
 
 ## Architecture
 
 ```mermaid
-flowchart LR
-    APP["Your application"] --> NET["vmnl/net.h"]
+flowchart
+    NET["vmnl/net.h"]
     NET --> CORE["core"]
     CORE --> CTX["context"]
-    CORE --> ERR["error codes"]
+    CORE --> ERR["errors"]
     CORE --> ALLOC["allocator"]
-    CORE -.-> LOG["logging hooks"]
+    CORE -.-> LOG["logging"]
     NET -.-> DATA["data"]
-    DATA -.-> BUF["byte buffers"]
+    DATA -.-> BUF["buffers"]
     DATA -.-> SER["serialization"]
     NET -.-> TIME["time"]
-    TIME -.-> CLOCK["monotonic clock"]
+    TIME -.-> CLOCK["clock"]
     TIME -.-> TIMER["timers"]
-    NET -.-> IO["io"]
+    NET -.-> IO["I/O"]
     IO -.-> SOCK["sockets"]
     IO -.-> POLL["polling"]
     IO -.-> DNS["DNS resolution"]
     NET -.-> PROTO["protocol"]
     PROTO -.-> TCP["TCP"]
-    PROTO -.-> UDP["raw UDP"]
-    PROTO -.-> RUDP["reliable UDP"]
+    PROTO -.-> UDP["UDP"]
+    PROTO -.-> RUDP["RUDP"]
     PROTO -.-> FRAG["fragmentation"]
-    NET -.-> SERV["services"]
-    SERV -.-> HTTP["HTTP and HTTPS client"]
+    NET -.-> SERV["service"]
+    SERV -.-> HTTP["HTTP(S) client"]
     SERV -.-> CHAT["text chat"]
     SERV -.-> VOICE["voice chat"]
     NET -.-> SEC["security"]
     SEC -.-> CRYPT["encryption"]
 ```
 
-
 ## Installation
 
 ### From GitHub releases
 
-Each release ships two prebuilt archives for Linux, macOS and Windows: one with the static library and one with the shared library, both with the headers.
-They are on the [releases page](https://github.com/VMNL/vmnl-net/releases).
+Each release ships with two prebuilt archives, static and shared libraries, for Linux, macOS and Windows.
+Both contain the headers, the CMake package and the pkg-config file, and can be downloaded from the [releases page](https://github.com/VMNL/vmnl-net/releases).
+
+Extract the archive with `tar`, which ships with Linux, macOS and Windows 10 or later:
+
+```sh
+tar -xzf vmnl_net-v0.1.0-linux-x86_64-static.tar.gz
+```
+
+It creates a `vmnl_net-v0.1.0-linux-x86_64-static` folder with `include/` and `lib/`, plus `bin/` for the Windows DLL.
+Move it wherever you keep your dependencies, for example a `third_party` folder in your project: it is the prefix used in [Using the library](#using-the-library).
 
 ### From sources
 
-`vmnl_net` is written in C11.
-You need CMake 3.28 or later and one of these compilers:
+You need CMake 3.28 or later (`cmake --version`) and one of these compilers, the first versions with C11 support:
 
-- GCC 4.9 or later;
-- Clang 3.3 or later, or Apple Clang;
-- MSVC from Visual Studio 2019 version 16.8 or later, with the Windows SDK 10.0.20348.0 or later.
-
-These are the first versions with C11 support.
+- GCC 4.9 or later
+- Clang 3.3 or later
+- Apple Clang from Xcode 5.0 or later
+- MSVC from Visual Studio 2019 version 16.8 or later, with the Windows SDK 10.0.20348.0 or later
 
 > [!NOTE]
 > Their support is theoretical: the CI only builds and tests with the compilers of the latest GitHub runners.
+
+Then clone, build and install it:
 
 ```sh
 git clone https://github.com/VMNL/vmnl-net.git
 cd vmnl-net
 cmake -B build
 cmake --build build --config Release
-cmake --install build --config Release --prefix <install directory>
+cmake --install build --config Release --prefix <prefix>
 ```
 
-The build can be tuned with these CMake options:
+The build can be tuned with these CMake options, which take `ON` or `OFF`:
 
 | Option | Default | Effect |
 | --- | --- | --- |
-| `BUILD_SHARED_LIBS` | `OFF` | Builds a shared library instead of a static one |
-| `VMNL_NET_BUILD_TESTS` | `ON` when built on its own | Builds the tests |
-| `VMNL_NET_BUILD_DOCS` | `OFF` | Generates the documentation with Doxygen into `build/docs/html` |
-| `VMNL_NET_INSTALL` | `ON` when built on its own | Generates the install rules |
+| `-DBUILD_SHARED_LIBS=` | `OFF` | Builds a shared library instead of a static one |
+| `-DVMNL_NET_BUILD_TESTS=` | `ON` when built on its own | Builds the tests |
+| `-DVMNL_NET_BUILD_DOCS=` | `OFF` | Generates the documentation with Doxygen into `build/docs/html` |
+| `-DVMNL_NET_INSTALL=` | `ON` when built on its own | Generates the install rules |
 
-The tests are built with the library when it is built on its own, and run with:
+### Using the library
+
+The prefix is the extracted archive folder, or the `--prefix` given to `cmake --install`.
+
+With CMake, pass it to `CMAKE_PREFIX_PATH` when configuring your project:
+
+```sh
+cmake -B build -DCMAKE_PREFIX_PATH=<prefix>
+```
+
+Then link the library in your `CMakeLists.txt`:
+
+```cmake
+find_package(vmnl_net 0.1 REQUIRED)
+target_link_libraries(my_app PRIVATE vmnl::net)
+```
+
+Without CMake, pkg-config finds it as `vmnl-net`:
+
+```sh
+export PKG_CONFIG_PATH=<prefix>/lib/pkgconfig
+cc main.c $(pkg-config --cflags --libs vmnl-net) -o main
+```
+
+With the shared library, the program must find it at run time: add `-Wl,-rpath,<prefix>/lib` on Linux and macOS, or copy `bin/vmnl_net.dll` next to the executable on Windows.
+
+Include `<vmnl/net.h>` to get the whole API, which is described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
+
+### Development commands
+
+These commands run from the root of the repository and need clang-format 22, Doxygen and gcovr installed.
+
+Run the tests:
 
 ```sh
 ctest --test-dir build --build-config Release
 ```
 
+Generate the documentation with Doxygen into `build/docs/html`:
+
+```sh
+cmake -B build -DVMNL_NET_BUILD_DOCS=ON
+cmake --build build --target docs
+```
+
+Check the formatting with clang-format 22, or fix it by replacing `--dry-run --Werror` with `-i`:
+
+```sh
+find src include tests \( -name '*.[ch]' -o -name '*.cpp' \) -exec clang-format --dry-run --Werror {} +
+```
+
+Run the tests with the sanitizers:
+
+```sh
+CFLAGS=-fsanitize=address,undefined CXXFLAGS=-fsanitize=address,undefined LDFLAGS=-fsanitize=address,undefined cmake -B build-sanitize -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-sanitize
+ctest --test-dir build-sanitize --output-on-failure
+```
+
+Generate the coverage report with gcovr:
+
+```sh
+CFLAGS=--coverage CXXFLAGS=--coverage LDFLAGS=--coverage cmake -B build-coverage -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-coverage
+ctest --test-dir build-coverage
+gcovr --root . --filter src/ build-coverage
+```
 
 ## Technical Documentation
 
 The CI generates the API reference with Doxygen from the public headers and publishes it on [GitHub Pages](https://vmnl.github.io/vmnl-net/).
 
-
 ## Roadmap
 
 Target dates are given by month and updated at each release.
-A version is *Planned* until work starts, *In progress* while it is built, and *Released* once it is implemented, documented and tested on Linux, macOS and Windows.
+A version is *Planned* until work starts, In progress while it is built, and **Released** once it is implemented, documented and tested on Linux, macOS and Windows.
 
 | Version | Content | Target | Status |
 | --- | --- | --- | --- |
-| `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | Released |
-| `0.2.0` | Dynamic and circular byte buffers; monotonic clock and application-driven timers | November 2026 | Planned |
-| `0.3.0` | Non-blocking socket wrapper over BSD sockets and Winsock2, TCP stream sockets and raw UDP datagram sockets; logging hooks | December 2026 | Planned |
-| `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 | Planned |
-| `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgements and retransmission, round-trip time and packet loss statistics | March 2027 | Planned |
-| `0.6.0` | Polling for many sockets with epoll, kqueue or WSAPoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 | Planned |
-| `0.7.0` | Fragmentation of reliable messages larger than the path MTU | June 2027 | Planned |
-| `0.8.0` | HTTP/1.1 client ([RFC 9112](https://www.rfc-editor.org/rfc/rfc9112)) and HTTPS | October 2027 | Planned |
-| `0.9.0` | Text chat over reliable channels and voice chat over unreliable channels | November 2027 | Planned |
-| `0.10.0` | Encrypted traffic between clients and servers | December 2027 | Planned |
-| `1.0.0` | First stable release, with a stable C ABI | February 2028 | Planned |
-
+| `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | **Released** |
+| `0.2.0` | Dynamic and circular byte buffers; monotonic clock and application-driven timers | November 2026 | *Planned* |
+| `0.3.0` | Non-blocking socket wrapper over BSD sockets and Winsock2, TCP and UDP sockets; logging hooks | December 2026 | *Planned* |
+| `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 | *Planned* |
+| `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgments and retransmission, round-trip time and packet loss statistics | March 2027 | *Planned* |
+| `0.6.0` | Polling for many sockets with epoll, kqueue or WSAPoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 | *Planned* |
+| `0.7.0` | Fragmentation of reliable messages larger than the path MTU | June 2027 | *Planned* |
+| `0.8.0` | HTTP/1.1 client ([RFC 9112](https://www.rfc-editor.org/rfc/rfc9112)) and HTTPS | October 2027 | *Planned* |
+| `0.9.0` | Text chat over reliable channels and voice chat over unreliable channels | November 2027 | *Planned* |
+| `0.10.0` | Encrypted traffic between clients and servers | December 2027 | *Planned* |
+| `1.0.0` | First stable release, with a stable C ABI | February 2028 | *Planned* |
 
 ## References
 
-- [Gaffer On Games, game networking articles](https://gafferongames.com/categories/game-networking/) by Glenn Fiedler: my main source on UDP, which shaped the reliable UDP milestone: connections, sequencing, acknowledgements, packet loss and round-trip time.
+- [Gaffer On Games, game networking articles](https://gafferongames.com/categories/game-networking/) by Glenn Fiedler: my main source on UDP, which shaped the reliable UDP milestone (connections, sequencing, acknowledgments, packet loss and round-trip time).
 - [Quake 3 Source Code Review: Network Model](https://fabiensanglard.net/quake3/network.php) by Fabien Sanglard and the [Quake III Arena network channel](https://github.com/id-Software/Quake-III-Arena/blob/master/code/qcommon/net_chan.c): how a shipped game builds reliable delivery over UDP, with sequencing, delta compression and fragmentation.
 - [netcode](https://github.com/mas-bandwidth/netcode): a reference design of secure client/server connections over UDP, for the connection and encryption milestones.
 - [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/): my starting point for DNS resolution and for polling many sockets.
-- [epoll(7)](https://man7.org/linux/man-pages/man7/epoll.7.html), [kqueue(2)](https://man.freebsd.org/cgi/man.cgi?query=kqueue) and [WSAPoll](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll): the reference for the exact behaviour of each polling API.
+- [epoll(7)](https://man7.org/linux/man-pages/man7/epoll.7.html), [kqueue(2)](https://man.freebsd.org/cgi/man.cgi?query=kqueue) and [WSAPoll](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll): the reference for the exact behavior of each polling API.
 - [RFC 768](https://www.rfc-editor.org/rfc/rfc768) (UDP), [RFC 9293](https://www.rfc-editor.org/rfc/rfc9293) (TCP) and [RFC 9112](https://www.rfc-editor.org/rfc/rfc9112) (HTTP/1.1): the specifications the UDP, TCP and HTTP layers follow.
-
 
 ## Author
 
 [Laszlo Serdet](https://github.com/lszsrd), networking lead of VMNL.
-
 
 ## License
 
