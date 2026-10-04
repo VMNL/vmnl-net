@@ -26,7 +26,7 @@ TCP, raw UDP, reliable UDP and socket polling for games and real-time applicatio
 ---
 
 > [!WARNING]
-> **In development, not released yet.**
+> **In early development.**
 > Most features are still planned and the API can change anytime until `1.0.0`.
 >
 > **Do not** use it in production yet.
@@ -153,7 +153,7 @@ A version is *Planned* until work starts, *In progress* while it is built, and *
 
 | Version | Content | Target | Status |
 | --- | --- | --- | --- |
-| `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | In progress |
+| `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | Released |
 | `0.2.0` | Dynamic and circular byte buffers; monotonic clock and application-driven timers | November 2026 | Planned |
 | `0.3.0` | Non-blocking socket wrapper over BSD sockets and Winsock2, TCP stream sockets and raw UDP datagram sockets; logging hooks | December 2026 | Planned |
 | `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 | Planned |
