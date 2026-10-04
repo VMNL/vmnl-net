@@ -62,7 +62,36 @@ Feature highlights:
 
 ## Architecture
 
-TODO: describe the modules and how they depend on each other once the first ones are in place.
+```mermaid
+flowchart LR
+    APP["Your application"] --> NET["vmnl/net.h"]
+    NET --> CORE["core"]
+    CORE --> CTX["context"]
+    CORE --> ERR["error codes"]
+    CORE --> ALLOC["allocator"]
+    CORE -.-> LOG["logging hooks"]
+    NET -.-> DATA["data"]
+    DATA -.-> BUF["byte buffers"]
+    DATA -.-> SER["serialization"]
+    NET -.-> TIME["time"]
+    TIME -.-> CLOCK["monotonic clock"]
+    TIME -.-> TIMER["timers"]
+    NET -.-> IO["io"]
+    IO -.-> SOCK["sockets"]
+    IO -.-> POLL["polling"]
+    IO -.-> DNS["DNS resolution"]
+    NET -.-> PROTO["protocol"]
+    PROTO -.-> TCP["TCP"]
+    PROTO -.-> UDP["raw UDP"]
+    PROTO -.-> RUDP["reliable UDP"]
+    PROTO -.-> FRAG["fragmentation"]
+    NET -.-> SERV["services"]
+    SERV -.-> HTTP["HTTP and HTTPS client"]
+    SERV -.-> CHAT["text chat"]
+    SERV -.-> VOICE["voice chat"]
+    NET -.-> SEC["security"]
+    SEC -.-> CRYPT["encryption"]
+```
 
 
 ## Installation
@@ -115,14 +144,6 @@ ctest --test-dir build --build-config Release
 ## Technical Documentation
 
 The CI generates the API reference with Doxygen from the public headers and publishes it on [GitHub Pages](https://vmnl.github.io/vmnl-net/).
-It goes online with the first module.
-
-The `docs` folder also has:
-
-- [API](docs/api.md): every public function, grouped by module;
-- [Architecture](docs/architecture.md): the modules and how they fit together.
-
-Both are still in progress.
 
 
 ## Roadmap

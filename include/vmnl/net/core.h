@@ -21,6 +21,7 @@ extern "C" {
 
 /**
  * \brief Error code returned by the library.
+ * \note A function that can fail returns it and writes its result through a pointer parameter.
  * \note Values are fixed across platforms and never reused.
  * \note E codes mirror errno and its glibc message, F (failure) codes are specific to vmnl_net.
  */
