@@ -1,8 +1,7 @@
-#include <vmnl/net/core.h>
+#include <vmnl/net/error.h>
 
 /**
- * \brief Messages of the error codes, indexed by value.
- * \note Retired codes keep their message.
+ * \brief Error codes mapping table with their human-readable messages.
  */
 static const char *const vmnl_net_error_strings[] = {
     [VMNL_NET_SUCCESS] = "Success",

@@ -9,7 +9,10 @@ SpaceAfterCStyleCast: true
 SpaceBeforeCpp11BracedList: true
 AlignConsecutiveAssignments:
   Enabled: true
+AlignConsecutiveMacros:
+  Enabled: true
 AlignTrailingComments:
   Kind: Never
 AllowShortFunctionsOnASingleLine: None
 AllowShortEnumsOnASingleLine: false
+SortIncludes: Never

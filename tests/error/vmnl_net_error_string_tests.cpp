@@ -1,6 +1,8 @@
-#include <vmnl/net/core.h>
+#include <vmnl/net/error.h>
 
 #include <gtest/gtest.h>
+
+#include <cstring>
 
 TEST(VmnlNetErrorString, Success)
 {
@@ -30,4 +32,16 @@ TEST(VmnlNetErrorString, FirstUnknownCode)
 TEST(VmnlNetErrorString, LargestCode)
 {
     EXPECT_STREQ(vmnl_net_error_string(UINT32_MAX), "Unknown error");
+}
+
+TEST(VmnlNetErrorString, EveryKnownCodeHasAMessage)
+{
+    for (VmnlNetError error = VMNL_NET_SUCCESS;; ++error) {
+        const char *message = vmnl_net_error_string(error);
+
+        ASSERT_NE(message, nullptr) << "code " << error;
+        if (std::strcmp(message, "Unknown error") == 0) {
+            break;
+        }
+    }
 }

@@ -1,15 +1,18 @@
 /**
  * \file context_internal.h
- * \brief Definition of the context.
+ * \brief Internal definition of the context.
  */
 
 #ifndef VMNL_NET_CONTEXT_INTERNAL_H
 #define VMNL_NET_CONTEXT_INTERNAL_H
 
-#include <vmnl/net/context.h>
+#include <vmnl/net/context.h> /* IWYU pragma: export */
 
+/**
+ * \brief State of a context, hidden behind the opaque VmnlNetContext handle.
+ */
 struct VmnlNetContext {
-    char reserved; /*!< Placeholder. */
+    VmnlNetAllocator allocator; /*!< Callbacks used to allocate/deallocate memory. */
 };
 
 #endif /* !VMNL_NET_CONTEXT_INTERNAL_H */

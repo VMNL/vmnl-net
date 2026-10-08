@@ -32,9 +32,11 @@ compile_commands.json
 .clangd/
 
 # IDEs
+.editorconfig
 .vscode/
 .idea/
 .vs/
+CMakeSettings.json
 
 # Operating systems
 .DS_Store
