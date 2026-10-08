@@ -23,9 +23,9 @@ jobs:
     strategy:
       matrix:
         target:
-          - { platform: linux-x86_64, os: ubuntu-latest }
-          - { platform: macos-arm64, os: macos-latest }
           - { platform: windows-x86_64, os: windows-latest }
+          - { platform: macos-arm64, os: macos-latest }
+          - { platform: linux-x86_64, os: ubuntu-latest }
         type: [static, shared]
     steps:
       - name: Check out the repository

@@ -4,34 +4,33 @@
 
 #include <cstdlib>
 
-static int allocations;
+static size_t allocations;
 
-static void *counting_allocate(size_t size)
+class VmnlNetContextCreateWithAllocator : public testing::Test {
+  protected:
+    void SetUp() override
+    {
+        allocations = 0;
+    }
+};
+
+TEST_F(VmnlNetContextCreateWithAllocator, CustomAllocator)
 {
-    ++allocations;
-    return std::malloc(size);
-}
+    VmnlNetAllocator allocator = {
+        [](size_t size) { allocations++; return std::malloc(size); },
+        std::realloc,
+        std::free,
+    };
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetContext *context = vmnl_net_context_create_with_allocator(&allocator, &error);
 
-static void *failing_allocate(size_t)
-{
-    return nullptr;
-}
-
-TEST(VmnlNetContextCreateWithAllocator, CustomFunctions)
-{
-    VmnlNetAllocator allocator = {counting_allocate, std::realloc, std::free};
-    VmnlNetError error         = UINT32_MAX;
-    VmnlNetContext *context;
-
-    allocations = 0;
-    context     = vmnl_net_context_create_with_allocator(&allocator, &error);
     EXPECT_NE(context, nullptr);
     EXPECT_EQ(error, VMNL_NET_SUCCESS);
     EXPECT_GT(allocations, 0);
     vmnl_net_context_destroy(context);
 }
 
-TEST(VmnlNetContextCreateWithAllocator, NullAllocator)
+TEST_F(VmnlNetContextCreateWithAllocator, NullAllocator)
 {
     VmnlNetError error = UINT32_MAX;
 
@@ -39,43 +38,43 @@ TEST(VmnlNetContextCreateWithAllocator, NullAllocator)
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
-TEST(VmnlNetContextCreateWithAllocator, NullAllocate)
+TEST_F(VmnlNetContextCreateWithAllocator, NullAllocate)
 {
+    VmnlNetError error = UINT32_MAX;
     VmnlNetAllocator allocator = {nullptr, std::realloc, std::free};
-    VmnlNetError error         = UINT32_MAX;
 
     EXPECT_EQ(vmnl_net_context_create_with_allocator(&allocator, &error), nullptr);
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
-TEST(VmnlNetContextCreateWithAllocator, NullReallocate)
+TEST_F(VmnlNetContextCreateWithAllocator, NullReallocate)
 {
+    VmnlNetError error = UINT32_MAX;
     VmnlNetAllocator allocator = {std::malloc, nullptr, std::free};
-    VmnlNetError error         = UINT32_MAX;
 
     EXPECT_EQ(vmnl_net_context_create_with_allocator(&allocator, &error), nullptr);
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
-TEST(VmnlNetContextCreateWithAllocator, NullDeallocate)
+TEST_F(VmnlNetContextCreateWithAllocator, NullDeallocate)
 {
+    VmnlNetError error = UINT32_MAX;
     VmnlNetAllocator allocator = {std::malloc, std::realloc, nullptr};
-    VmnlNetError error         = UINT32_MAX;
 
     EXPECT_EQ(vmnl_net_context_create_with_allocator(&allocator, &error), nullptr);
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
-TEST(VmnlNetContextCreateWithAllocator, AllocationFailure)
+TEST_F(VmnlNetContextCreateWithAllocator, AllocationFailure)
 {
-    VmnlNetAllocator allocator = {failing_allocate, std::realloc, std::free};
-    VmnlNetError error         = UINT32_MAX;
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAllocator allocator = {[](size_t) -> void * { return nullptr; }, std::realloc, std::free};
 
     EXPECT_EQ(vmnl_net_context_create_with_allocator(&allocator, &error), nullptr);
     EXPECT_EQ(error, VMNL_NET_ENOMEM);
 }
 
-TEST(VmnlNetContextCreateWithAllocator, NullError)
+TEST_F(VmnlNetContextCreateWithAllocator, NullError)
 {
     EXPECT_EQ(vmnl_net_context_create_with_allocator(nullptr, nullptr), nullptr);
 }

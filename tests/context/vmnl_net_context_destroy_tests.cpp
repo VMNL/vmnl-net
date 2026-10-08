@@ -4,35 +4,33 @@
 
 #include <cstdlib>
 
-static int allocations;
-static int deallocations;
+static size_t allocations = 0;
+static size_t deallocations = 0;
 
-static void *counting_allocate(size_t size)
+class VmnlNetContextDestroy : public testing::Test {
+  protected:
+    void SetUp() override
+    {
+        allocations = 0;
+        deallocations = 0;
+    }
+};
+
+TEST_F(VmnlNetContextDestroy, ReleasesMemory)
 {
-    ++allocations;
-    return std::malloc(size);
-}
+    VmnlNetAllocator allocator = {
+        [](size_t size) { allocations++; return std::malloc(size); },
+        std::realloc,
+        [](void *pointer) { deallocations++; std::free(pointer); },
+    };
+    VmnlNetContext *context = vmnl_net_context_create_with_allocator(&allocator, nullptr);
 
-static void counting_deallocate(void *pointer)
-{
-    ++deallocations;
-    std::free(pointer);
-}
-
-TEST(VmnlNetContextDestroy, ReleasesMemory)
-{
-    VmnlNetAllocator allocator = {counting_allocate, std::realloc, counting_deallocate};
-    VmnlNetContext *context;
-
-    allocations   = 0;
-    deallocations = 0;
-    context       = vmnl_net_context_create_with_allocator(&allocator, nullptr);
     ASSERT_NE(context, nullptr);
     vmnl_net_context_destroy(context);
-    EXPECT_EQ(deallocations, allocations);
+    EXPECT_EQ(allocations, deallocations);
 }
 
-TEST(VmnlNetContextDestroy, NullContext)
+TEST_F(VmnlNetContextDestroy, NullContext)
 {
     vmnl_net_context_destroy(nullptr);
 }

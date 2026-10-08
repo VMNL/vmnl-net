@@ -34,13 +34,14 @@ TEST(VmnlNetErrorString, LargestCode)
     EXPECT_STREQ(vmnl_net_error_string(UINT32_MAX), "Unknown error");
 }
 
-TEST(VmnlNetErrorString, EveryKnownCodeHasAMessage)
+TEST(VmnlNetErrorString, EveryCodeHasAMessage)
 {
-    for (VmnlNetError error = VMNL_NET_SUCCESS;; ++error) {
-        const char *message = vmnl_net_error_string(error);
+    const char *error_message;
 
-        ASSERT_NE(message, nullptr) << "code " << error;
-        if (std::strcmp(message, "Unknown error") == 0) {
+    for (VmnlNetError error = VMNL_NET_SUCCESS;; error++) {
+        error_message = vmnl_net_error_string(error);
+        ASSERT_NE(error_message, nullptr) << "code " << error;
+        if (std::strcmp(error_message, "Unknown error") == 0) {
             break;
         }
     }

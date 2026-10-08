@@ -5,8 +5,8 @@
  */
 static const char *const vmnl_net_error_strings[] = {
     [VMNL_NET_SUCCESS] = "Success",
-    [VMNL_NET_EINVAL]  = "Invalid argument",
-    [VMNL_NET_ENOMEM]  = "Cannot allocate memory",
+    [VMNL_NET_EINVAL] = "Invalid argument",
+    [VMNL_NET_ENOMEM] = "Cannot allocate memory",
     [VMNL_NET_FSYSTEM] = "System error",
 };
 
