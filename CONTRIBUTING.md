@@ -66,7 +66,7 @@ git config core.hooksPath .githooks
 ```
 
 A pull request has a title in the format of a commit and a description of a few plain sentences, since it becomes the body of the merge commit.
-Attach it to the milestone of its version.
+It closes the issue of its feature with `Closes #N`, and the issue carries the milestone of the version and the labels.
 
 ## Markdown
 

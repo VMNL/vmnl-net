@@ -13,4 +13,4 @@ updates:
         patterns: ['*']
     commit-message:
       prefix: cicd
-    labels: [cicd]
+    labels: ['area:ci']
