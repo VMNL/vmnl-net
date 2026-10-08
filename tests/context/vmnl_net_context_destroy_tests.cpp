@@ -21,22 +21,18 @@ static void counting_deallocate(void *pointer)
 
 TEST(VmnlNetContextDestroy, ReleasesMemory)
 {
-    VmnlNetContext *context = nullptr;
+    VmnlNetAllocator allocator = {counting_allocate, std::realloc, counting_deallocate};
+    VmnlNetContext *context;
 
     allocations   = 0;
     deallocations = 0;
-    ASSERT_EQ(vmnl_net_set_allocator(counting_allocate, std::realloc, counting_deallocate), VMNL_NET_SUCCESS);
-    ASSERT_EQ(vmnl_net_context_create(&context), VMNL_NET_SUCCESS);
+    context       = vmnl_net_context_create_with_allocator(&allocator, nullptr);
+    ASSERT_NE(context, nullptr);
     vmnl_net_context_destroy(context);
     EXPECT_EQ(deallocations, allocations);
-    vmnl_net_set_allocator(std::malloc, std::realloc, std::free);
 }
 
 TEST(VmnlNetContextDestroy, NullContext)
 {
-    deallocations = 0;
-    ASSERT_EQ(vmnl_net_set_allocator(std::malloc, std::realloc, counting_deallocate), VMNL_NET_SUCCESS);
     vmnl_net_context_destroy(nullptr);
-    EXPECT_EQ(deallocations, 0);
-    vmnl_net_set_allocator(std::malloc, std::realloc, std::free);
 }

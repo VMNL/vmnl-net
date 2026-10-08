@@ -17,18 +17,22 @@ FetchContent_Declare(googletest
   FIND_PACKAGE_ARGS NAMES GTest
 )
 
-FetchContent_MakeAvailable(googletest)
+block()
+    set(CMAKE_EXPORT_COMPILE_COMMANDS OFF)
+    FetchContent_MakeAvailable(googletest)
+endblock()
 
 add_executable(vmnl_net_tests)
 
 target_sources(vmnl_net_tests
   PRIVATE
-    context/vmnl_net_context_create_tests.cpp
-    context/vmnl_net_context_destroy_tests.cpp
-    core/vmnl_net_error_string_tests.cpp
-    core/vmnl_net_set_allocator_tests.cpp
     core/vmnl_net_version_tests.cpp
     core/vmnl_net_version_string_tests.cpp
+    error/vmnl_net_error_string_tests.cpp
+    context/vmnl_net_context_create_tests.cpp
+    context/vmnl_net_context_create_with_allocator_tests.cpp
+    context/vmnl_net_context_destroy_tests.cpp
+    clock/vmnl_net_clock_now_tests.cpp
 )
 
 target_link_libraries(vmnl_net_tests

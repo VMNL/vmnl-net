@@ -3,7 +3,7 @@
  *
  * \defgroup Context Context
  * \addtogroup Context
- * \brief Root object of vmnl_net.
+ * \brief Library's context - WIP.
  * @{
  */
 
@@ -11,27 +11,40 @@
 #define VMNL_NET_CONTEXT_H
 
 #include <vmnl/net/core.h>
+#include <vmnl/net/error.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * \brief Opaque context of the library.
- * \note A context is not thread-safe: use it from one thread at a time.
+ * \brief Opaque handle to a context.
  */
 typedef struct VmnlNetContext VmnlNetContext;
 
 /**
- * \brief Creates a context.
- * \param context Receives the new context, or NULL on failure.
- * \return VMNL_NET_SUCCESS, VMNL_NET_EINVAL if *context* is NULL, or VMNL_NET_ENOMEM.
+ * \brief Creates a context backed by malloc(), realloc() and free().
+ * \param error Error code of the call, nullable:
+ * - VMNL_NET_ENOMEM: memory allocation failure.
+ * \return Created context on success, NULL otherwise.
  */
-VMNL_NET_API VmnlNetError vmnl_net_context_create(VmnlNetContext **context);
+VMNL_NET_API VmnlNetContext *vmnl_net_context_create(VmnlNetError *error);
+
+/**
+ * \brief Creates a context backed by a custom allocator.
+ * \param allocator Functions used to allocate/deallocate memory, copied into the context.
+ * \param error Error code of the call, nullable:
+ * - VMNL_NET_EINVAL: *allocator* or one of its functions is NULL.
+ * - VMNL_NET_ENOMEM: memory allocation failure.
+ * \return Created context on success, NULL otherwise.
+ * \note These functions allocate the memory of the context and of every object created from it.
+ */
+VMNL_NET_API VmnlNetContext *vmnl_net_context_create_with_allocator(const VmnlNetAllocator *allocator, VmnlNetError *error);
 
 /**
  * \brief Destroys a context.
- * \param context Context to destroy, NULL does nothing.
+ * \param context Pointer to the VmnlNetContext to destroy.
+ * \note Passing a NULL pointer is a no-op.
  */
 VMNL_NET_API void vmnl_net_context_destroy(VmnlNetContext *context);
 

@@ -2,34 +2,20 @@
 
 #include <gtest/gtest.h>
 
-#include <cstdlib>
-
-static void *failing_allocate(size_t)
-{
-    return nullptr;
-}
-
 TEST(VmnlNetContextCreate, Success)
 {
-    VmnlNetContext *context = nullptr;
+    VmnlNetError error      = UINT32_MAX;
+    VmnlNetContext *context = vmnl_net_context_create(&error);
 
-    EXPECT_EQ(vmnl_net_context_create(&context), VMNL_NET_SUCCESS);
     EXPECT_NE(context, nullptr);
+    EXPECT_EQ(error, VMNL_NET_SUCCESS);
     vmnl_net_context_destroy(context);
 }
 
-TEST(VmnlNetContextCreate, NullContext)
+TEST(VmnlNetContextCreate, NullError)
 {
-    EXPECT_EQ(vmnl_net_context_create(nullptr), VMNL_NET_EINVAL);
-}
+    VmnlNetContext *context = vmnl_net_context_create(nullptr);
 
-TEST(VmnlNetContextCreate, AllocationFailure)
-{
-    static char sentinel;
-    VmnlNetContext *context = reinterpret_cast<VmnlNetContext *>(&sentinel);
-
-    ASSERT_EQ(vmnl_net_set_allocator(failing_allocate, std::realloc, std::free), VMNL_NET_SUCCESS);
-    EXPECT_EQ(vmnl_net_context_create(&context), VMNL_NET_ENOMEM);
-    EXPECT_EQ(context, nullptr);
-    vmnl_net_set_allocator(std::malloc, std::realloc, std::free);
+    EXPECT_NE(context, nullptr);
+    vmnl_net_context_destroy(context);
 }

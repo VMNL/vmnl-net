@@ -43,16 +43,24 @@ generate_export_header(vmnl_net
 
 target_sources(vmnl_net
   PRIVATE
-    src/context/vmnl_net_context_create.c
-    src/context/vmnl_net_context_destroy.c
-    src/core/vmnl_net_error_string.c
-    src/core/vmnl_net_set_allocator.c
     src/core/vmnl_net_version.c
     src/core/vmnl_net_version_string.c
+    src/error/vmnl_net_error_string.c
+    src/context/vmnl_net_context_create.c
+    src/context/vmnl_net_context_create_with_allocator.c
+    src/context/vmnl_net_context_destroy.c
+    $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/vmnl_net_clock_now.c>
+    $<$<PLATFORM_ID:Windows>:src/clock/win32/vmnl_net_clock_now.c>
   PUBLIC
     FILE_SET HEADERS
     BASE_DIRS include ${PROJECT_BINARY_DIR}/include
-    FILES include/vmnl/net.h include/vmnl/net/context.h include/vmnl/net/core.h ${PROJECT_BINARY_DIR}/include/vmnl/net_export.h
+    FILES
+      ${PROJECT_BINARY_DIR}/include/vmnl/net_export.h
+      include/vmnl/net.h
+      include/vmnl/net/core.h
+      include/vmnl/net/error.h
+      include/vmnl/net/context.h
+      include/vmnl/net/clock.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
@@ -87,6 +95,8 @@ target_compile_definitions(vmnl_net
     VMNL_NET_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
     VMNL_NET_VERSION_MINOR=${PROJECT_VERSION_MINOR}
     VMNL_NET_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+    $<$<NOT:$<PLATFORM_ID:Windows>>:_POSIX_C_SOURCE=200809L>
+    $<$<PLATFORM_ID:Windows>:WIN32_LEAN_AND_MEAN>
 )
 
 target_link_libraries(vmnl_net
