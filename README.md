@@ -17,7 +17,7 @@ TCP, UDP, reliable UDP (RUDP) and socket polling for games and real-time applica
 <br>
 
 [![CI](https://img.shields.io/github/actions/workflow/status/VMNL/vmnl-net/ci.yml?style=flat-square&label=CI)](https://github.com/VMNL/vmnl-net/actions/workflows/ci.yml)
-![License](https://img.shields.io/github/license/VMNL/vmnl-net?style=flat-square)
+[![License](https://img.shields.io/github/license/VMNL/vmnl-net?style=flat-square)](https://github.com/VMNL/vmnl-net/blob/main/LICENSE)
 ![Repo size](https://img.shields.io/github/repo-size/VMNL/vmnl-net?style=flat-square)
 ![Stability](https://img.shields.io/badge/stability-experimental-orange?style=flat-square)
 
