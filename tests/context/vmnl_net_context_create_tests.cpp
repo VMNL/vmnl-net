@@ -4,7 +4,7 @@
 
 TEST(VmnlNetContextCreate, Success)
 {
-    VmnlNetError error      = UINT32_MAX;
+    VmnlNetError error = UINT32_MAX;
     VmnlNetContext *context = vmnl_net_context_create(&error);
 
     EXPECT_NE(context, nullptr);
