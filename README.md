@@ -134,7 +134,6 @@ The build can be tuned with these CMake options, which take `ON` or `OFF`:
 | `-DVMNL_NET_BUILD_DOCS=` | `OFF` | Generates the documentation with Doxygen into `build/docs/html` |
 | `-DVMNL_NET_INSTALL=` | `ON` when built on its own | Generates the install rules |
 
-
 ### Using the library
 
 The prefix is the extracted archive folder, or the `--prefix` given to `cmake --install`.
@@ -162,46 +161,6 @@ cc main.c $(pkg-config --cflags --libs vmnl-net) -o main
 With the shared library, the program must find it at run time: copy `bin/vmnl_net.dll` next to the executable on Windows, or add `-Wl,-rpath,<prefix>/lib` on macOS and Linux.
 
 Include `<vmnl/net.h>` to get the whole API, which is described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
-
-### Development commands
-
-These commands run from the root of the repository and need clang-format 22, Doxygen and gcovr installed.
-
-Run the tests:
-
-```sh
-ctest --test-dir build --build-config Release
-```
-
-Generate the documentation with Doxygen into `build/docs/html`:
-
-```sh
-cmake -B build -DVMNL_NET_BUILD_DOCS=ON
-cmake --build build --target docs
-```
-
-Check the formatting with clang-format 22, or fix it by replacing `--dry-run --Werror` with `-i`:
-
-```sh
-find src include tests \( -name '*.[ch]' -o -name '*.cpp' \) -exec clang-format --dry-run --Werror {} +
-```
-
-Run the tests with the sanitizers:
-
-```sh
-CFLAGS=-fsanitize=address,undefined CXXFLAGS=-fsanitize=address,undefined LDFLAGS=-fsanitize=address,undefined cmake -B build-sanitize -DCMAKE_BUILD_TYPE=Debug
-cmake --build build-sanitize
-ctest --test-dir build-sanitize --output-on-failure
-```
-
-Generate the coverage report with gcovr:
-
-```sh
-CFLAGS=--coverage CXXFLAGS=--coverage LDFLAGS=--coverage cmake -B build-coverage -DCMAKE_BUILD_TYPE=Debug
-cmake --build build-coverage
-ctest --test-dir build-coverage
-gcovr --root . --filter src/ build-coverage
-```
 
 ## Technical Documentation
 
