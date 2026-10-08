@@ -4,5 +4,5 @@
 
 TEST(VmnlNetVersionString, ProjectVersion)
 {
-    EXPECT_STREQ(vmnl_net_version_string(), "0.1.0");
+    EXPECT_STREQ(vmnl_net_version_string(), "0.2.0");
 }

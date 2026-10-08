@@ -4,5 +4,5 @@
 
 TEST(VmnlNetVersion, ProjectVersion)
 {
-    EXPECT_EQ(vmnl_net_version(), 0x000100);
+    EXPECT_EQ(vmnl_net_version(), 0x000200);
 }
