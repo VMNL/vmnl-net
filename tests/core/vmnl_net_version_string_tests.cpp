@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-TEST(VmnlNetVersionString, ProjectVersion)
+TEST(VmnlNetVersionString, Success)
 {
     EXPECT_STREQ(vmnl_net_version_string(), "0.2.0");
 }

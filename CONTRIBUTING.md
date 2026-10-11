@@ -51,6 +51,7 @@ clang-format takes care of the layout. On top of it:
 Each public function has its own GoogleTest file, `tests/<module>/<function>_tests.cpp`.
 The suite takes the name of the function, like `VmnlNetContextCreate`, and each test the case it covers, like `Success` or `NullError`, or a short sentence for a property, like `NeverGoesBackwards`.
 A `VmnlNetError` starts at `UINT32_MAX`, so the test proves the function writes it.
+Tests are ordered from `Success` to the properties, the limits like `ZeroSize`, the allocation failures, the `Null` cases in the order of the parameters and `NullError` last.
 
 ## Commits and Pull Requests
 

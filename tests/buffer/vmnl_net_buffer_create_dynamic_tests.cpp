@@ -43,14 +43,6 @@ TEST_F(VmnlNetBufferCreateDynamic, ZeroCapacity)
     vmnl_net_context_destroy(context);
 }
 
-TEST_F(VmnlNetBufferCreateDynamic, NullContext)
-{
-    VmnlNetError error = UINT32_MAX;
-
-    EXPECT_EQ(vmnl_net_buffer_create_dynamic(nullptr, 64, &error), nullptr);
-    EXPECT_EQ(error, VMNL_NET_EINVAL);
-}
-
 TEST_F(VmnlNetBufferCreateDynamic, AllocationFailure)
 {
     VmnlNetAllocator allocator = {[](size_t size) { return allocations++ == 1 ? nullptr : std::malloc(size); }, std::realloc, std::free};
@@ -62,7 +54,7 @@ TEST_F(VmnlNetBufferCreateDynamic, AllocationFailure)
     vmnl_net_context_destroy(context);
 }
 
-TEST_F(VmnlNetBufferCreateDynamic, StorageAllocationFailure)
+TEST_F(VmnlNetBufferCreateDynamic, ReallocationFailure)
 {
     VmnlNetAllocator allocator = {
         [](size_t size) { allocations++; return std::malloc(size); },
@@ -76,6 +68,14 @@ TEST_F(VmnlNetBufferCreateDynamic, StorageAllocationFailure)
     EXPECT_EQ(error, VMNL_NET_ENOMEM);
     vmnl_net_context_destroy(context);
     EXPECT_EQ(allocations, deallocations);
+}
+
+TEST_F(VmnlNetBufferCreateDynamic, NullContext)
+{
+    VmnlNetError error = UINT32_MAX;
+
+    EXPECT_EQ(vmnl_net_buffer_create_dynamic(nullptr, 64, &error), nullptr);
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
 TEST_F(VmnlNetBufferCreateDynamic, NullError)
