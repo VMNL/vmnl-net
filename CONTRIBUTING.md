@@ -22,7 +22,7 @@ cmake --build build-sanitize
 ctest --test-dir build-sanitize --output-on-failure
 
 # Coverage, which must stay at 100% of lines and branches
-CFLAGS=--coverage LDFLAGS=--coverage cmake -B build-coverage -DCMAKE_BUILD_TYPE=Debug
+CFLAGS=--coverage LDFLAGS=--coverage cmake -B build-coverage -DCMAKE_BUILD_TYPE=Debug -DVMNL_NET_BUILD_EXAMPLES=OFF
 cmake --build build-coverage
 ctest --test-dir build-coverage
 gcovr --root . --filter src/ --fail-under-line 100 --fail-under-branch 100 build-coverage

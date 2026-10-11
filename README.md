@@ -131,6 +131,7 @@ The build can be tuned with these CMake options, which take `ON` or `OFF`:
 | --- | --- | --- |
 | `-DBUILD_SHARED_LIBS=` | `OFF` | Builds a shared library instead of a static one |
 | `-DVMNL_NET_BUILD_TESTS=` | `ON` when built on its own | Builds the tests |
+| `-DVMNL_NET_BUILD_EXAMPLES=` | `ON` when built on its own | Builds the examples of the documentation |
 | `-DVMNL_NET_BUILD_DOCS=` | `OFF` | Generates the documentation with Doxygen into `build/docs/html` |
 | `-DVMNL_NET_INSTALL=` | `ON` when built on its own | Generates the install rules |
 
