@@ -2,4 +2,5 @@
 
 void vmnl_net_buffer_commit(VmnlNetBuffer *buffer, size_t size)
 {
+    buffer->size += size;
 }
