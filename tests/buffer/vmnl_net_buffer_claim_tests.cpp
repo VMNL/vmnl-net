@@ -48,6 +48,17 @@ TEST_F(VmnlNetBufferClaim, RingWrapsAround)
     EXPECT_EQ(views[1].size, 4);
 }
 
+TEST_F(VmnlNetBufferClaim, ZeroSize)
+{
+    VmnlNetBufferView views[2];
+    VmnlNetError error = UINT32_MAX;
+
+    EXPECT_TRUE(vmnl_net_buffer_claim(context, dynamic_buffer, 0, views, &error));
+    EXPECT_EQ(error, VMNL_NET_SUCCESS);
+    EXPECT_EQ(views[0].size, 0);
+    EXPECT_EQ(views[1].size, 0);
+}
+
 TEST_F(VmnlNetBufferClaim, RingBeyondCapacity)
 {
     VmnlNetBufferView views[2];
