@@ -64,8 +64,8 @@ flowchart
     CORE --> ERR["errors"]
     CORE --> ALLOC["allocator"]
     CORE -.-> LOG["logging"]
-    NET -.-> DATA["data"]
-    DATA -.-> BUF["buffers"]
+    NET --> DATA["data"]
+    DATA --> BUF["buffers"]
     DATA -.-> SER["serialization"]
     NET --> TIME["time"]
     TIME --> CLOCK["clock"]
@@ -97,7 +97,7 @@ Both contain the headers, the CMake package and the pkg-config file, and can be 
 Extract the archive with `tar`, which ships with Windows, macOS and Linux:
 
 ```sh
-tar -xzf vmnl_net-v0.1.0-linux-x86_64-static.tar.gz
+tar -xzf vmnl_net-v0.2.0-linux-x86_64-static.tar.gz
 ```
 
 It creates a folder named after the archive, with `include/` and `lib/`, plus `bin/` for the Windows DLL.
@@ -131,6 +131,7 @@ The build can be tuned with these CMake options, which take `ON` or `OFF`:
 | --- | --- | --- |
 | `-DBUILD_SHARED_LIBS=` | `OFF` | Builds a shared library instead of a static one |
 | `-DVMNL_NET_BUILD_TESTS=` | `ON` when built on its own | Builds the tests |
+| `-DVMNL_NET_BUILD_EXAMPLES=` | `ON` when built on its own | Builds the examples of the documentation |
 | `-DVMNL_NET_BUILD_DOCS=` | `OFF` | Generates the documentation with Doxygen into `build/docs/html` |
 | `-DVMNL_NET_INSTALL=` | `ON` when built on its own | Generates the install rules |
 
@@ -147,7 +148,7 @@ cmake -B build -DCMAKE_PREFIX_PATH=<prefix>
 Then link the library in your `CMakeLists.txt`:
 
 ```cmake
-find_package(vmnl_net 0.1 REQUIRED)
+find_package(vmnl_net 0.2 REQUIRED)
 target_link_libraries(my_app PRIVATE vmnl::net)
 ```
 
@@ -174,7 +175,7 @@ A version is *Planned* until work starts, In progress while it is built, and **R
 | Version | Content | Target | Status |
 | --- | --- | --- | --- |
 | `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | **Released** |
-| `0.2.0` | Dynamic and circular byte buffers; monotonic clock and application-driven timers | November 2026 | In progress |
+| `0.2.0` | Dynamic and ring byte buffers; monotonic clock and application-driven timers | November 2026 | In progress |
 | `0.3.0` | Non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 | *Planned* |
 | `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 | *Planned* |
 | `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgments and retransmission, round-trip time and packet loss statistics | March 2027 | *Planned* |

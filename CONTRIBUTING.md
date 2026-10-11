@@ -9,7 +9,7 @@ Run these commands from the root of the repository:
 
 ```sh
 # Formatting, fixed by replacing --dry-run --Werror with -i
-find src include tests \( -name '*.[ch]' -o -name '*.cpp' \) -exec clang-format --dry-run --Werror {} +
+find src include tests examples \( -name '*.[ch]' -o -name '*.cpp' \) -exec clang-format --dry-run --Werror {} +
 
 # Build and tests
 cmake -B build
@@ -22,7 +22,7 @@ cmake --build build-sanitize
 ctest --test-dir build-sanitize --output-on-failure
 
 # Coverage, which must stay at 100% of lines and branches
-CFLAGS=--coverage LDFLAGS=--coverage cmake -B build-coverage -DCMAKE_BUILD_TYPE=Debug
+CFLAGS=--coverage LDFLAGS=--coverage cmake -B build-coverage -DCMAKE_BUILD_TYPE=Debug -DVMNL_NET_BUILD_EXAMPLES=OFF
 cmake --build build-coverage
 ctest --test-dir build-coverage
 gcovr --root . --filter src/ --fail-under-line 100 --fail-under-branch 100 build-coverage
@@ -34,7 +34,7 @@ cmake --build build --target docs
 
 With Apple Clang, gcovr also needs `--gcov-executable "xcrun llvm-cov gcov"`.
 
-A change to the public API comes with its Doxygen comments and tests, a bug fix with a regression test, and a new feature with an update of the roadmap in the README.
+A change to the public API comes with its Doxygen comments and tests, a new module with an example in `examples/`, a bug fix with a regression test, and a new feature with an update of the roadmap in the README.
 
 ## Conventions
 
@@ -51,6 +51,7 @@ clang-format takes care of the layout. On top of it:
 Each public function has its own GoogleTest file, `tests/<module>/<function>_tests.cpp`.
 The suite takes the name of the function, like `VmnlNetContextCreate`, and each test the case it covers, like `Success` or `NullError`, or a short sentence for a property, like `NeverGoesBackwards`.
 A `VmnlNetError` starts at `UINT32_MAX`, so the test proves the function writes it.
+Tests are ordered from `Success` to the properties, the limits like `ZeroSize`, the allocation failures, the `Null` cases in the order of the parameters and `NullError` last.
 
 ## Commits and Pull Requests
 

@@ -15,6 +15,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 option(BUILD_SHARED_LIBS "Build a shared library instead of a static one" OFF)
 option(VMNL_NET_BUILD_TESTS "Build the tests" ${PROJECT_IS_TOP_LEVEL})
+option(VMNL_NET_BUILD_EXAMPLES "Build the examples" ${PROJECT_IS_TOP_LEVEL})
 option(VMNL_NET_BUILD_DOCS "Generate the documentation with Doxygen" OFF)
 option(VMNL_NET_INSTALL "Generate the install rules" ${PROJECT_IS_TOP_LEVEL})
 
@@ -49,6 +50,25 @@ target_sources(vmnl_net
     src/context/vmnl_net_context_create.c
     src/context/vmnl_net_context_create_with_allocator.c
     src/context/vmnl_net_context_destroy.c
+    src/buffer/vmnl_net_buffer_capacity.c
+    src/buffer/vmnl_net_buffer_claim.c
+    src/buffer/vmnl_net_buffer_clear.c
+    src/buffer/vmnl_net_buffer_commit.c
+    src/buffer/vmnl_net_buffer_consume.c
+    src/buffer/vmnl_net_buffer_copy.c
+    src/buffer/vmnl_net_buffer_create_dynamic.c
+    src/buffer/vmnl_net_buffer_create_generic.c
+    src/buffer/vmnl_net_buffer_create_ring.c
+    src/buffer/vmnl_net_buffer_destroy.c
+    src/buffer/vmnl_net_buffer_discard.c
+    src/buffer/vmnl_net_buffer_peek.c
+    src/buffer/vmnl_net_buffer_read.c
+    src/buffer/vmnl_net_buffer_release.c
+    src/buffer/vmnl_net_buffer_reserve.c
+    src/buffer/vmnl_net_buffer_resize.c
+    src/buffer/vmnl_net_buffer_size.c
+    src/buffer/vmnl_net_buffer_view.c
+    src/buffer/vmnl_net_buffer_write.c
     $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/vmnl_net_clock_now.c>
     $<$<PLATFORM_ID:Windows>:src/clock/win32/vmnl_net_clock_now.c>
   PUBLIC
@@ -60,6 +80,7 @@ target_sources(vmnl_net
       include/vmnl/net/core.h
       include/vmnl/net/error.h
       include/vmnl/net/context.h
+      include/vmnl/net/buffer.h
       include/vmnl/net/clock.h
 )
 
@@ -115,6 +136,10 @@ set_target_properties(vmnl_net
 if(VMNL_NET_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+endif()
+
+if(VMNL_NET_BUILD_EXAMPLES)
+    add_subdirectory(examples)
 endif()
 
 if(VMNL_NET_BUILD_DOCS)

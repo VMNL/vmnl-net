@@ -26,12 +26,23 @@ add_executable(vmnl_net_tests)
 
 target_sources(vmnl_net_tests
   PRIVATE
-    core/vmnl_net_version_tests.cpp
     core/vmnl_net_version_string_tests.cpp
+    core/vmnl_net_version_tests.cpp
     error/vmnl_net_error_string_tests.cpp
     context/vmnl_net_context_create_tests.cpp
     context/vmnl_net_context_create_with_allocator_tests.cpp
     context/vmnl_net_context_destroy_tests.cpp
+    buffer/vmnl_net_buffer_capacity_tests.cpp
+    buffer/vmnl_net_buffer_clear_tests.cpp
+    buffer/vmnl_net_buffer_consume_tests.cpp
+    buffer/vmnl_net_buffer_create_dynamic_tests.cpp
+    buffer/vmnl_net_buffer_create_ring_tests.cpp
+    buffer/vmnl_net_buffer_destroy_tests.cpp
+    buffer/vmnl_net_buffer_peek_tests.cpp
+    buffer/vmnl_net_buffer_read_tests.cpp
+    buffer/vmnl_net_buffer_reserve_tests.cpp
+    buffer/vmnl_net_buffer_size_tests.cpp
+    buffer/vmnl_net_buffer_write_tests.cpp
     clock/vmnl_net_clock_now_tests.cpp
 )
 

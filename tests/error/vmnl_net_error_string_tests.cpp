@@ -24,14 +24,9 @@ TEST(VmnlNetErrorString, Fsystem)
     EXPECT_STREQ(vmnl_net_error_string(VMNL_NET_FSYSTEM), "System error");
 }
 
-TEST(VmnlNetErrorString, FirstUnknownCode)
+TEST(VmnlNetErrorString, Enobufs)
 {
-    EXPECT_STREQ(vmnl_net_error_string(VMNL_NET_FSYSTEM + 1), "Unknown error");
-}
-
-TEST(VmnlNetErrorString, LargestCode)
-{
-    EXPECT_STREQ(vmnl_net_error_string(UINT32_MAX), "Unknown error");
+    EXPECT_STREQ(vmnl_net_error_string(VMNL_NET_ENOBUFS), "No buffer space available");
 }
 
 TEST(VmnlNetErrorString, EveryCodeHasAMessage)
@@ -45,4 +40,14 @@ TEST(VmnlNetErrorString, EveryCodeHasAMessage)
             break;
         }
     }
+}
+
+TEST(VmnlNetErrorString, FirstUnknownCode)
+{
+    EXPECT_STREQ(vmnl_net_error_string(VMNL_NET_ENOBUFS + 1), "Unknown error");
+}
+
+TEST(VmnlNetErrorString, LargestCode)
+{
+    EXPECT_STREQ(vmnl_net_error_string(UINT32_MAX), "Unknown error");
 }

@@ -4,7 +4,13 @@
  * \defgroup Context Context
  * \addtogroup Context
  * \brief Library's context - WIP.
+ * \see \ref context.c
  * @{
+ */
+
+/**
+ * \example context.c
+ * Logs the allocations of a context with a custom allocator.
  */
 
 #ifndef VMNL_NET_CONTEXT_H

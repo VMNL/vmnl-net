@@ -36,7 +36,7 @@ jobs:
 
       - name: Build the ${{ matrix.type }} library
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=${{ matrix.type == 'shared' }} -DVMNL_NET_BUILD_TESTS=OFF
+          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=${{ matrix.type == 'shared' }} -DVMNL_NET_BUILD_TESTS=OFF -DVMNL_NET_BUILD_EXAMPLES=OFF
           cmake --build build --config Release
         timeout-minutes: 30
 
