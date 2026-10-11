@@ -9,7 +9,7 @@ Run these commands from the root of the repository:
 
 ```sh
 # Formatting, fixed by replacing --dry-run --Werror with -i
-find src include tests \( -name '*.[ch]' -o -name '*.cpp' \) -exec clang-format --dry-run --Werror {} +
+find src include tests examples \( -name '*.[ch]' -o -name '*.cpp' \) -exec clang-format --dry-run --Werror {} +
 
 # Build and tests
 cmake -B build
