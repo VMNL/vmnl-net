@@ -26,8 +26,8 @@ add_executable(vmnl_net_tests)
 
 target_sources(vmnl_net_tests
   PRIVATE
-    core/vmnl_net_version_tests.cpp
     core/vmnl_net_version_string_tests.cpp
+    core/vmnl_net_version_tests.cpp
     error/vmnl_net_error_string_tests.cpp
     context/vmnl_net_context_create_tests.cpp
     context/vmnl_net_context_create_with_allocator_tests.cpp
