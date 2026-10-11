@@ -23,8 +23,7 @@ extern "C" {
 #endif
 
 #define VMNL_NET_NANOSECONDS_PER_MILLISECOND ((uint64_t) 1000000) /*!< Nanoseconds in one millisecond. */
-
-#define VMNL_NET_NANOSECONDS_PER_SECOND ((uint64_t) 1000000000) /*!< Nanoseconds in one second. */
+#define VMNL_NET_NANOSECONDS_PER_SECOND      ((uint64_t) 1000000000) /*!< Nanoseconds in one second. */
 
 /**
  * \brief Gets the time of a monotonic clock, in nanoseconds.

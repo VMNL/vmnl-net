@@ -30,7 +30,7 @@ class VmnlNetTimerUpdate : public testing::Test {
 TEST_F(VmnlNetTimerUpdate, Success)
 {
     vmnl_net_timer_start(context, timer, 0, 50, 0);
-    vmnl_net_timer_update(context, 51);
+    vmnl_net_timer_update(context, 50);
     EXPECT_EQ(calls, 1);
     vmnl_net_timer_update(context, 1000);
     EXPECT_EQ(calls, 1);
@@ -49,10 +49,10 @@ TEST_F(VmnlNetTimerUpdate, ExpiresAtItsDeadline)
 TEST_F(VmnlNetTimerUpdate, RepeatsPeriodicTimers)
 {
     vmnl_net_timer_start(context, timer, 0, 10, 10);
-    vmnl_net_timer_update(context, 11);
-    vmnl_net_timer_update(context, 21);
+    vmnl_net_timer_update(context, 10);
+    vmnl_net_timer_update(context, 20);
     EXPECT_EQ(calls, 2);
-    EXPECT_EQ(vmnl_net_timer_remaining(context, 21), 9);
+    EXPECT_EQ(vmnl_net_timer_remaining(context, 20), 10);
 }
 
 TEST_F(VmnlNetTimerUpdate, MissedPeriodsExpireOnce)
@@ -63,12 +63,19 @@ TEST_F(VmnlNetTimerUpdate, MissedPeriodsExpireOnce)
     EXPECT_EQ(vmnl_net_timer_remaining(context, 45), 10);
 }
 
+TEST_F(VmnlNetTimerUpdate, ReachedPeriodCountsAsMissed)
+{
+    vmnl_net_timer_start(context, timer, 0, 10, 10);
+    vmnl_net_timer_update(context, 20);
+    EXPECT_EQ(calls, 1);
+    EXPECT_EQ(vmnl_net_timer_remaining(context, 20), 10);
+}
+
 TEST_F(VmnlNetTimerUpdate, FollowsTheDeadlines)
 {
     VmnlNetTimer *timers[3];
     size_t i;
 
-    calls = 0;
     for (i = 0; i < 3; i++) {
         timers[i] = vmnl_net_timer_create(context, [](VmnlNetTimer *, void *user_data) { order[calls++] = (size_t) user_data; }, (void *) i, nullptr);
     }
@@ -102,9 +109,9 @@ TEST_F(VmnlNetTimerUpdate, DestroyedFromItsCallback)
     VmnlNetTimer *destroyed = vmnl_net_timer_create(context, [](VmnlNetTimer *self, void *) { calls++; vmnl_net_timer_destroy(shared_context, self); }, nullptr, nullptr);
 
     vmnl_net_timer_start(context, destroyed, 0, 10, 10);
-    vmnl_net_timer_update(context, 11);
+    vmnl_net_timer_update(context, 10);
     EXPECT_EQ(calls, 1);
-    EXPECT_EQ(vmnl_net_timer_remaining(context, 11), UINT64_MAX);
+    EXPECT_EQ(vmnl_net_timer_remaining(context, 10), UINT64_MAX);
 }
 
 TEST_F(VmnlNetTimerUpdate, StoppedFromAnotherCallback)
@@ -114,7 +121,7 @@ TEST_F(VmnlNetTimerUpdate, StoppedFromAnotherCallback)
     other_timer = timer;
     vmnl_net_timer_start(context, stopper, 0, 10, 0);
     vmnl_net_timer_start(context, timer, 0, 10, 0);
-    vmnl_net_timer_update(context, 11);
+    vmnl_net_timer_update(context, 10);
     EXPECT_EQ(calls, 0);
     vmnl_net_timer_destroy(context, stopper);
 }

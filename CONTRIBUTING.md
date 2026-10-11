@@ -40,7 +40,7 @@ A change to the public API comes with its Doxygen comments and tests, a new modu
 
 clang-format takes care of the layout. On top of it:
 
-- each public function has its own file, `src/<module>/<function>.c`, private code goes in `src/<module>/<module>_internal.h` and platform code in `posix/` or `win32/`;
+- each public function has its own file, `src/<module>/<function>.c`, private code goes in `src/<module>/<module>_internal.h`, helpers shared by several modules in `src/core/`, and platform code in `posix/` or `win32/`;
 - includes go from the public headers of the library to the private ones, then the dependencies and the C library, one block each, and a file only includes what it needs;
 - a function that can fail takes a nullable `VmnlNetError *error` as last parameter, sets it on every call, and tells the failure through its return value;
 - `sizeof` takes no parentheses on an expression, compound literals take a space after the type, and counters use `i++` rather than `++i`;

@@ -37,7 +37,7 @@ TEST_F(VmnlNetBufferWrite, Success)
     EXPECT_STREQ(data, "abc");
 }
 
-TEST_F(VmnlNetBufferWrite, GrowsByHalf)
+TEST_F(VmnlNetBufferWrite, GrowsOneAndAHalfTimes)
 {
     ASSERT_TRUE(vmnl_net_buffer_write(context, dynamic_buffer, "abc", 3, nullptr));
     EXPECT_EQ(vmnl_net_buffer_capacity(dynamic_buffer), 3);

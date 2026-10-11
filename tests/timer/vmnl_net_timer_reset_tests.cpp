@@ -28,9 +28,9 @@ TEST_F(VmnlNetTimerReset, Success)
     vmnl_net_timer_start(context, timer, 0, 50, 0);
     vmnl_net_timer_reset(context, timer, 30);
     EXPECT_EQ(vmnl_net_timer_remaining(context, 30), 50);
-    vmnl_net_timer_update(context, 51);
+    vmnl_net_timer_update(context, 50);
     EXPECT_EQ(calls, 0);
-    vmnl_net_timer_update(context, 81);
+    vmnl_net_timer_update(context, 80);
     EXPECT_EQ(calls, 1);
 }
 
@@ -46,7 +46,7 @@ TEST_F(VmnlNetTimerReset, NeverStarted)
 {
     vmnl_net_timer_reset(context, timer, 100);
     EXPECT_EQ(vmnl_net_timer_remaining(context, 100), 0);
-    vmnl_net_timer_update(context, 101);
+    vmnl_net_timer_update(context, 100);
     EXPECT_EQ(calls, 1);
 }
 

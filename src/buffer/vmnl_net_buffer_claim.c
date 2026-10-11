@@ -33,6 +33,10 @@ static bool vmnl_net_buffer_claim_dynamic(VmnlNetContext *context, VmnlNetBuffer
 {
     size_t new_capacity = buffer->capacity + buffer->capacity / 2;
 
+    if (size > SIZE_MAX - buffer->size) {
+        vmnl_net_error_set(error, VMNL_NET_ENOMEM);
+        return false;
+    }
     if (new_capacity < buffer->size + size) {
         new_capacity = buffer->size + size;
     }

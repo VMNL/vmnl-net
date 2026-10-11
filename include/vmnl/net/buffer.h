@@ -10,10 +10,10 @@
  *
  * \par Two kinds
  * - A dynamic buffer keeps its bytes contiguous and, when it lacks room, grows to 1.5 times its capacity, or more if a single write needs it. It never shrinks.
- * - A ring buffer keeps a fixed capacity and goes around the end of its storage. A write that does not fit fails with #VMNL_NET_ENOBUFS, and nothing is written.
+ * - A ring buffer keeps a fixed capacity and wraps around the end of its storage. A write that does not fit fails with #VMNL_NET_ENOBUFS, and nothing is written.
  *
  * \par Views or copies
- * vmnl_net_buffer_claim() and vmnl_net_buffer_view() give the storage itself, in at most two views; the second one only holds bytes when a ring buffer goes around the end of its storage.
+ * vmnl_net_buffer_claim() and vmnl_net_buffer_view() give the storage itself, in at most two views; the second one only holds bytes when a ring buffer wraps around the end of its storage.
  * A view stays valid until the next call that modifies the buffer.
  * Views are the recommended way, above all for large data; vmnl_net_buffer_write(), vmnl_net_buffer_read() and vmnl_net_buffer_peek() copy the bytes, which can do for a few bytes.
  * @{
