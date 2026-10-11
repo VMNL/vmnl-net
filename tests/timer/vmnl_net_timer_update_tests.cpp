@@ -37,11 +37,13 @@ TEST_F(VmnlNetTimerUpdate, Success)
     EXPECT_EQ(vmnl_net_timer_remaining(context, 1000), UINT64_MAX);
 }
 
-TEST_F(VmnlNetTimerUpdate, ExpiresAfterItsDeadline)
+TEST_F(VmnlNetTimerUpdate, ExpiresAtItsDeadline)
 {
     vmnl_net_timer_start(context, timer, 0, 50, 0);
-    vmnl_net_timer_update(context, 50);
+    vmnl_net_timer_update(context, 49);
     EXPECT_EQ(calls, 0);
+    vmnl_net_timer_update(context, 50);
+    EXPECT_EQ(calls, 1);
 }
 
 TEST_F(VmnlNetTimerUpdate, RepeatsPeriodicTimers)
@@ -90,7 +92,7 @@ TEST_F(VmnlNetTimerUpdate, RestartedTimerWaitsForTheNextCall)
     vmnl_net_timer_start(context, restarting, 0, 50, 0);
     vmnl_net_timer_update(context, 100);
     EXPECT_EQ(calls, 1);
-    vmnl_net_timer_update(context, 101);
+    vmnl_net_timer_update(context, 100);
     EXPECT_EQ(calls, 2);
     vmnl_net_timer_destroy(context, restarting);
 }

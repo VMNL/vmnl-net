@@ -27,9 +27,9 @@ TEST_F(VmnlNetTimerStart, Success)
 {
     vmnl_net_timer_start(context, timer, 0, 50, 0);
     EXPECT_EQ(vmnl_net_timer_remaining(context, 0), 50);
-    vmnl_net_timer_update(context, 50);
+    vmnl_net_timer_update(context, 49);
     EXPECT_EQ(calls, 0);
-    vmnl_net_timer_update(context, 51);
+    vmnl_net_timer_update(context, 50);
     EXPECT_EQ(calls, 1);
 }
 
@@ -45,9 +45,8 @@ TEST_F(VmnlNetTimerStart, RestartsARunningTimer)
 TEST_F(VmnlNetTimerStart, ZeroTimeout)
 {
     vmnl_net_timer_start(context, timer, 100, 0, 0);
+    EXPECT_EQ(vmnl_net_timer_remaining(context, 100), 0);
     vmnl_net_timer_update(context, 100);
-    EXPECT_EQ(calls, 0);
-    vmnl_net_timer_update(context, 101);
     EXPECT_EQ(calls, 1);
 }
 
@@ -55,7 +54,7 @@ TEST_F(VmnlNetTimerStart, MaximumTimeout)
 {
     vmnl_net_timer_start(context, timer, 1000, UINT64_MAX, 0);
     EXPECT_EQ(vmnl_net_timer_remaining(context, 1000), UINT64_MAX - 1000);
-    vmnl_net_timer_update(context, UINT64_MAX);
+    vmnl_net_timer_update(context, UINT64_MAX - 1);
     EXPECT_EQ(calls, 0);
 }
 
