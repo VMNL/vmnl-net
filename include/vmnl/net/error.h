@@ -4,7 +4,13 @@
  * \defgroup Error Error
  * \addtogroup Error
  * \brief Library's error codes.
+ * \see \ref error.c
  * @{
+ */
+
+/**
+ * \example error.c
+ * Checks the result of a call and reacts to its error code.
  */
 
 #ifndef VMNL_NET_ERROR_H

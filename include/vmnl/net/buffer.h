@@ -4,7 +4,13 @@
  * \defgroup Buffer Buffer
  * \addtogroup Buffer
  * \brief FIFO byte buffers
+ * \see \ref buffer.c
  * @{
+ */
+
+/**
+ * \example buffer.c
+ * Writes, peeks and reads bytes with a dynamic buffer.
  */
 
 #ifndef VMNL_NET_BUFFER_H
