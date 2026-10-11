@@ -32,6 +32,15 @@ extern "C" {
 typedef struct VmnlNetBuffer VmnlNetBuffer;
 
 /**
+ * \brief Region of the storage of a buffer.
+ * \warning Invalidated by any call that modifies the buffer.
+ */
+typedef struct VmnlNetBufferView {
+    uint8_t *data; /*!< First byte. */
+    size_t size; /*!< Number of bytes, 0 if unused. */
+} VmnlNetBufferView;
+
+/**
  * \brief Creates a dynamic buffer.
  * \param context Context allocating the buffer.
  * \param capacity Initial capacity in bytes, can be 0.
@@ -96,6 +105,7 @@ VMNL_NET_API bool vmnl_net_buffer_reserve(VmnlNetContext *context, VmnlNetBuffer
  * \param error Error code of the call, nullable:
  * - VMNL_NET_EINVAL: *buffer* is NULL, *data* is NULL with a non-zero *size*, or *size* exceeds the stored bytes.
  * \return true on success, false otherwise.
+ * \note Copies the bytes, vmnl_net_buffer_view() avoids the copy.
  */
 VMNL_NET_API bool vmnl_net_buffer_read(VmnlNetBuffer *buffer, void *data, size_t size, VmnlNetError *error);
 
@@ -111,6 +121,7 @@ VMNL_NET_API bool vmnl_net_buffer_read(VmnlNetBuffer *buffer, void *data, size_t
  * - VMNL_NET_ENOBUFS: not enough free space in a ring buffer.
  * \return true on success, false otherwise.
  * \note Nothing is written on failure.
+ * \note Copies *data*, vmnl_net_buffer_claim() avoids the copy.
  */
 VMNL_NET_API bool vmnl_net_buffer_write(VmnlNetContext *context, VmnlNetBuffer *buffer, const void *data, size_t size, VmnlNetError *error);
 
@@ -122,6 +133,7 @@ VMNL_NET_API bool vmnl_net_buffer_write(VmnlNetContext *context, VmnlNetBuffer *
  * \param error Error code of the call, nullable:
  * - VMNL_NET_EINVAL: *buffer* is NULL, *data* is NULL with a non-zero *size*, or *size* exceeds the stored bytes.
  * \return true on success, false otherwise.
+ * \note Copies the bytes, vmnl_net_buffer_view() avoids the copy.
  */
 VMNL_NET_API bool vmnl_net_buffer_peek(const VmnlNetBuffer *buffer, void *data, size_t size, VmnlNetError *error);
 
@@ -134,6 +146,42 @@ VMNL_NET_API bool vmnl_net_buffer_peek(const VmnlNetBuffer *buffer, void *data, 
  * \return true on success, false otherwise.
  */
 VMNL_NET_API bool vmnl_net_buffer_consume(VmnlNetBuffer *buffer, size_t size, VmnlNetError *error);
+
+/**
+ * \brief Gets the stored bytes of a buffer without copying them.
+ * \param buffer Buffer to view.
+ * \param views Stored bytes in order, *views[1]* is empty unless a ring wraps around.
+ * \param error Error code of the call, nullable:
+ * - VMNL_NET_EINVAL: *buffer* or *views* is NULL.
+ * \return true on success, false otherwise.
+ * \note The bytes can be modified in place, vmnl_net_buffer_consume() removes them.
+ */
+VMNL_NET_API bool vmnl_net_buffer_view(const VmnlNetBuffer *buffer, VmnlNetBufferView views[2], VmnlNetError *error);
+
+/**
+ * \brief Gets at least *size* bytes of free space to write in place.
+ * \param context Context that created *buffer*.
+ * \param buffer Buffer to write to.
+ * \param size Number of bytes needed.
+ * \param views Free space in order, *views[1]* is empty unless a ring wraps around.
+ * \param error Error code of the call, nullable:
+ * - VMNL_NET_EINVAL: *context*, *buffer* or *views* is NULL.
+ * - VMNL_NET_ENOMEM: memory allocation failure.
+ * - VMNL_NET_ENOBUFS: not enough free space in a ring buffer.
+ * \return true on success, false otherwise.
+ * \note A dynamic buffer moves its bytes to the front or grows to make room.
+ */
+VMNL_NET_API bool vmnl_net_buffer_claim(VmnlNetContext *context, VmnlNetBuffer *buffer, size_t size, VmnlNetBufferView views[2], VmnlNetError *error);
+
+/**
+ * \brief Makes bytes written in the claimed space readable.
+ * \param buffer Buffer written to.
+ * \param size Number of bytes written.
+ * \param error Error code of the call, nullable:
+ * - VMNL_NET_EINVAL: *buffer* is NULL or *size* exceeds the free space.
+ * \return true on success, false otherwise.
+ */
+VMNL_NET_API bool vmnl_net_buffer_commit(VmnlNetBuffer *buffer, size_t size, VmnlNetError *error);
 
 /**
  * \brief Removes every byte of a buffer, keeping its capacity.

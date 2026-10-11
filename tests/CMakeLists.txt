@@ -33,7 +33,9 @@ target_sources(vmnl_net_tests
     context/vmnl_net_context_create_with_allocator_tests.cpp
     context/vmnl_net_context_destroy_tests.cpp
     buffer/vmnl_net_buffer_capacity_tests.cpp
+    buffer/vmnl_net_buffer_claim_tests.cpp
     buffer/vmnl_net_buffer_clear_tests.cpp
+    buffer/vmnl_net_buffer_commit_tests.cpp
     buffer/vmnl_net_buffer_consume_tests.cpp
     buffer/vmnl_net_buffer_create_dynamic_tests.cpp
     buffer/vmnl_net_buffer_create_ring_tests.cpp
@@ -42,6 +44,7 @@ target_sources(vmnl_net_tests
     buffer/vmnl_net_buffer_read_tests.cpp
     buffer/vmnl_net_buffer_reserve_tests.cpp
     buffer/vmnl_net_buffer_size_tests.cpp
+    buffer/vmnl_net_buffer_view_tests.cpp
     buffer/vmnl_net_buffer_write_tests.cpp
     clock/vmnl_net_clock_now_tests.cpp
 )

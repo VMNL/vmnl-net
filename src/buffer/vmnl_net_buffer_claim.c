@@ -51,6 +51,10 @@ static bool vmnl_net_buffer_claim_dynamic(VmnlNetContext *context, VmnlNetBuffer
 
 bool vmnl_net_buffer_claim(VmnlNetContext *context, VmnlNetBuffer *buffer, size_t size, VmnlNetBufferView views[2], VmnlNetError *error)
 {
+    if (context == NULL || buffer == NULL || views == NULL) {
+        vmnl_net_error_set(error, VMNL_NET_EINVAL);
+        return false;
+    }
     if (buffer->type == VMNL_NET_BUFFER_TYPE_RING) {
         return vmnl_net_buffer_claim_ring(buffer, size, views, error);
     }

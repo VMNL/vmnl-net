@@ -22,7 +22,7 @@ bool vmnl_net_buffer_write(VmnlNetContext *context, VmnlNetBuffer *buffer, const
     view_size = (size > views[0].size) ? views[0].size : size;
     memcpy(views[0].data, data, view_size);
     memcpy(views[1].data, (const uint8_t *) data + view_size, size - view_size);
-    vmnl_net_buffer_commit(buffer, size);
+    vmnl_net_buffer_commit(buffer, size, NULL);
     vmnl_net_error_set(error, VMNL_NET_SUCCESS);
     return true;
 }
