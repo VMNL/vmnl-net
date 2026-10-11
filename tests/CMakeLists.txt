@@ -47,6 +47,13 @@ target_sources(vmnl_net_tests
     buffer/vmnl_net_buffer_view_tests.cpp
     buffer/vmnl_net_buffer_write_tests.cpp
     clock/vmnl_net_clock_now_tests.cpp
+    timer/vmnl_net_timer_create_tests.cpp
+    timer/vmnl_net_timer_destroy_tests.cpp
+    timer/vmnl_net_timer_remaining_tests.cpp
+    timer/vmnl_net_timer_reset_tests.cpp
+    timer/vmnl_net_timer_start_tests.cpp
+    timer/vmnl_net_timer_stop_tests.cpp
+    timer/vmnl_net_timer_update_tests.cpp
 )
 
 target_link_libraries(vmnl_net_tests
