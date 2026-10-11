@@ -30,6 +30,7 @@ typedef uint32_t VmnlNetError;
 #define VMNL_NET_EINVAL  1u /*!< Invalid argument. */
 #define VMNL_NET_ENOMEM  2u /*!< Not enough space/cannot allocate memory. */
 #define VMNL_NET_FSYSTEM 3u /*!< An OS call failed with an error that has no dedicated code (errno, GetLastError() or WSAGetLastError()). */
+#define VMNL_NET_ENOBUFS 4u /*!< No buffer space available. */
 
 /**
  * \brief Converts a VmnlNetError to a human-readable string.
