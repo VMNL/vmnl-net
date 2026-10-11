@@ -97,7 +97,7 @@ Both contain the headers, the CMake package and the pkg-config file, and can be 
 Extract the archive with `tar`, which ships with Windows, macOS and Linux:
 
 ```sh
-tar -xzf vmnl_net-v0.1.0-linux-x86_64-static.tar.gz
+tar -xzf vmnl_net-v0.2.0-linux-x86_64-static.tar.gz
 ```
 
 It creates a folder named after the archive, with `include/` and `lib/`, plus `bin/` for the Windows DLL.
@@ -148,7 +148,7 @@ cmake -B build -DCMAKE_PREFIX_PATH=<prefix>
 Then link the library in your `CMakeLists.txt`:
 
 ```cmake
-find_package(vmnl_net 0.1 REQUIRED)
+find_package(vmnl_net 0.2 REQUIRED)
 target_link_libraries(my_app PRIVATE vmnl::net)
 ```
 
