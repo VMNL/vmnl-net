@@ -60,6 +60,7 @@ target_sources(vmnl_net
       include/vmnl/net/core.h
       include/vmnl/net/error.h
       include/vmnl/net/context.h
+      include/vmnl/net/buffer.h
       include/vmnl/net/clock.h
 )
 
