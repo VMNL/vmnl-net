@@ -82,6 +82,7 @@ target_sources(vmnl_net
       include/vmnl/net/context.h
       include/vmnl/net/buffer.h
       include/vmnl/net/clock.h
+      include/vmnl/net/timer.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
