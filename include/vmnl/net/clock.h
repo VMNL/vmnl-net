@@ -4,6 +4,10 @@
  * \defgroup Clock Clock
  * \addtogroup Clock
  * \brief Monotonic clock.
+ *
+ * The clock never goes back, even when the system time changes, so the difference between two readings is always a valid duration.
+ * It reads CLOCK_BOOTTIME on Linux, CLOCK_MONOTONIC on macOS and QueryPerformanceCounter() on Windows, which all count the time spent asleep: a timeout expires on waking up if its time has passed.
+ * Durations are written with #VMNL_NET_NANOSECONDS_PER_SECOND, and 64 bits hold 584 years of nanoseconds.
  * @{
  */
 

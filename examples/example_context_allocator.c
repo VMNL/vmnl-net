@@ -23,13 +23,15 @@ static void deallocate(void *pointer)
 
 int main(void)
 {
+    //! [context]
     VmnlNetContext *standard = vmnl_net_context_create(NULL);
     VmnlNetContext *custom = vmnl_net_context_create_with_allocator(&(VmnlNetAllocator) {allocate, reallocate, deallocate}, NULL);
-    // The buffer allocates through custom, which every call on it must receive
-    VmnlNetBuffer *buffer = vmnl_net_buffer_create_dynamic(custom, 64, NULL);
 
-    vmnl_net_buffer_destroy(custom, buffer);
+    // ...
+    // Always pass the context that created an object, and destroy the object before that context
+    // ...
     vmnl_net_context_destroy(custom);
     vmnl_net_context_destroy(standard);
+    //! [context]
     return 0;
 }

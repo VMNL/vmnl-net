@@ -43,7 +43,7 @@ static bool vmnl_net_buffer_claim_dynamic(VmnlNetContext *context, VmnlNetBuffer
         memmove(buffer->data, buffer->data + buffer->start, buffer->size);
         buffer->start = 0;
     }
-    views[0] = (VmnlNetBufferView) {.data = buffer->data + buffer->start + buffer->size, .size = buffer->capacity - buffer->start - buffer->size};
+    views[0] = (VmnlNetBufferView) {.data = (buffer->data == NULL) ? NULL : buffer->data + buffer->start + buffer->size, .size = buffer->capacity - buffer->start - buffer->size};
     views[1] = (VmnlNetBufferView) {.data = buffer->data, .size = 0};
     vmnl_net_error_set(error, VMNL_NET_SUCCESS);
     return true;
@@ -51,6 +51,10 @@ static bool vmnl_net_buffer_claim_dynamic(VmnlNetContext *context, VmnlNetBuffer
 
 bool vmnl_net_buffer_claim(VmnlNetContext *context, VmnlNetBuffer *buffer, size_t size, VmnlNetBufferView views[2], VmnlNetError *error)
 {
+    if (context == NULL || buffer == NULL || views == NULL) {
+        vmnl_net_error_set(error, VMNL_NET_EINVAL);
+        return false;
+    }
     if (buffer->type == VMNL_NET_BUFFER_TYPE_RING) {
         return vmnl_net_buffer_claim_ring(buffer, size, views, error);
     }

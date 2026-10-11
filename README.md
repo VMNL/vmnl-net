@@ -57,7 +57,7 @@ Feature highlights:
 ## Architecture
 
 ```mermaid
-flowchart
+flowchart LR
     NET["vmnl/net.h"]
     NET --> CORE["core"]
     CORE --> CTX["context"]

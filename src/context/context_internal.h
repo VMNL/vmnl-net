@@ -9,7 +9,7 @@
 #include <vmnl/net/context.h> /* IWYU pragma: export */
 
 /**
- * \brief State of a context, hidden behind the opaque VmnlNetContext handle.
+ * \brief Internal definition of a context.
  */
 struct VmnlNetContext {
     VmnlNetAllocator allocator; /*!< Callbacks used to allocate/deallocate memory. */

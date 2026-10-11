@@ -4,6 +4,10 @@
  * \defgroup Core Core
  * \addtogroup Core
  * \brief Library's core features: version and memory allocator.
+ *
+ * vmnl_net_version() packs the version in one integer, so that two versions compare with a single comparison, and vmnl_net_version_string() gives it as text.
+ * Before 1.0.0, any minor version may break the API.
+ * A VmnlNetAllocator is given to vmnl_net_context_create_with_allocator(), which copies it.
  * @{
  */
 
