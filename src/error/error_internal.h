@@ -10,6 +10,10 @@
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Sets the error code.
  * \param error Error pointer, nullable.
@@ -22,5 +26,9 @@ static inline void vmnl_net_error_set(VmnlNetError *error, VmnlNetError value)
     }
     *error = value;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !VMNL_NET_ERROR_INTERNAL_H */

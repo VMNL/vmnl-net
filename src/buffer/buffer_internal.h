@@ -8,6 +8,10 @@
 
 #include <vmnl/net/buffer.h> /* IWYU pragma: export */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * \brief Kinds of buffer.
  */
@@ -70,5 +74,9 @@ void vmnl_net_buffer_discard(VmnlNetBuffer *buffer, size_t size);
  * \param size Number of bytes, **MUST** not exceed the stored bytes.
  */
 void vmnl_net_buffer_copy(const VmnlNetBuffer *buffer, void *data, size_t size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !VMNL_NET_BUFFER_INTERNAL_H */
