@@ -4,6 +4,7 @@
 
 int main(void)
 {
+    //! [handling]
     VmnlNetError error;
     VmnlNetContext *context = vmnl_net_context_create(&error);
     VmnlNetBuffer *buffer;
@@ -19,6 +20,7 @@ int main(void)
         // Pass NULL when the reason does not matter
         buffer = vmnl_net_buffer_create_ring(context, 1024, NULL);
     }
+    //! [handling]
     vmnl_net_buffer_destroy(context, buffer);
     vmnl_net_context_destroy(context);
     return 0;

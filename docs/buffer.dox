@@ -1,0 +1,29 @@
+/**
+ * \addtogroup Buffer
+ *
+ * \par In place, without copies (recommended)
+ * \snippet{trimleft} example_buffer_view.c view
+ *
+ * \par Dynamic buffer, with copies
+ * \snippet{trimleft} example_buffer_dynamic.c dynamic
+ *
+ * \par Ring buffer, with copies
+ * \snippet{trimleft} example_buffer_ring.c ring
+ *
+ * \see \ref example_buffer_dynamic.c, \ref example_buffer_ring.c, \ref example_buffer_view.c
+ */
+
+/**
+ * \example example_buffer_dynamic.c
+ * Writes, reads and drops bytes in a dynamic buffer.
+ */
+
+/**
+ * \example example_buffer_ring.c
+ * Fills a ring buffer, then reuses the space freed by reads.
+ */
+
+/**
+ * \example example_buffer_view.c
+ * Writes and reads the bytes of a buffer in place, without copies.
+ */

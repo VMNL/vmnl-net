@@ -34,7 +34,7 @@ cmake --build build --target docs
 
 With Apple Clang, gcovr also needs `--gcov-executable "xcrun llvm-cov gcov"`.
 
-A change to the public API comes with its Doxygen comments and tests, a new module with an example in `examples/`, a bug fix with a regression test, and a new feature with an update of the roadmap in the README.
+A change to the public API comes with its Doxygen comments and tests, a new module with an example in `examples/example_<module>_<feature>.c`, a bug fix with a regression test, and a new feature with an update of the roadmap in the README.
 
 ## Conventions
 

@@ -4,13 +4,12 @@
  * \defgroup Error Error
  * \addtogroup Error
  * \brief Library's error codes.
- * \see \ref error.c
+ *
+ * A function that can fail tells it through its return value, NULL or false, and takes a nullable VmnlNetError pointer as last parameter.
+ * It sets that error on every call, #VMNL_NET_SUCCESS included, so the value only describes the last call that received it.
+ * E codes are named after errno and use its glibc message, F (failure) codes are specific to the library.
+ * Each code has the same value on every platform and in every version, and the value of a removed code is never reused.
  * @{
- */
-
-/**
- * \example error.c
- * Checks the result of a call and reacts to its error code.
  */
 
 #ifndef VMNL_NET_ERROR_H
@@ -26,9 +25,6 @@ extern "C" {
 
 /**
  * \brief Error code set by functions that can fail.
- * \note Functions that can fail take a nullable VmnlNetError pointer as last parameter, set it on every call and also signal a failure through their return value.
- * \note E codes are named after errno and use its glibc message, F (failure) codes are specific to the library.
- * \note Each code has the same value on every platform and in every version, and the value of a removed code is never reused.
  */
 typedef uint32_t VmnlNetError;
 

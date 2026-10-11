@@ -1,5 +1,5 @@
-foreach(example buffer context error)
-    add_executable(vmnl_net_example_${example} ${example}.c)
+foreach(example buffer_dynamic buffer_ring buffer_view clock_elapsed context_allocator error_handling)
+    add_executable(vmnl_net_example_${example} example_${example}.c)
 
     target_link_libraries(vmnl_net_example_${example}
       PRIVATE

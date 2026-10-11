@@ -3,14 +3,12 @@
  *
  * \defgroup Context Context
  * \addtogroup Context
- * \brief Library's context - WIP.
- * \see \ref context.c
+ * \brief Library's context.
+ *
+ * A context holds the allocator of the library: the context itself and every object created from it allocate and free their memory through it.
+ * vmnl_net_context_create() uses malloc(), realloc() and free(), vmnl_net_context_create_with_allocator() copies the functions it is given.
+ * Functions are not thread-safe, so a program that uses several threads gives each one its own context and objects.
  * @{
- */
-
-/**
- * \example context.c
- * Logs the allocations of a context with a custom allocator.
  */
 
 #ifndef VMNL_NET_CONTEXT_H
@@ -31,7 +29,7 @@ typedef struct VmnlNetContext VmnlNetContext;
 /**
  * \brief Creates a context backed by malloc(), realloc() and free().
  * \param error Error code of the call, nullable:
- * - VMNL_NET_ENOMEM: memory allocation failure.
+ * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created context on success, NULL otherwise.
  */
 VMNL_NET_API VmnlNetContext *vmnl_net_context_create(VmnlNetError *error);
@@ -40,8 +38,8 @@ VMNL_NET_API VmnlNetContext *vmnl_net_context_create(VmnlNetError *error);
  * \brief Creates a context backed by a custom allocator.
  * \param allocator Functions used to allocate/deallocate memory, copied into the context.
  * \param error Error code of the call, nullable:
- * - VMNL_NET_EINVAL: *allocator* or one of its functions is NULL.
- * - VMNL_NET_ENOMEM: memory allocation failure.
+ * - #VMNL_NET_EINVAL: *allocator* or one of its functions is NULL.
+ * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created context on success, NULL otherwise.
  * \note These functions allocate the memory of the context and of every object created from it.
  */
@@ -49,8 +47,9 @@ VMNL_NET_API VmnlNetContext *vmnl_net_context_create_with_allocator(const VmnlNe
 
 /**
  * \brief Destroys a context.
- * \param context Pointer to the VmnlNetContext to destroy.
- * \note Passing a NULL pointer is a no-op.
+ * \param context Context to destroy.
+ * \note Does nothing if *context* is NULL.
+ * \warning The objects created from *context* **MUST** be destroyed before it.
  */
 VMNL_NET_API void vmnl_net_context_destroy(VmnlNetContext *context);
 
