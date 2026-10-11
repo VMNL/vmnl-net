@@ -69,6 +69,17 @@ TEST_F(VmnlNetBufferClaim, RingBeyondCapacity)
     EXPECT_EQ(error, VMNL_NET_ENOBUFS);
 }
 
+TEST_F(VmnlNetBufferClaim, DynamicBeyondAddressSpace)
+{
+    VmnlNetBufferView views[2];
+    VmnlNetError error = UINT32_MAX;
+
+    ASSERT_TRUE(vmnl_net_buffer_write(context, dynamic_buffer, "abc", 3, nullptr));
+    EXPECT_FALSE(vmnl_net_buffer_claim(context, dynamic_buffer, SIZE_MAX - 1, views, &error));
+    EXPECT_EQ(error, VMNL_NET_ENOMEM);
+    EXPECT_EQ(vmnl_net_buffer_size(dynamic_buffer), 3);
+}
+
 TEST_F(VmnlNetBufferClaim, ReallocationFailure)
 {
     VmnlNetAllocator allocator = {std::malloc, [](void *, size_t) -> void * { return nullptr; }, std::free};
