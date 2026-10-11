@@ -61,12 +61,14 @@ TEST_F(VmnlNetBufferWrite, MovesBytesToTheFront)
 
 TEST_F(VmnlNetBufferWrite, KeepsBytesInPlace)
 {
+    VmnlNetError error = UINT32_MAX;
     char data[16] = {};
 
     ASSERT_TRUE(vmnl_net_buffer_reserve(context, dynamic_buffer, 8, nullptr));
     ASSERT_TRUE(vmnl_net_buffer_write(context, dynamic_buffer, "abcd", 4, nullptr));
     ASSERT_TRUE(vmnl_net_buffer_consume(dynamic_buffer, 2, nullptr));
-    EXPECT_TRUE(vmnl_net_buffer_write(context, dynamic_buffer, "ef", 2, nullptr));
+    EXPECT_TRUE(vmnl_net_buffer_write(context, dynamic_buffer, "ef", 2, &error));
+    EXPECT_EQ(error, VMNL_NET_SUCCESS);
     EXPECT_EQ(vmnl_net_buffer_capacity(dynamic_buffer), 8);
     ASSERT_TRUE(vmnl_net_buffer_peek(dynamic_buffer, data, 4, nullptr));
     EXPECT_STREQ(data, "cdef");
