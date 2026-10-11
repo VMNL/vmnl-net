@@ -39,7 +39,7 @@ int main(void)
     vmnl_net_timer_start(context, timeout, now, 50 * VMNL_NET_NANOSECONDS_PER_MILLISECOND, 0); // Once, in 50 ms
     //! [start]
     //! [loop]
-    while (running) {
+    while (running == true) {
         wait_for_network(vmnl_net_timer_remaining(context, vmnl_net_clock_now())); // Until a packet arrives or the next timer is due
         vmnl_net_timer_update(context, vmnl_net_clock_now()); // Calls the callbacks of the timers due by now, on_tick and on_timeout here
     }
