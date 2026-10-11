@@ -71,6 +71,15 @@ target_sources(vmnl_net
     src/buffer/vmnl_net_buffer_write.c
     $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/vmnl_net_clock_now.c>
     $<$<PLATFORM_ID:Windows>:src/clock/win32/vmnl_net_clock_now.c>
+    src/timer/vmnl_net_timer_create.c
+    src/timer/vmnl_net_timer_destroy.c
+    src/timer/vmnl_net_timer_insert.c
+    src/timer/vmnl_net_timer_remaining.c
+    src/timer/vmnl_net_timer_remove.c
+    src/timer/vmnl_net_timer_reset.c
+    src/timer/vmnl_net_timer_start.c
+    src/timer/vmnl_net_timer_stop.c
+    src/timer/vmnl_net_timer_update.c
   PUBLIC
     FILE_SET HEADERS
     BASE_DIRS include ${PROJECT_BINARY_DIR}/include
@@ -82,6 +91,7 @@ target_sources(vmnl_net
       include/vmnl/net/context.h
       include/vmnl/net/buffer.h
       include/vmnl/net/clock.h
+      include/vmnl/net/timer.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)

@@ -14,7 +14,8 @@ VmnlNetContext *vmnl_net_context_create_with_allocator(const VmnlNetAllocator *a
         vmnl_net_error_set(error, VMNL_NET_ENOMEM);
         return NULL;
     }
-    *context = (VmnlNetContext) {*allocator};
+    *context = (VmnlNetContext) {.allocator = *allocator};
+    vmnl_net_list_init(&context->timers);
     vmnl_net_error_set(error, VMNL_NET_SUCCESS);
     return context;
 }

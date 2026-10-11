@@ -12,5 +12,6 @@
 #include <vmnl/net/context.h>
 #include <vmnl/net/buffer.h>
 #include <vmnl/net/clock.h>
+#include <vmnl/net/timer.h>
 
 #endif /* !VMNL_NET_H */
