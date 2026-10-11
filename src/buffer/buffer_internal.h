@@ -9,6 +9,14 @@
 #include <vmnl/net/buffer.h> /* IWYU pragma: export */
 
 /**
+ * \brief Kinds of buffer.
+ */
+typedef enum {
+    VMNL_NET_BUFFER_TYPE_DYNAMIC, /*!< Grows when full. */
+    VMNL_NET_BUFFER_TYPE_RING, /*!< Fixed capacity, wraps around. */
+} VmnlNetBufferType;
+
+/**
  * \brief Internal definition of a buffer.
  */
 struct VmnlNetBuffer {
@@ -16,10 +24,7 @@ struct VmnlNetBuffer {
     size_t capacity; /*!< Storage size in bytes. */
     size_t size; /*!< Number of stored bytes. */
     size_t start; /*!< Index of the first stored byte. */
-    enum {
-        VMNL_NET_BUFFER_TYPE_DYNAMIC, /*!< Grows when full. */
-        VMNL_NET_BUFFER_TYPE_RING, /*!< Fixed capacity, wraps around. */
-    } type; /*!< Kind of buffer. */
+    VmnlNetBufferType type; /*!< Kind of buffer. */
 };
 
 /**
@@ -30,6 +35,17 @@ typedef struct VmnlNetBufferView {
     uint8_t *data; /*!< First byte. */
     size_t size; /*!< Number of bytes, 0 if unused. */
 } VmnlNetBufferView;
+
+/**
+ * \brief Creates a buffer of the given kind.
+ * \param context Context allocating the buffer, **MUST** not be NULL.
+ * \param type Kind of buffer.
+ * \param capacity Initial capacity in bytes, can be 0.
+ * \param error Error code of the call, nullable:
+ * - VMNL_NET_ENOMEM: memory allocation failure.
+ * \return Created buffer on success, NULL otherwise.
+ */
+VmnlNetBuffer *vmnl_net_buffer_create_generic(VmnlNetContext *context, VmnlNetBufferType type, size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Resizes the storage of a buffer.

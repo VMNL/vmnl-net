@@ -49,6 +49,25 @@ target_sources(vmnl_net
     src/context/vmnl_net_context_create.c
     src/context/vmnl_net_context_create_with_allocator.c
     src/context/vmnl_net_context_destroy.c
+    src/buffer/vmnl_net_buffer_capacity.c
+    src/buffer/vmnl_net_buffer_claim.c
+    src/buffer/vmnl_net_buffer_clear.c
+    src/buffer/vmnl_net_buffer_commit.c
+    src/buffer/vmnl_net_buffer_consume.c
+    src/buffer/vmnl_net_buffer_copy.c
+    src/buffer/vmnl_net_buffer_create_dynamic.c
+    src/buffer/vmnl_net_buffer_create_generic.c
+    src/buffer/vmnl_net_buffer_create_ring.c
+    src/buffer/vmnl_net_buffer_destroy.c
+    src/buffer/vmnl_net_buffer_discard.c
+    src/buffer/vmnl_net_buffer_peek.c
+    src/buffer/vmnl_net_buffer_read.c
+    src/buffer/vmnl_net_buffer_release.c
+    src/buffer/vmnl_net_buffer_reserve.c
+    src/buffer/vmnl_net_buffer_resize.c
+    src/buffer/vmnl_net_buffer_size.c
+    src/buffer/vmnl_net_buffer_view.c
+    src/buffer/vmnl_net_buffer_write.c
     $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/vmnl_net_clock_now.c>
     $<$<PLATFORM_ID:Windows>:src/clock/win32/vmnl_net_clock_now.c>
   PUBLIC

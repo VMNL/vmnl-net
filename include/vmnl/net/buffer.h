@@ -51,7 +51,7 @@ VMNL_NET_API VmnlNetBuffer *vmnl_net_buffer_create_ring(VmnlNetContext *context,
  * \brief Destroys a buffer.
  * \param context Context that created *buffer*.
  * \param buffer Buffer to destroy.
- * \note Passing a NULL *buffer* is a no-op.
+ * \note Does nothing if *context* or *buffer* is NULL.
  */
 VMNL_NET_API void vmnl_net_buffer_destroy(VmnlNetContext *context, VmnlNetBuffer *buffer);
 
