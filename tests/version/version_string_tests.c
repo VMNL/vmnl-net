@@ -4,5 +4,5 @@
 
 UTEST(vmnl_net_version_string, success)
 {
-    UTEST_SKIP("not written");
+    EXPECT_STREQ(vmnl_net_version_string(), VMNL_NET_TEST_VERSION);
 }

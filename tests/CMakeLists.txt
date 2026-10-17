@@ -31,4 +31,12 @@ target_link_libraries(vmnl_net_tests
     vmnl_net_warnings
 )
 
+target_compile_definitions(vmnl_net_tests
+  PRIVATE
+    VMNL_NET_TEST_VERSION="${PROJECT_VERSION}"
+    VMNL_NET_TEST_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+    VMNL_NET_TEST_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+    VMNL_NET_TEST_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+)
+
 utest_discover_tests(vmnl_net_tests)
