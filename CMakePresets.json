@@ -14,6 +14,7 @@
         "CMAKE_BUILD_TYPE": "Release",
         "VMNL_NET_BUILD_TESTS": "OFF",
         "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
         "VMNL_NET_BUILD_DOCS": "OFF"
       }
     },
@@ -24,6 +25,7 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "VMNL_NET_BUILD_TESTS": "ON",
+        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
         "VMNL_NET_BUILD_DOCS": "OFF"
       }
     },
@@ -35,6 +37,7 @@
         "CMAKE_BUILD_TYPE": "Release",
         "BUILD_SHARED_LIBS": "OFF",
         "VMNL_NET_BUILD_TESTS": "ON",
+        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
         "VMNL_NET_BUILD_DOCS": "OFF"
       }
     },
@@ -78,12 +81,25 @@
       }
     },
     {
+      "name": "bench",
+      "displayName": "Build the benchmarks in Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VMNL_NET_BUILD_TESTS": "OFF",
+        "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "VMNL_NET_BUILD_BENCHMARKS": "ON",
+        "VMNL_NET_BUILD_DOCS": "OFF"
+      }
+    },
+    {
       "name": "docs",
       "displayName": "Generate the documentation",
       "inherits": "base",
       "cacheVariables": {
         "VMNL_NET_BUILD_TESTS": "OFF",
         "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
         "VMNL_NET_BUILD_DOCS": "ON"
       }
     }
@@ -124,6 +140,11 @@
       "name": "sanitize",
       "configurePreset": "sanitize",
       "configuration": "Debug"
+    },
+    {
+      "name": "bench",
+      "configurePreset": "bench",
+      "configuration": "Release"
     },
     {
       "name": "docs",
@@ -219,6 +240,13 @@
         { "type": "configure", "name": "sanitize" },
         { "type": "build", "name": "sanitize" },
         { "type": "test", "name": "sanitize" }
+      ]
+    },
+    {
+      "name": "bench",
+      "steps": [
+        { "type": "configure", "name": "bench" },
+        { "type": "build", "name": "bench" }
       ]
     },
     {

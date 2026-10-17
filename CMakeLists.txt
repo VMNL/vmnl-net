@@ -16,6 +16,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 option(BUILD_SHARED_LIBS "Build a shared library instead of a static one" OFF)
 option(VMNL_NET_BUILD_DOCS "Generate the documentation with Doxygen" OFF)
 option(VMNL_NET_BUILD_TESTS "Build the tests" ${PROJECT_IS_TOP_LEVEL})
+option(VMNL_NET_BUILD_BENCHMARKS "Build the benchmarks" OFF)
 option(VMNL_NET_BUILD_EXAMPLES "Build the examples" ${PROJECT_IS_TOP_LEVEL})
 option(VMNL_NET_INSTALL "Generate the install rules" ${PROJECT_IS_TOP_LEVEL})
 
@@ -124,6 +125,10 @@ if(VMNL_NET_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
     include(${PROJECT_SOURCE_DIR}/cmake/coverage.cmake)
+endif()
+
+if(VMNL_NET_BUILD_BENCHMARKS)
+    add_subdirectory(bench)
 endif()
 
 # if(VMNL_NET_BUILD_EXAMPLES)
