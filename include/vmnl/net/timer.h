@@ -9,7 +9,7 @@
  * It is created from a context, takes that context at every call, and is destroyed before it.
  * The library reads no clock: the functions take the current time as *now*, usually from vmnl_net_clock_now(), and vmnl_net_timer_update() fires the expired timers, typically once per iteration of the application loop.
  * vmnl_net_timer_remaining() bounds how long the application can wait, on the network for instance, without missing a timer.
- * Durations are in nanoseconds, written with #VMNL_NET_NANOSECONDS_PER_MILLISECOND or #VMNL_NET_NANOSECONDS_PER_SECOND.
+ * Durations are in nanoseconds, written with #VMNL_NET_NANOSECONDS_PER_SECOND.
  * Timers with the same deadline expire in the order they were started.
  * @{
  */

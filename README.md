@@ -51,7 +51,7 @@ Feature highlights:
 - Native readiness polling: WSAPoll on Windows, kqueue on macOS and BSD, epoll on Linux
 - IPv4 and IPv6
 - No background threads: the application drives the library from its own loop, and functions are not thread-safe unless stated otherwise
-- Explicit resource management: opaque handles, custom allocator per context and logging hooks, error codes reported through an optional last parameter
+- Explicit resource management: opaque handles, one replaceable allocator and logging hooks, error codes reported through an optional last parameter
 - An ABI easy to wrap from other languages: opaque handles and fixed-size integer types, the same on every platform
 
 ## Architecture
@@ -197,12 +197,12 @@ Move it wherever you keep your dependencies, for example a `third_party` folder 
 
 ### From sources
 
-You need CMake 3.28 or later (`cmake --version`) and one of these compilers, the first versions with C11 support:
+You need CMake 3.28 or later (`cmake --version`) and one of these compilers:
 
 - GCC 4.9 or later
 - Clang 3.3 or later
 - Apple Clang from Xcode 5.0 or later
-- MSVC from Visual Studio 2019 version 16.8 or later, with the Windows SDK 10.0.20348.0 or later
+- MSVC from Visual Studio 2022 version 17.9 or later, with the Windows SDK 10.0.22621.0 or later
 
 > [!NOTE]
 > Their support is theoretical: the CI only builds and tests with the compilers of the latest GitHub runners.
@@ -218,7 +218,7 @@ cmake --install build/release-static --config Release --prefix <prefix>
 
 `release-static` builds the static library in Release and runs its tests, and `release-shared` does the same with the shared library.
 Added to another CMake project with `add_subdirectory` or `FetchContent`, the library generates no install rules unless `VMNL_NET_INSTALL` is `ON`.
-The other presets, for the tests in Debug, the sanitizers, the coverage and the documentation, are listed in [CONTRIBUTING.md](https://github.com/VMNL/vmnl-net/blob/main/CONTRIBUTING.md).
+The other presets, for the tests in Debug, the sanitizers, the coverage, the benchmarks and the documentation, are listed in [CONTRIBUTING.md](https://github.com/VMNL/vmnl-net/blob/main/CONTRIBUTING.md).
 
 ### Using the library
 
@@ -246,7 +246,7 @@ cc main.c $(pkg-config --cflags --libs vmnl-net) -o main
 
 With the shared library, the program must find it at run time: copy `bin/vmnl_net.dll` next to the executable on Windows, or add `-Wl,-rpath,<prefix>/lib` on macOS and Linux.
 
-Include `<vmnl/net.h>` to get the whole API, which is described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
+Include the header of each module you use, such as `<vmnl/net/buffer.h>`, all described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
 
 ## Technical Documentation
 
