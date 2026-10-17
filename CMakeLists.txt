@@ -146,16 +146,21 @@ set_target_properties(vmnl_net
 if(VMNL_NET_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
+    include(${PROJECT_SOURCE_DIR}/cmake/coverage.cmake)
 endif()
 
 if(VMNL_NET_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+if(PROJECT_IS_TOP_LEVEL)
+    include(${PROJECT_SOURCE_DIR}/cmake/format.cmake)
+endif()
+
 if(VMNL_NET_BUILD_DOCS)
-    include(cmake/doxygen.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/doxygen.cmake)
 endif()
 
 if(VMNL_NET_INSTALL)
-    include(cmake/install.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/install.cmake)
 endif()

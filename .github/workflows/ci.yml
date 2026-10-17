@@ -1,4 +1,4 @@
-# Builds and tests the static and the shared library on Windows, macOS and Linux.
+# Builds and tests the static and the shared library in Release on Windows, macOS and Linux.
 # Also checks that the sources follow .clang-format.
 # Then runs the tests under AddressSanitizer and UBSan, and measures their coverage.
 name: CI
@@ -30,8 +30,12 @@ jobs:
           persist-credentials: false
         timeout-minutes: 5
 
+      - name: Install clang-format ${{ env.CLANG_FORMAT_VERSION }}
+        run: pipx install "clang-format==$CLANG_FORMAT_VERSION"
+        timeout-minutes: 5
+
       - name: Check the formatting
-        run: find src include tests examples \( -name '*.[ch]' -o -name '*.cpp' \) -exec pipx run "clang-format==$CLANG_FORMAT_VERSION" --dry-run --Werror {} +
+        run: cmake --workflow --preset format-check
         timeout-minutes: 10
 
   build:
@@ -51,20 +55,12 @@ jobs:
           persist-credentials: false
         timeout-minutes: 5
 
-      - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=${{ matrix.type == 'shared' }}
-        timeout-minutes: 10
-
-      - name: Build
-        run: cmake --build build --config Debug
-        timeout-minutes: 20
-
-      - name: Test
-        run: ctest --test-dir build --build-config Debug --output-on-failure
-        timeout-minutes: 10
+      - name: Build and test
+        run: cmake --workflow --preset release-${{ matrix.type }}
+        timeout-minutes: 30
 
       - name: Install
-        run: cmake --install build --config Debug --prefix install
+        run: cmake --install build/release-${{ matrix.type }} --config Release --prefix install
         timeout-minutes: 5
 
   sanitize:
@@ -75,9 +71,6 @@ jobs:
     env:
       CC: clang
       CXX: clang++
-      CFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
-      CXXFLAGS: -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
-      LDFLAGS: -fsanitize=address,undefined
     steps:
       - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -85,26 +78,15 @@ jobs:
           persist-credentials: false
         timeout-minutes: 5
 
-      - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug
-        timeout-minutes: 10
-
-      - name: Build
-        run: cmake --build build
-        timeout-minutes: 20
-
-      - name: Test
-        run: ctest --test-dir build --output-on-failure
-        timeout-minutes: 10
+      - name: Build and test
+        run: cmake --workflow --preset sanitize
+        timeout-minutes: 30
 
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    env:
-      CFLAGS: --coverage
-      LDFLAGS: --coverage
     steps:
       - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -113,19 +95,19 @@ jobs:
         timeout-minutes: 5
 
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Debug -DVMNL_NET_BUILD_EXAMPLES=OFF
+        run: cmake --preset coverage
         timeout-minutes: 10
 
       - name: Build
-        run: cmake --build build
+        run: cmake --build --preset coverage
         timeout-minutes: 20
 
       - name: Test
-        run: ctest --test-dir build --output-on-failure
+        run: ctest --preset coverage
         timeout-minutes: 10
 
       - name: Measure the coverage
-        run: pipx run "gcovr==$GCOVR_VERSION" --root . --filter src/ --markdown-summary "$GITHUB_STEP_SUMMARY" --html-details coverage/ --fail-under-line 100 --fail-under-branch 100 build
+        run: pipx run "gcovr==$GCOVR_VERSION" --root . --filter src/ --markdown-summary "$GITHUB_STEP_SUMMARY" --html-details coverage/ --fail-under-line 100 --fail-under-branch 100 build/coverage
         timeout-minutes: 5
 
       - name: Upload the report

@@ -1,0 +1,246 @@
+{
+  "version": 8,
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/build/${presetName}"
+    },
+    {
+      "name": "lib",
+      "displayName": "Build the library in Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "VMNL_NET_BUILD_TESTS": "OFF",
+        "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "VMNL_NET_BUILD_DOCS": "OFF"
+      }
+    },
+    {
+      "name": "dev",
+      "displayName": "Build and run the tests in Debug",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VMNL_NET_BUILD_TESTS": "ON",
+        "VMNL_NET_BUILD_DOCS": "OFF"
+      }
+    },
+    {
+      "name": "release-static",
+      "displayName": "Build and run the tests of the static library in Release",
+      "inherits": "base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_SHARED_LIBS": "OFF",
+        "VMNL_NET_BUILD_TESTS": "ON",
+        "VMNL_NET_BUILD_DOCS": "OFF"
+      }
+    },
+    {
+      "name": "release-shared",
+      "displayName": "Build and run the tests of the shared library in Release",
+      "inherits": "release-static",
+      "cacheVariables": {
+        "BUILD_SHARED_LIBS": "ON"
+      }
+    },
+    {
+      "name": "coverage",
+      "displayName": "Measure the coverage in Debug",
+      "inherits": "dev",
+      "condition": {
+        "type": "notEquals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "CMAKE_C_FLAGS": "--coverage",
+        "CMAKE_EXE_LINKER_FLAGS": "--coverage",
+        "CMAKE_SHARED_LINKER_FLAGS": "--coverage"
+      }
+    },
+    {
+      "name": "sanitize",
+      "displayName": "Run the tests under the sanitizers in Debug",
+      "inherits": "dev",
+      "condition": {
+        "type": "inList",
+        "string": "${hostSystemName}",
+        "list": ["Linux", "Darwin"]
+      },
+      "cacheVariables": {
+        "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    },
+    {
+      "name": "docs",
+      "displayName": "Generate the documentation",
+      "inherits": "base",
+      "cacheVariables": {
+        "VMNL_NET_BUILD_TESTS": "OFF",
+        "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "VMNL_NET_BUILD_DOCS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "lib",
+      "configurePreset": "lib",
+      "configuration": "Release"
+    },
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release-static",
+      "configurePreset": "release-static",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-shared",
+      "configurePreset": "release-shared",
+      "configuration": "Release"
+    },
+    {
+      "name": "coverage",
+      "configurePreset": "coverage",
+      "configuration": "Debug"
+    },
+    {
+      "name": "coverage-report",
+      "configurePreset": "coverage",
+      "configuration": "Debug",
+      "targets": ["coverage"]
+    },
+    {
+      "name": "sanitize",
+      "configurePreset": "sanitize",
+      "configuration": "Debug"
+    },
+    {
+      "name": "docs",
+      "configurePreset": "docs",
+      "targets": ["docs"]
+    },
+    {
+      "name": "format",
+      "configurePreset": "lib",
+      "targets": ["format"]
+    },
+    {
+      "name": "format-check",
+      "configurePreset": "lib",
+      "targets": ["format-check"]
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Debug",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "release-static",
+      "inherits": "dev",
+      "configurePreset": "release-static",
+      "configuration": "Release"
+    },
+    {
+      "name": "release-shared",
+      "inherits": "release-static",
+      "configurePreset": "release-shared"
+    },
+    {
+      "name": "coverage",
+      "inherits": "dev",
+      "configurePreset": "coverage"
+    },
+    {
+      "name": "sanitize",
+      "inherits": "dev",
+      "configurePreset": "sanitize"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "lib",
+      "steps": [
+        { "type": "configure", "name": "lib" },
+        { "type": "build", "name": "lib" }
+      ]
+    },
+    {
+      "name": "dev",
+      "steps": [
+        { "type": "configure", "name": "dev" },
+        { "type": "build", "name": "dev" },
+        { "type": "test", "name": "dev" }
+      ]
+    },
+    {
+      "name": "release-static",
+      "steps": [
+        { "type": "configure", "name": "release-static" },
+        { "type": "build", "name": "release-static" },
+        { "type": "test", "name": "release-static" }
+      ]
+    },
+    {
+      "name": "release-shared",
+      "steps": [
+        { "type": "configure", "name": "release-shared" },
+        { "type": "build", "name": "release-shared" },
+        { "type": "test", "name": "release-shared" }
+      ]
+    },
+    {
+      "name": "coverage",
+      "steps": [
+        { "type": "configure", "name": "coverage" },
+        { "type": "build", "name": "coverage" },
+        { "type": "test", "name": "coverage" },
+        { "type": "build", "name": "coverage-report" }
+      ]
+    },
+    {
+      "name": "sanitize",
+      "steps": [
+        { "type": "configure", "name": "sanitize" },
+        { "type": "build", "name": "sanitize" },
+        { "type": "test", "name": "sanitize" }
+      ]
+    },
+    {
+      "name": "docs",
+      "steps": [
+        { "type": "configure", "name": "docs" },
+        { "type": "build", "name": "docs" }
+      ]
+    },
+    {
+      "name": "format",
+      "steps": [
+        { "type": "configure", "name": "lib" },
+        { "type": "build", "name": "format" }
+      ]
+    },
+    {
+      "name": "format-check",
+      "steps": [
+        { "type": "configure", "name": "lib" },
+        { "type": "build", "name": "format-check" }
+      ]
+    }
+  ]
+}
