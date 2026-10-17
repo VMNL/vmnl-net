@@ -24,7 +24,8 @@ UTEST(vmnl_net_clock_now, counts_nanoseconds)
     const clock_t time = clock();
 
     ASSERT_NE(time, (clock_t) -1);
-    while (clock() - time < CLOCKS_PER_SEC / 100)
+    // clock() rounds down, one more tick covers it
+    while (clock() - time < CLOCKS_PER_SEC / 100 + 1)
         ;
     EXPECT_GE(vmnl_net_clock_now() - start, VMNL_NET_NANOSECONDS_PER_SECOND / 100);
 }
