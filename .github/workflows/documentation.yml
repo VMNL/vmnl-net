@@ -44,13 +44,13 @@ jobs:
       - name: Generate the documentation
         env:
           DOXYGEN_THEME: theme/doxygen-awesome.css theme/doxygen-awesome-sidebar-only.css
-        run: cmake -B build -DVMNL_NET_BUILD_DOCS=ON -DVMNL_NET_BUILD_TESTS=OFF && cmake --build build --target docs
+        run: cmake --workflow --preset docs
         timeout-minutes: 5
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
-          path: build/docs/html
+          path: build/docs/docs/html
         timeout-minutes: 5
 
   deploy:

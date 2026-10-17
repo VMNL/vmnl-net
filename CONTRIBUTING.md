@@ -4,35 +4,34 @@ This page lists the checks to run before opening a pull request and the few conv
 
 ## Checks
 
-You need CMake, clang-format 22, Doxygen and gcovr.
-Run these commands from the root of the repository:
+You need CMake 3.28 or later, clang-format 22, Doxygen and gcovr.
+Each check is a workflow of `CMakePresets.json`, run from the root of the repository, that builds into `build/<preset>`:
 
 ```sh
-# Formatting, fixed by replacing --dry-run --Werror with -i
-find src include tests examples \( -name '*.[ch]' -o -name '*.cpp' \) -exec clang-format --dry-run --Werror {} +
+# Every preset, with what it does
+cmake --list-presets=all
 
-# Build and tests
-cmake -B build
-cmake --build build
-ctest --test-dir build --output-on-failure
+# Formatting, fixed with --preset format
+cmake --workflow --preset format-check
 
-# Sanitizers
-CFLAGS=-fsanitize=address,undefined CXXFLAGS=-fsanitize=address,undefined LDFLAGS=-fsanitize=address,undefined cmake -B build-sanitize -DCMAKE_BUILD_TYPE=Debug
-cmake --build build-sanitize
-ctest --test-dir build-sanitize --output-on-failure
+# Library only, in Release
+cmake --workflow --preset lib
 
-# Coverage, which must stay at 100% of lines and branches
-CFLAGS=--coverage LDFLAGS=--coverage cmake -B build-coverage -DCMAKE_BUILD_TYPE=Debug -DVMNL_NET_BUILD_EXAMPLES=OFF
-cmake --build build-coverage
-ctest --test-dir build-coverage
-gcovr --root . --filter src/ --fail-under-line 100 --fail-under-branch 100 build-coverage
+# Build and tests, in Debug
+cmake --workflow --preset dev
+
+# Build and tests, in Release like the CI, with release-shared for the shared library
+cmake --workflow --preset release-static
+
+# Sanitizers, on Linux and macOS
+cmake --workflow --preset sanitize
+
+# Coverage, which must stay at 100% of lines and branches with GCC and gcovr 8.6 like the CI, outside Windows
+cmake --workflow --preset coverage
 
 # Documentation, which fails on any warning
-cmake -B build -DVMNL_NET_BUILD_DOCS=ON
-cmake --build build --target docs
+cmake --workflow --preset docs
 ```
-
-With Apple Clang, gcovr also needs `--gcov-executable "xcrun llvm-cov gcov"`.
 
 A change to the public API comes with its Doxygen comments and tests, a new module with an example in `examples/example_<module>_<feature>.c`, a bug fix with a regression test, and a new feature with an update of the roadmap in the README.
 

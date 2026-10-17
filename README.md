@@ -115,25 +115,18 @@ You need CMake 3.28 or later (`cmake --version`) and one of these compilers, the
 > [!NOTE]
 > Their support is theoretical: the CI only builds and tests with the compilers of the latest GitHub runners.
 
-Then clone, build and install it:
+Then clone, build, test and install it:
 
 ```sh
 git clone https://github.com/VMNL/vmnl-net.git
 cd vmnl-net
-cmake -B build
-cmake --build build --config Release
-cmake --install build --config Release --prefix <prefix>
+cmake --workflow --preset release-static
+cmake --install build/release-static --config Release --prefix <prefix>
 ```
 
-The build can be tuned with these CMake options, which take `ON` or `OFF`:
-
-| Option | Default | Effect |
-| --- | --- | --- |
-| `-DBUILD_SHARED_LIBS=` | `OFF` | Builds a shared library instead of a static one |
-| `-DVMNL_NET_BUILD_TESTS=` | `ON` when built on its own | Builds the tests |
-| `-DVMNL_NET_BUILD_EXAMPLES=` | `ON` when built on its own | Builds the examples of the documentation |
-| `-DVMNL_NET_BUILD_DOCS=` | `OFF` | Generates the documentation with Doxygen into `build/docs/html` |
-| `-DVMNL_NET_INSTALL=` | `ON` when built on its own | Generates the install rules |
+`release-static` builds the static library in Release and runs its tests, and `release-shared` does the same with the shared library.
+Added to another CMake project with `add_subdirectory` or `FetchContent`, the library generates no install rules unless `VMNL_NET_INSTALL` is `ON`.
+The other presets, for the tests in Debug, the sanitizers, the coverage and the documentation, are listed in [CONTRIBUTING.md](https://github.com/VMNL/vmnl-net/blob/main/CONTRIBUTING.md).
 
 ### Using the library
 
