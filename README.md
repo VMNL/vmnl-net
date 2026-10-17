@@ -56,35 +56,127 @@ Feature highlights:
 
 ## Architecture
 
+The library is built in layers, each module pointing to the ones it uses.
+In the diagram, solid lines show what exists and dotted ones what is planned.
+
+Every module reports its failures with errors, so those arrows are left out.
+
 ```mermaid
-flowchart LR
-    NET["vmnl/net.h"]
-    NET --> CORE["core"]
-    CORE --> CTX["context"]
-    CORE --> ERR["errors"]
-    CORE --> ALLOC["allocator"]
-    CORE -.-> LOG["logging"]
-    NET --> DATA["data"]
-    DATA --> BUF["buffers"]
-    DATA -.-> SER["serialization"]
-    NET --> TIME["time"]
-    TIME --> CLOCK["clock"]
-    TIME --> TIMER["timers"]
-    NET -.-> IO["I/O"]
-    IO -.-> SOCK["sockets"]
-    IO -.-> POLL["polling"]
-    IO -.-> DNS["DNS resolution"]
-    NET -.-> PROTO["protocol"]
-    PROTO -.-> TCP["TCP"]
-    PROTO -.-> UDP["UDP"]
-    PROTO -.-> RUDP["RUDP"]
-    PROTO -.-> FRAG["fragmentation"]
-    NET -.-> SERV["service"]
-    SERV -.-> HTTP["HTTP(S) client"]
-    SERV -.-> CHAT["text chat"]
-    SERV -.-> VOICE["voice chat"]
-    NET -.-> SEC["security"]
-    SEC -.-> CRYPT["encryption"]
+block-beta
+    columns 1
+
+    block:SERVICES
+        columns 10
+        SERVICES_TITLE["Services"]
+        HTTP["<sup>0.8</sup> HTTP(S) client"]
+        space:5
+        CHAT["<sup>0.9</sup> text chat"]
+        VOICE["<sup>0.9</sup> voice chat"]
+        space
+    end
+
+    block:PROTOCOLS
+        columns 10
+        PROTOCOLS_TITLE["Protocols"]
+        TCP["<sup>0.3</sup> TCP"]
+        space:2
+        CRYPT["<sup>0.10</sup> encryption"]
+        space
+        UDP["<sup>0.3</sup> UDP"]
+        RUDP["<sup>0.5</sup> RUDP"]
+        FRAG["<sup>0.7</sup> fragmentation"]
+        space
+    end
+
+    block:IO
+        columns 10
+        IO_TITLE["I/O"]
+        SOCKET["<sup>0.3</sup> sockets"]
+        space:4
+        POLL["<sup>0.6</sup> polling"]
+        space
+        DNS["<sup>0.6</sup> DNS resolution"]
+        space
+    end
+
+    block:DATA
+        columns 10
+        DATA_TITLE["Data"]
+        BUFFER["<sup>0.2</sup> buffer API"]
+        space:3
+        SER["<sup>0.4</sup> serialization"]
+        space:4
+    end
+
+    block:BUFFERS
+        columns 10
+        BUFFERS_TITLE["Buffers"]
+        FLAT["<sup>0.3</sup> flat"]
+        DYNAMIC["<sup>0.2</sup> dynamic"]
+        RING["<sup>0.2</sup> ring"]
+        CHUNKS["<sup>0.3</sup> chunks"]
+        space:5
+    end
+
+    block:TIME
+        columns 10
+        TIME_TITLE["Time"]
+        space:6
+        TIMER["<sup>0.2</sup> timers"]
+        CLOCK["<sup>0.2</sup> clock"]
+        space
+    end
+
+    block:CORE
+        columns 10
+        CORE_TITLE["Core"]
+        space
+        ALLOCATOR["<sup>0.1</sup> allocator"]
+        space:3
+        CONTEXT["<sup>0.1</sup> context"]
+        ERROR["<sup>0.1</sup> errors"]
+        VERSION["<sup>0.1</sup> version"]
+        LOG["<sup>0.3</sup> logging"]
+    end
+
+    block:INTERNAL
+        columns 10
+        INTERNAL_TITLE["Internal"]
+        space:4
+        LIST["<sup>0.2</sup> intrusive list"]
+        space:4
+    end
+
+    HTTP -.-> TCP
+    CHAT -.-> RUDP
+    VOICE -.-> RUDP
+    RUDP -.-> UDP
+    RUDP -.-> FRAG
+    RUDP -.-> TIMER
+    TCP -.-> SOCKET
+    UDP -.-> SOCKET
+    SOCKET -.-> POLL
+    SOCKET -.-> BUFFER
+    SER -.-> BUFFER
+    BUFFER -.-> FLAT
+    BUFFER --> DYNAMIC
+    BUFFER --> RING
+    BUFFER -.-> CHUNKS
+    POLL -.-> CONTEXT
+    TIMER --> CONTEXT
+    TIMER --> CLOCK
+    CONTEXT --> ALLOCATOR
+    CONTEXT --> LIST
+    FLAT -.-> ALLOCATOR
+    DYNAMIC --> ALLOCATOR
+    RING --> ALLOCATOR
+    CHUNKS -.-> ALLOCATOR
+    CHUNKS -.-> LIST
+
+    classDef title fill:none,stroke:none
+    classDef planned fill:none,stroke-dasharray: 4 3
+    class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
+    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,FLAT,CHUNKS,SER,LOG planned
 ```
 
 ## Installation
@@ -169,31 +261,66 @@ The CI generates the API reference with Doxygen from the public headers and publ
 
 ## Roadmap
 
-Target dates are given by month and updated at each release.
-A version is *Planned* until work starts, In progress while it is built, and **Released** once it is implemented, documented and tested on Windows, macOS and Linux.
+Each version keeps its target month, and gets its release date once it is implemented, documented and tested on Windows, macOS and Linux.
 
-| Version | Content | Target | Status |
+| Version | Content | Target | Release |
 | --- | --- | --- | --- |
-| `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | **Released** |
-| `0.2.0` | Dynamic and ring byte buffers; monotonic clock and application-driven timers | October 2026 | **Released** |
-| `0.3.0` | Non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 | *Planned* |
-| `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 | *Planned* |
-| `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgments and retransmission, round-trip time and packet loss statistics | March 2027 | *Planned* |
-| `0.6.0` | Polling for many sockets with WSAPoll, kqueue or epoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 | *Planned* |
-| `0.7.0` | Fragmentation of reliable messages larger than the path MTU | June 2027 | *Planned* |
-| `0.8.0` | HTTP/1.1 client ([RFC 9112](https://www.rfc-editor.org/rfc/rfc9112)) and HTTPS | October 2027 | *Planned* |
-| `0.9.0` | Text chat over reliable channels and voice chat over unreliable channels | November 2027 | *Planned* |
-| `0.10.0` | Encrypted traffic between clients and servers | December 2027 | *Planned* |
-| `1.0.0` | First stable release, with a stable C ABI | February 2028 | *Planned* |
+| `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | October 4, 2026 |
+| `0.2.0` | Dynamic and ring byte buffers; monotonic clock and application-driven timers | November 2026 | October 11, 2026 |
+| `0.3.0` | Non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 |  |
+| `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 |  |
+| `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgments and retransmission, round-trip time and packet loss statistics | March 2027 |  |
+| `0.6.0` | Polling for many sockets with WSAPoll, kqueue or epoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 |  |
+| `0.7.0` | Fragmentation of reliable messages larger than the path MTU | June 2027 |  |
+| `0.8.0` | HTTP/1.1 client ([RFC 9112](https://www.rfc-editor.org/rfc/rfc9112)) and HTTPS | October 2027 |  |
+| `0.9.0` | Text chat over reliable channels and voice chat over unreliable channels | November 2027 |  |
+| `0.10.0` | Encrypted traffic between clients and servers | December 2027 |  |
+| `1.0.0` | First stable release, with a stable C ABI | February 2028 |  |
 
 ## References
 
-- [Gaffer On Games, game networking articles](https://gafferongames.com/categories/game-networking/) by Glenn Fiedler: my main source on UDP, which shaped the reliable UDP milestone (connections, sequencing, acknowledgments, packet loss and round-trip time).
-- [Quake 3 Source Code Review: Network Model](https://fabiensanglard.net/quake3/network.php) by Fabien Sanglard and the [Quake III Arena network channel](https://github.com/id-Software/Quake-III-Arena/blob/master/code/qcommon/net_chan.c): how a shipped game builds reliable delivery over UDP, with sequencing, delta compression and fragmentation.
-- [netcode](https://github.com/mas-bandwidth/netcode): a reference design of secure client/server connections over UDP, for the connection and encryption milestones.
-- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/): my starting point for DNS resolution and for polling many sockets.
-- [WSAPoll](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll), [kqueue(2)](https://man.freebsd.org/cgi/man.cgi?query=kqueue) and [epoll(7)](https://man7.org/linux/man-pages/man7/epoll.7.html): the reference for the exact behavior of each polling API.
-- [RFC 768](https://www.rfc-editor.org/rfc/rfc768) (UDP), [RFC 9293](https://www.rfc-editor.org/rfc/rfc9293) (TCP) and [RFC 9112](https://www.rfc-editor.org/rfc/rfc9112) (HTTP/1.1): the specifications the UDP, TCP and HTTP layers follow.
+The papers and articles the library is built on, in roadmap order.
+Most of them describe old and proven designs, so about once a month I check what changed around them: a new system API, the same design done in another language, or a flaw found in a similar library.
+When a source changes a decision, the issue of that decision cites it.
+
+### Buffers (0.2.0)
+
+- [Dynamic buffer requirements](https://www.boost.org/doc/libs/latest/doc/html/boost_asio/reference/DynamicBuffer_v1.html) of Boost.Asio and [Networking TS changes to enable better DynamicBuffer composition](https://open-std.org/jtc1/sc22/WG21/docs/papers/2020/p1790r1.html) by Christopher Kohlhoff (WG21, 2020): the prepare, commit, data and consume model, the offset reads of its version 2, and the copy problem behind it, which a C handle does not have.
+- [ByteBuf](https://netty.io/4.1/api/io/netty/buffer/ByteBuf.html) of Netty: the same model in Java, with reader and writer indices, and an explicit compaction that the library does in prepare().
+- [The Growth Factor Debate: 1.5x, 2x, or Something Else?](https://pablogs.dev/posts/growth-factor-dynamic-array-1.5-vs-2/) by pablo (2026): why the dynamic buffer grows by 1.5 rather than 2.
+
+### Timers (0.2.0)
+
+- [Hashed and Hierarchical Timing Wheels](http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf) by George Varghese and Tony Lauck (SOSP, 1987): the timer wheels I compare with the sorted list and the heap.
+- [Reinventing the timer wheel](https://lwn.net/Articles/646950/) by Jonathan Corbet (LWN, 2015): how Linux removed the cascading from its timer wheel, trading accuracy for timeouts that are almost always canceled before they expire.
+
+### Sockets (0.3.0)
+
+- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/) by Brian Hall: my starting point for sockets, DNS resolution and polling.
+- [RFC 768](https://www.rfc-editor.org/rfc/rfc768) and [RFC 9293](https://www.rfc-editor.org/rfc/rfc9293): the UDP and TCP specifications the sockets follow.
+
+### Serialization (0.4.0)
+
+- [Reading and Writing Packets](https://gafferongames.com/post/reading_and_writing_packets/) and [Serialization Strategies](https://gafferongames.com/post/serialization_strategies/) by Glenn Fiedler (Gaffer On Games): bit packing, and the bounds checks that reject malicious packets.
+
+### Reliable UDP (0.5.0)
+
+- [Game networking articles](https://gafferongames.com/categories/game-networking/) by Glenn Fiedler (Gaffer On Games): my main source on UDP, for connections, acknowledgments, round-trip time and packet loss.
+- [Quake 3 Source Code Review: Network Model](https://fabiensanglard.net/quake3/network.php) by Fabien Sanglard: how a shipped game sends its snapshots over UDP, with delta compression.
+- [RFC 9002](https://www.rfc-editor.org/rfc/rfc9002): loss detection and congestion control in QUIC, the reference for retransmissions.
+
+### Polling and DNS (0.6.0)
+
+- [WSAPoll](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll), [kqueue(2)](https://man.freebsd.org/cgi/man.cgi?query=kqueue) and [epoll(7)](https://man7.org/linux/man-pages/man7/epoll.7.html): the exact behavior of each polling API.
+- [Ringing in a new asynchronous I/O API](https://lwn.net/Articles/776703/) by Jonathan Corbet (LWN, 2019) and [On the way to io_uring networking](https://www.youtube.com/watch?v=O0NMUvThafI) by Pavel Begunkov (Kernel Recipes, 2023): io_uring, the completion model of Linux, which questions the readiness model of the library.
+
+### Fragmentation (0.7.0)
+
+- [Packet Fragmentation and Reassembly](https://gafferongames.com/post/packet_fragmentation_and_reassembly/) by Glenn Fiedler (Gaffer On Games): fragment headers, a conservative MTU of 1200 bytes, and the checks against malicious fragments.
+
+### HTTP (0.8.0)
+
+- [RFC 9112](https://www.rfc-editor.org/rfc/rfc9112): the HTTP/1.1 specification the HTTP client follows.
 
 ## Author
 
