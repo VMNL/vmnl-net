@@ -1,0 +1,32 @@
+/* Mermaid diagrams take the colors of the page, so they read in light and dark mode */
+
+pre.mermaid svg .node rect,
+pre.mermaid svg .node circle,
+pre.mermaid svg .node polygon,
+pre.mermaid svg .cluster rect {
+    fill: none !important;
+    stroke: var(--page-secondary-foreground-color, #6f7e8e) !important;
+}
+
+pre.mermaid svg .flowchart-link {
+    stroke: var(--page-secondary-foreground-color, #6f7e8e) !important;
+}
+
+pre.mermaid svg marker path {
+    fill: var(--page-secondary-foreground-color, #6f7e8e) !important;
+    stroke: var(--page-secondary-foreground-color, #6f7e8e) !important;
+}
+
+pre.mermaid svg .nodeLabel,
+pre.mermaid svg .edgeLabel,
+pre.mermaid svg .cluster-label,
+pre.mermaid svg text {
+    color: var(--page-foreground-color, #2f4153) !important;
+    fill: var(--page-foreground-color, #2f4153) !important;
+}
+
+pre.mermaid svg .edgeLabel,
+pre.mermaid svg .edgeLabel p,
+pre.mermaid svg .labelBkg {
+    background-color: var(--page-background-color, #ffffff) !important;
+}
