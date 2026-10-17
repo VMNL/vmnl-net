@@ -14,9 +14,9 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 option(BUILD_SHARED_LIBS "Build a shared library instead of a static one" OFF)
+option(VMNL_NET_BUILD_DOCS "Generate the documentation with Doxygen" OFF)
 option(VMNL_NET_BUILD_TESTS "Build the tests" ${PROJECT_IS_TOP_LEVEL})
 option(VMNL_NET_BUILD_EXAMPLES "Build the examples" ${PROJECT_IS_TOP_LEVEL})
-option(VMNL_NET_BUILD_DOCS "Generate the documentation with Doxygen" OFF)
 option(VMNL_NET_INSTALL "Generate the install rules" ${PROJECT_IS_TOP_LEVEL})
 
 if(PROJECT_IS_TOP_LEVEL)
@@ -38,60 +38,39 @@ add_library(vmnl_net)
 add_library(vmnl::net ALIAS vmnl_net)
 
 generate_export_header(vmnl_net
-  EXPORT_MACRO_NAME VMNL_NET_API
-  EXPORT_FILE_NAME include/vmnl/net_export.h
+    EXPORT_MACRO_NAME VMNL_NET_API
+    EXPORT_FILE_NAME include/vmnl/net_api.h
 )
 
 target_sources(vmnl_net
-  PRIVATE
-    src/core/vmnl_net_version.c
-    src/core/vmnl_net_version_string.c
-    src/error/vmnl_net_error_string.c
-    src/context/vmnl_net_context_create.c
-    src/context/vmnl_net_context_create_with_allocator.c
-    src/context/vmnl_net_context_destroy.c
-    src/buffer/vmnl_net_buffer_capacity.c
-    src/buffer/vmnl_net_buffer_claim.c
-    src/buffer/vmnl_net_buffer_clear.c
-    src/buffer/vmnl_net_buffer_commit.c
-    src/buffer/vmnl_net_buffer_consume.c
-    src/buffer/vmnl_net_buffer_copy.c
-    src/buffer/vmnl_net_buffer_create_dynamic.c
-    src/buffer/vmnl_net_buffer_create_generic.c
-    src/buffer/vmnl_net_buffer_create_ring.c
-    src/buffer/vmnl_net_buffer_destroy.c
-    src/buffer/vmnl_net_buffer_discard.c
-    src/buffer/vmnl_net_buffer_peek.c
-    src/buffer/vmnl_net_buffer_read.c
-    src/buffer/vmnl_net_buffer_release.c
-    src/buffer/vmnl_net_buffer_reserve.c
-    src/buffer/vmnl_net_buffer_resize.c
-    src/buffer/vmnl_net_buffer_size.c
-    src/buffer/vmnl_net_buffer_view.c
-    src/buffer/vmnl_net_buffer_write.c
-    $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/vmnl_net_clock_now.c>
-    $<$<PLATFORM_ID:Windows>:src/clock/win32/vmnl_net_clock_now.c>
-    src/timer/vmnl_net_timer_create.c
-    src/timer/vmnl_net_timer_destroy.c
-    src/timer/vmnl_net_timer_insert.c
-    src/timer/vmnl_net_timer_remaining.c
-    src/timer/vmnl_net_timer_remove.c
-    src/timer/vmnl_net_timer_reset.c
-    src/timer/vmnl_net_timer_start.c
-    src/timer/vmnl_net_timer_stop.c
-    src/timer/vmnl_net_timer_update.c
-  PUBLIC
-    FILE_SET HEADERS
-    BASE_DIRS include ${PROJECT_BINARY_DIR}/include
-    FILES
-      ${PROJECT_BINARY_DIR}/include/vmnl/net_export.h
-      include/vmnl/net.h
-      include/vmnl/net/core.h
-      include/vmnl/net/error.h
-      include/vmnl/net/context.h
-      include/vmnl/net/buffer.h
-      include/vmnl/net/clock.h
-      include/vmnl/net/timer.h
+    PRIVATE
+        src/version/version.c
+        src/version/version_string.c
+        src/error/error_as_string.c
+        src/allocator/allocator_set.c
+        src/context/context_create.c
+        src/context/context_destroy.c
+        src/clock/clock_elapsed.c
+        $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/clock_now.c>
+        $<$<PLATFORM_ID:Windows>:src/clock/win32/clock_now.c>
+        # src/timer/timer_create.c
+        # src/timer/timer_destroy.c
+        # src/timer/timer_remaining.c
+        # src/timer/timer_start.c
+        # src/timer/timer_stop.c
+        # src/timer/timer_update.c
+    PUBLIC
+        FILE_SET HEADERS
+        BASE_DIRS include ${PROJECT_BINARY_DIR}/include
+        FILES
+            ${PROJECT_BINARY_DIR}/include/vmnl/net_api.h
+            include/vmnl/net/attribute.h
+            include/vmnl/net/context.h
+            include/vmnl/net/version.h
+            include/vmnl/net/error.h
+            include/vmnl/net/allocator.h
+            include/vmnl/net/clock.h
+            # include/vmnl/net/timer.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
@@ -99,18 +78,8 @@ set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT
 if(NOT MSVC)
     target_compile_options(vmnl_net_warnings
       INTERFACE
-        -Wall
-        -Wextra
-        -Wpedantic
-        -Wshadow
-        -Wconversion
-        -Wsign-conversion
-        -Wcast-align
-        -Wpointer-arith
-        -Wvla
-        -Wformat=2
-        $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>
-        $<$<COMPILE_LANGUAGE:C>:-Wmissing-prototypes>
+        -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wcast-align -Wpointer-arith -Wvla -Wformat=2
+        $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes -Wmissing-prototypes>
     )
 else()
     target_compile_options(vmnl_net_warnings INTERFACE /W4)
@@ -143,16 +112,6 @@ set_target_properties(vmnl_net
     SOVERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
 )
 
-if(VMNL_NET_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-    include(${PROJECT_SOURCE_DIR}/cmake/coverage.cmake)
-endif()
-
-if(VMNL_NET_BUILD_EXAMPLES)
-    add_subdirectory(examples)
-endif()
-
 if(PROJECT_IS_TOP_LEVEL)
     include(${PROJECT_SOURCE_DIR}/cmake/format.cmake)
 endif()
@@ -160,6 +119,16 @@ endif()
 if(VMNL_NET_BUILD_DOCS)
     include(${PROJECT_SOURCE_DIR}/cmake/doxygen.cmake)
 endif()
+
+if(VMNL_NET_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+    include(${PROJECT_SOURCE_DIR}/cmake/coverage.cmake)
+endif()
+
+# if(VMNL_NET_BUILD_EXAMPLES)
+#     add_subdirectory(examples)
+# endif()
 
 if(VMNL_NET_INSTALL)
     include(${PROJECT_SOURCE_DIR}/cmake/install.cmake)

@@ -1,4 +1,4 @@
-#include <vmnl/net/core.h>
+#include <vmnl/net/version.h>
 
 uint32_t vmnl_net_version(void)
 {
