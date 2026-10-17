@@ -21,6 +21,21 @@ target_sources(vmnl_net_tests
     context/context_destroy_tests.c
     clock/clock_elapsed_tests.c
     clock/clock_now_tests.c
+    buffer/buffer_capacity_tests.c
+    buffer/buffer_clear_tests.c
+    buffer/buffer_commit_tests.c
+    buffer/buffer_consume_tests.c
+    buffer/buffer_create_chunks_tests.c
+    buffer/buffer_create_dynamic_tests.c
+    buffer/buffer_create_flat_tests.c
+    buffer/buffer_create_ring_tests.c
+    buffer/buffer_data_tests.c
+    buffer/buffer_destroy_tests.c
+    buffer/buffer_is_empty_tests.c
+    buffer/buffer_prepare_tests.c
+    buffer/buffer_reserve_tests.c
+    buffer/buffer_shrink_tests.c
+    buffer/buffer_size_tests.c
 )
 
 target_include_directories(vmnl_net_tests SYSTEM PRIVATE ${utest_SOURCE_DIR})

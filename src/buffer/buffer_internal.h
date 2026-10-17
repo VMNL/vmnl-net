@@ -1,6 +1,20 @@
 /**
  * \file buffer_internal.h
- * \brief Internal definition and helpers of the buffers.
+ * \brief Internal definition of the buffers.
+ *
+ * Every kind of buffer starts with a VmnlNetBuffer that points to its VmnlNetBufferOps: a public function checks its arguments, then calls the operation of the kind.
+ *
+ * \par Example
+ * \code
+ * bool vmnl_net_buffer_consume(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error)
+ * {
+ *     if (nbytes > buffer->size) {
+ *         vmnl_net_error_set(error, VMNL_NET_EINVAL);
+ *         return false;
+ *     }
+ *     return buffer->ops->consume(buffer, nbytes, error);
+ * }
+ * \endcode
  */
 
 #ifndef VMNL_NET_BUFFER_INTERNAL_H
@@ -8,72 +22,65 @@
 
 #include <vmnl/net/buffer.h> /* IWYU pragma: export */
 
+#include "list/list_internal.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * \brief Kinds of buffer.
+ * \brief Operations of one kind of buffer.
+ * \attention An operation **MUST** be called once its public function checked the arguments: it does not check them again.
  */
-typedef enum {
-    VMNL_NET_BUFFER_TYPE_DYNAMIC, /*!< Grows when full. */
-    VMNL_NET_BUFFER_TYPE_RING, /*!< Fixed capacity, wraps around. */
-} VmnlNetBufferType;
-
-/**
- * \brief Internal definition of a buffer.
- */
-struct VmnlNetBuffer {
-    uint8_t *data; /*!< Storage, NULL while the capacity is 0. */
-    size_t capacity; /*!< Storage size in bytes. */
-    size_t size; /*!< Number of stored bytes. */
-    size_t start; /*!< Index of the first stored byte. */
-    VmnlNetBufferType type; /*!< Kind of buffer. */
+struct VmnlNetBufferOps {
+    void (*clear)(VmnlNetBuffer *buffer); /*!< Implements vmnl_net_buffer_clear(). */
+    bool (*reserve)(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_reserve(). */
+    bool (*shrink)(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_shrink(). */
+    size_t (*data)(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews); /*!< Implements vmnl_net_buffer_data(). */
+    bool (*consume)(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error); /*!< Implements vmnl_net_buffer_consume(). */
+    bool (*prepare)(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error); /*!< Implements vmnl_net_buffer_prepare(). */
+    bool (*commit)(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error); /*!< Implements vmnl_net_buffer_commit(). */
+    void (*destroy)(VmnlNetBuffer *buffer); /*!< Implements vmnl_net_buffer_destroy(). */
 };
 
 /**
- * \brief Creates a buffer of the given kind.
- * \param context Context allocating the buffer, **MUST** not be NULL.
- * \param type Kind of buffer.
- * \param capacity Initial capacity in bytes, can be 0.
- * \param error Error code of the call, nullable:
- * - VMNL_NET_ENOMEM: memory allocation failure.
- * \return Created buffer on success, NULL otherwise.
+ * \brief Common part of every kind of buffer, opaque outside the library.
  */
-VmnlNetBuffer *vmnl_net_buffer_create_generic(VmnlNetContext *context, VmnlNetBufferType type, size_t capacity, VmnlNetError *error);
+struct VmnlNetBuffer {
+    const struct VmnlNetBufferOps *ops; /*!< Operations of the kind. */
+    size_t size; /*!< Stored bytes, at most capacity. */
+    size_t capacity; /*!< Allocated bytes. */
+};
 
 /**
- * \brief Resizes the storage of a buffer.
- * \param context Context that created *buffer*.
- * \param buffer Buffer to resize.
- * \param capacity New capacity in bytes, **MUST** not be 0.
- * \param error Error code of the call, nullable:
- * - VMNL_NET_ENOMEM: memory allocation failure, the storage is unchanged.
- * \return true on success, false otherwise.
+ * \brief Flat, dynamic or ring buffer, its bytes in one block.
+ * \remark The stored bytes run from offset, and in a ring buffer continue at the start of the block once they reach its end.
  */
-bool vmnl_net_buffer_resize(VmnlNetContext *context, VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error);
+struct VmnlNetBufferContiguous {
+    struct VmnlNetBuffer base; /*!< Common part, first so that a VmnlNetBuffer pointer converts to it. */
+    uint8_t *pointer; /*!< Allocated bytes. */
+    size_t offset; /*!< Index of the first stored byte. */
+};
 
 /**
- * \brief Frees the storage of a buffer.
- * \param context Context that created *buffer*.
- * \param buffer Buffer to release.
+ * \brief Chunk buffer, its bytes in a list of chunks.
+ * \remark Growing by missing bytes adds missing / chunk_size chunks, plus one for a remainder: unlike (missing + chunk_size - 1) / chunk_size, it cannot overflow.
  */
-void vmnl_net_buffer_release(VmnlNetContext *context, VmnlNetBuffer *buffer);
+struct VmnlNetBufferChunks {
+    struct VmnlNetBuffer base; /*!< Common part, first so that a VmnlNetBuffer pointer converts to it. */
+    struct VmnlNetListLink chunks; /*!< Head of the chunks, from the first stored byte to the free space. */
+    size_t chunk_size; /*!< Bytes of every chunk. */
+};
 
 /**
- * \brief Removes bytes from the front of a buffer.
- * \param buffer Buffer to remove from.
- * \param size Number of bytes, **MUST** not exceed the stored bytes.
+ * \brief Chunk of a chunk buffer, allocated in one block with its bytes right after it.
  */
-void vmnl_net_buffer_discard(VmnlNetBuffer *buffer, size_t size);
-
-/**
- * \brief Copies bytes from the front of a buffer without removing them.
- * \param buffer Buffer to copy from.
- * \param data Destination.
- * \param size Number of bytes, **MUST** not exceed the stored bytes.
- */
-void vmnl_net_buffer_copy(const VmnlNetBuffer *buffer, void *data, size_t size);
+struct VmnlNetBufferChunk {
+    struct VmnlNetListLink link; /*!< Link in the chunks of its buffer. */
+    uint8_t *pointer; /*!< Bytes of the chunk, (uint8_t *) (chunk + 1). */
+    size_t offset; /*!< Index of the first stored byte. */
+    size_t size; /*!< Stored bytes. */
+};
 
 #ifdef __cplusplus
 }
