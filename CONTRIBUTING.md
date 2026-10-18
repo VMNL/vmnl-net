@@ -2,65 +2,95 @@
 
 This page lists the checks to run before opening a pull request and the few conventions the tools do not enforce.
 
-## Checks
+## Workflow
 
-You need CMake 3.28 or later, clang-format 22, Doxygen and gcovr, and a C++17 compiler for the benchmarks.
-Each check is a workflow of `CMakePresets.json`, run from the root of the repository, that builds into `build/<preset>`:
+The code must be clean and efficient, with the data structures and the algorithms that fit each problem.
+Several presets of `CMakePresets.json` check it, each run from the root of the repository with `cmake --workflow --preset <preset>`, and built into `build/<preset>`.
 
-```sh
-# Every preset, with what it does
-cmake --list-presets=all
+### Requirements
 
-# Formatting, fixed with --preset format
-cmake --workflow --preset format-check
+- CMake 3.28 or later and one of the compilers listed in the README
+- a C++17 compiler for the benchmarks
+- clang-format 22 for the formatting
+- GCC and gcovr 8.6 for the coverage
+- Doxygen 1.18 for the documentation
 
-# Library only, in Release
-cmake --workflow --preset lib
+### Presets
 
-# Build and tests, in Debug
-cmake --workflow --preset dev
+| Preset | Use | Platforms |
+| --- | --- | --- |
+| `release` | Builds the library in Release | All |
+| `debug` | Builds the library in Debug | All |
+| `test` | Builds and runs the tests in Debug | All |
+| `sanitize` | Runs the tests under AddressSanitizer and UndefinedBehaviorSanitizer | Linux, macOS |
+| `coverage` | Measures the coverage of the tests, which must stay at 100% of lines and branches | Linux, macOS |
+| `bench` | Builds the benchmarks in Release, run with `./build/bench/bin/vmnl_net_benchmarks` | All |
+| `docs` | Generates the documentation in `build/docs/docs/html`, and fails on any warning | All |
+| `format` | Formats the sources with clang-format | All |
+| `format-check` | Checks the formatting, like the CI | All |
 
-# Build and tests, in Release like the CI, with release-shared for the shared library
-cmake --workflow --preset release-static
-
-# Sanitizers, on Linux and macOS
-cmake --workflow --preset sanitize
-
-# Coverage, which must stay at 100% of lines and branches with GCC and gcovr 8.6 like the CI, outside Windows
-cmake --workflow --preset coverage
-
-# Benchmarks, built in Release for meaningful numbers
-cmake --workflow --preset bench
-./build/bench/bin/vmnl_net_benchmarks
-
-# Documentation, which fails on any warning
-cmake --workflow --preset docs
-```
+`cmake --list-presets=all` lists them with the names shown in the IDEs.
 
 A change to the public API comes with its Doxygen comments and tests, a new module with an example in `examples/example_<module>_<feature>.c`, a bug fix with a regression test, and a new feature with its benchmarks and an update of the roadmap in the README.
 
 ## Conventions
 
-clang-format takes care of the layout. On top of it:
+clang-format takes care of the layout, the rules below cover the rest.
 
-- names follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INSTRUCTIONS.md): `VmnlNet` types, `vmnl_net_` functions, `VMNL_NET_` macros, `is_` for predicates and `as_` for conversions;
-- each public function has its own file, named after it without the `vmnl_net_` prefix, like `src/buffer/buffer_create_flat.c`, private code goes in `src/<module>/<module>_internal.h`, an internal module used by several others, like the list, in its own folder, and platform code in `posix/` or `win32/`;
-- includes go from the public headers of the library to the private ones, then the dependencies and the C library, one block each, and a file only includes what it needs;
-- a function that can fail takes a nullable `VmnlNetError *error` as last parameter, sets it on every call, and tells the failure through its return value;
-- like in the libc, a pointer parameter is not checked against NULL unless it is nullable, except the functions given by the caller, like an allocator, which give `VMNL_NET_EINVAL`;
-- `sizeof` takes no parentheses on an expression, compound literals take a space after the type, counters use `i++` rather than `++i`, and booleans are compared with `== true` or `== false` rather than `!`;
-- Doxygen comments stay short and technical, with `nullable` for optional pointers, the error codes listed under the `error` parameter, the contracts in `\attention` with `**MUST**` and a short reason, the other facts in `\remark`, and snippets that compile.
+### Names
+
+They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INSTRUCTIONS.md).
+
+| Element | Form | Example |
+| --- | --- | --- |
+| Type | `VmnlNet<Name>` | `VmnlNetBuffer` |
+| Function | `vmnl_net_<module>_<action>` | `vmnl_net_buffer_create_flat` |
+| Macro | `VMNL_NET_<NAME>` | `VMNL_NET_EINVAL` |
+| Predicate | `vmnl_net_<module>_is_<state>` | `vmnl_net_buffer_is_empty` |
+| Conversion | `vmnl_net_<module>_as_<type>` | `vmnl_net_error_as_string` |
+
+### Files
+
+- one public function per file, named without the `vmnl_net_` prefix: `src/buffer/buffer_create_flat.c`
+- private code in `src/<module>/<module>_internal.h`
+- an internal module used by several others in its own folder, like `src/list/`
+- platform code in `posix/` or `win32/`
+- includes in four blocks: public headers of the library, private ones, dependencies, C library
+- a file includes only what it needs
+
+### Errors and NULL
+
+- a function that can fail takes a nullable `VmnlNetError *error` last, sets it on every call, and tells the failure through its return value
+- NULL is accepted only where it means something: an `error` the caller does not read, a `user_data` it does not need, or nothing to destroy
+- any other pointer is used without check, like `strlen(NULL)` in the libc, so a NULL one is a bug of the caller
+
+### Not checked by clang-format
+
+- `sizeof` without parentheses on an expression: `sizeof *context`
+- counters with `it++` and `it--`, not `++it` and `--it`, unless the expression needs the updated value
+- comparisons written out for readability: booleans with `== true` or `== false`, pointers with `== NULL` or `!= NULL`, not `!value` nor `value` alone
+
+### Doxygen
+
+- short and technical, with snippets that compile
+- `nullable` for optional pointers
+- the error codes listed under the `error` parameter
+- the contracts in `\attention`, with `**MUST**` and a short reason
+- the other facts in `\remark`
 
 ## Tests
 
-Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake.
-Each public function has its own test file, named like its source, `tests/<module>/<name>_tests.c`, and listed in `tests/CMakeLists.txt`.
-The suite takes the name of the function, like `vmnl_net_buffer_create_flat`, and each test the case it covers in snake case, like `success` or `null_error`, or a short sentence for a property, like `never_goes_backwards`.
-A `VmnlNetError` starts at `UINT32_MAX`, so the test proves the function writes it.
-Tests are ordered from `success` to the properties, the limits like `zero_capacity`, the allocation failures, the `null_` cases of the nullable parameters, and `null_error` last.
+Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake, and the formatting check skips them.
+
+- one file per public function, named like its source: `tests/<module>/<name>_tests.c`, listed in `tests/CMakeLists.txt`
+- the suite is the name of the function: `vmnl_net_buffer_create_flat`
+- each test says what the function does, in snake case, starting with a verb and without article: `creates_flat_buffer`, `rejects_zero_capacity`, `accepts_null_error`
+- the tests go from the nominal case to the properties, the limits, the allocation failures and the nullable parameters, the NULL error last
+- a `VmnlNetError` starts at `UINT32_MAX`, so the test proves the function writes it
+- a test that replaces the allocator restores the default one before its first `ASSERT`, since the test binary run on its own runs every test in the same process
 
 ```c
-UTEST(vmnl_net_buffer_create_flat, success)
+UTEST(vmnl_net_buffer_create_flat, creates_flat_buffer)
 {
     const size_t capacity = 64;
     VmnlNetError error = UINT32_MAX;
@@ -72,8 +102,6 @@ UTEST(vmnl_net_buffer_create_flat, success)
     vmnl_net_buffer_destroy(buffer);
 }
 ```
-
-CTest runs each test in its own process, so a test that replaces the allocator cannot break the next ones, but it still restores the default one before it returns.
 
 ## Benchmarks
 
