@@ -1,6 +1,14 @@
 /**
  * \file error_internal.h
- * \brief Internal helpers for error codes.
+ * \brief Internal helpers of the error codes.
+ *
+ * \par Example
+ * \code
+ * if (nbytes > buffer->size) {
+ *     vmnl_net_error_set(error, VMNL_NET_EINVAL);
+ *     return false;
+ * }
+ * \endcode
  */
 
 #ifndef VMNL_NET_ERROR_INTERNAL_H
@@ -15,9 +23,10 @@ extern "C" {
 #endif
 
 /**
- * \brief Sets the error code.
- * \param error Error pointer, nullable.
- * \param value Error code to set.
+ * \brief Writes an error code if the caller asked for one.
+ * \param error Error pointer of the caller, nullable.
+ * \param value Code to write.
+ * \remark A NULL \p error is skipped, so public functions call it on every return path, #VMNL_NET_SUCCESS included, without checking.
  */
 static inline void vmnl_net_error_set(VmnlNetError *error, VmnlNetError value)
 {

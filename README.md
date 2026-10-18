@@ -45,14 +45,29 @@ TCP, UDP, reliable UDP (RUDP) and socket polling for games and real-time applica
 It exposes a single non-blocking API over the native socket interfaces of Windows, macOS and Linux, and builds higher-level protocols and services on top of it.
 It is developed as the networking module of the [VMNL](https://github.com/VMNL/vmnl) project and can be used on its own from any C or C++ application.
 
-Feature highlights:
+### Is it for you?
 
-- TCP, UDP and RUDP, a reliable UDP protocol with connections and channels
-- Native readiness polling: WSAPoll on Windows, kqueue on macOS and BSD, epoll on Linux
-- IPv4 and IPv6
-- No background threads: the application drives the library from its own loop, and functions are not thread-safe unless stated otherwise
-- Explicit resource management: opaque handles, custom allocator per context and logging hooks, error codes reported through an optional last parameter
-- An ABI easy to wrap from other languages: opaque handles and fixed-size integer types, the same on every platform
+A multiplayer game needs several network layers: UDP for the gameplay, reliable UDP for the events that must arrive, TCP and HTTP for the services around it, chat and voice between the players.
+Most libraries cover one of them, so a game combines several, each with its own threads, allocator and error codes.
+`vmnl_net` aims to cover them all in one C library, and says here what it will not do, so that you know before investing time in it.
+
+Made for:
+
+- One library for TCP, UDP, reliable UDP, HTTP and voice, with one allocator, logging hooks and one way to report errors
+- No background threads: the library only runs inside the calls of the application, so it takes no lock, has no data race, and a bug reproduces under a debugger
+- No buffer lent to a pending operation: each call returns at once and the library owns its buffers, so none can outlive the request that uses it, unlike completion-based APIs
+- Native polling with epoll, kqueue or WSAPoll, IPv4 and IPv6
+- A C ABI with opaque handles and fixed-size integers, easy to bind from Rust, C# or Python
+
+Not made for:
+
+- One set of connections on several cores: a context belongs to one thread
+- Thousands of sockets on Windows: WSAPoll scans them all at each call
+- Games hosted by a player at home: hole punching is not in the roadmap, so the host must open a port on their router
+- The browser, mobile or consoles: Windows, macOS and Linux only
+
+> [!NOTE]
+> The network only progresses inside the calls of the application: if your game loop blocks or computes for long, run the network in a thread of its own.
 
 ## Architecture
 
@@ -60,6 +75,7 @@ The library is built in layers, each module pointing to the ones it uses.
 In the diagram, solid lines show what exists and dotted ones what is planned.
 
 Every module reports its failures with errors, so those arrows are left out.
+RUDP is a connection over UDP with reliable and unreliable channels: text chat uses the reliable ones, voice chat the unreliable ones, without retransmission.
 
 ```mermaid
 block-beta
@@ -197,28 +213,29 @@ Move it wherever you keep your dependencies, for example a `third_party` folder 
 
 ### From sources
 
-You need CMake 3.28 or later (`cmake --version`) and one of these compilers, the first versions with C11 support:
+You need CMake 3.28 or later (`cmake --version`) and one of these compilers:
 
 - GCC 4.9 or later
 - Clang 3.3 or later
 - Apple Clang from Xcode 5.0 or later
-- MSVC from Visual Studio 2019 version 16.8 or later, with the Windows SDK 10.0.20348.0 or later
+- MSVC from Visual Studio 2022 version 17.9 or later, with the Windows SDK 10.0.22621.0 or later
 
 > [!NOTE]
 > Their support is theoretical: the CI only builds and tests with the compilers of the latest GitHub runners.
 
-Then clone, build, test and install it:
+Then clone, build and install it:
 
 ```sh
 git clone https://github.com/VMNL/vmnl-net.git
 cd vmnl-net
-cmake --workflow --preset release-static
-cmake --install build/release-static --config Release --prefix <prefix>
+cmake --workflow --preset release
+cmake --install build/release --config Release --prefix <prefix>
 ```
 
-`release-static` builds the static library in Release and runs its tests, and `release-shared` does the same with the shared library.
+The `release` preset builds the static library in Release.
+For the shared library, configure it with `cmake --preset release -DBUILD_SHARED_LIBS=ON`, then build it with `cmake --build --preset release`.
 Added to another CMake project with `add_subdirectory` or `FetchContent`, the library generates no install rules unless `VMNL_NET_INSTALL` is `ON`.
-The other presets, for the tests in Debug, the sanitizers, the coverage and the documentation, are listed in [CONTRIBUTING.md](https://github.com/VMNL/vmnl-net/blob/main/CONTRIBUTING.md).
+The other presets, for the tests, the sanitizers, the coverage, the benchmarks and the documentation, are listed in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Using the library
 
@@ -246,7 +263,7 @@ cc main.c $(pkg-config --cflags --libs vmnl-net) -o main
 
 With the shared library, the program must find it at run time: copy `bin/vmnl_net.dll` next to the executable on Windows, or add `-Wl,-rpath,<prefix>/lib` on macOS and Linux.
 
-Include `<vmnl/net.h>` to get the whole API, which is described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
+Include the header of each module you use, such as `<vmnl/net/buffer.h>`, all described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
 
 ## Technical Documentation
 

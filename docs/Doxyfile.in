@@ -2,7 +2,7 @@ PROJECT_NAME           = "VMNL / Network"
 PROJECT_NUMBER         = @PROJECT_VERSION@
 PROJECT_BRIEF          = "@PROJECT_DESCRIPTION@"
 OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@/docs
-INPUT                  = README.md include/vmnl docs
+INPUT                  = README.md CONTRIBUTING.md include/vmnl docs
 FILE_PATTERNS          = *.h *.md *.dox
 RECURSIVE              = YES
 EXAMPLE_PATH           = examples
@@ -17,6 +17,7 @@ MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = YES
 PREDEFINED             = VMNL_NET_API=
 EXTRACT_ALL            = NO
+SORT_MEMBER_DOCS       = NO
 QUIET                  = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES

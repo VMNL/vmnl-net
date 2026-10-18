@@ -55,12 +55,20 @@ jobs:
           persist-credentials: false
         timeout-minutes: 5
 
-      - name: Build and test
-        run: cmake --workflow --preset release-${{ matrix.type }}
-        timeout-minutes: 30
+      - name: Configure
+        run: cmake --preset test -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=${{ matrix.type == 'shared' }}
+        timeout-minutes: 10
+
+      - name: Build
+        run: cmake --build --preset test --config Release
+        timeout-minutes: 20
+
+      - name: Test
+        run: ctest --preset test --build-config Release
+        timeout-minutes: 10
 
       - name: Install
-        run: cmake --install build/release-${{ matrix.type }} --config Release --prefix install
+        run: cmake --install build/test --config Release --prefix install
         timeout-minutes: 5
 
   sanitize:

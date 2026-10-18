@@ -8,18 +8,17 @@
 
 #include <vmnl/net/context.h> /* IWYU pragma: export */
 
-#include "core/list_internal.h"
+#include "list/list_internal.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * \brief Internal definition of a context.
+ * \brief Context, opaque outside the library.
  */
 struct VmnlNetContext {
-    VmnlNetAllocator allocator; /*!< Callbacks used to allocate/deallocate memory. */
-    VmnlNetList timers; /*!< Running timers, sorted by deadline. */
+    struct VmnlNetListLink timers; /*!< Running timers, sorted by deadline. */
 };
 
 #ifdef __cplusplus
