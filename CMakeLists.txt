@@ -114,6 +114,7 @@ set_target_properties(vmnl_net
 )
 
 if(PROJECT_IS_TOP_LEVEL)
+    include(${PROJECT_SOURCE_DIR}/cmake/compile_commands.cmake)
     include(${PROJECT_SOURCE_DIR}/cmake/format.cmake)
 endif()
 
