@@ -9,19 +9,19 @@
  * Buffers are allocated with the global allocator, see vmnl_net_allocator_set().
  *
  * \par Kinds
- * | Kind    | When full   | Views       | Use                           |
- * | ------- | ----------- | ----------- | ----------------------------- |
- * | Flat    | Fails       | 1           | Packets of known maximum size |
- * | Dynamic | Grows       | 1           | Messages of unknown size      |
- * | Ring    | Fails       | Up to 2     | Streams in bounded memory     |
- * | Chunks  | Adds chunks | 1 per chunk | Large streams                 |
+ * | Kind                     | When full   | Views       | Capacity 0               | Use                           |
+ * | ------------------------ | ----------- | ----------- | ------------------------ | ----------------------------- |
+ * | #VMNL_NET_BUFFER_FLAT    | Fails       | 1           | Rejected                 | Packets of known maximum size |
+ * | #VMNL_NET_BUFFER_DYNAMIC | Grows       | 1           | Allocates on first write | Messages of unknown size      |
+ * | #VMNL_NET_BUFFER_RING    | Fails       | Up to 2     | Rejected                 | Streams in bounded memory     |
+ * | #VMNL_NET_BUFFER_CHUNKS  | Adds chunks | 1 per chunk | Allocates on first write | Large streams                 |
  *
  * Every kind but flat can be resized with vmnl_net_buffer_resize() and vmnl_net_buffer_shrink().
  *
  * \par Example
  * \code
  * VmnlNetError error;
- * VmnlNetBuffer *buffer = vmnl_net_buffer_create_dynamic(0, &error);
+ * VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_DYNAMIC, 0, &error);
  * VmnlNetBufferView view;
  * size_t nviews = 1;
  *
@@ -48,6 +48,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,47 +70,30 @@ typedef struct VmnlNetBufferView {
 } VmnlNetBufferView;
 
 /**
- * \brief Creates a flat buffer.
- * \param capacity Bytes allocated, never changed.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p capacity is 0.
- * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return Created buffer on success, NULL otherwise.
+ * \brief Kind of a buffer, see the kinds of the \ref Buffer module.
+ * \remark The kinds start at 1: a zeroed value is rejected instead of being taken for a kind.
  */
-VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create_flat(const size_t capacity, VmnlNetError *error);
+typedef uint32_t VmnlNetBufferKind;
+
+#define VMNL_NET_BUFFER_FLAT    UINT32_C(1) /*!< Fixed capacity, one view. */
+#define VMNL_NET_BUFFER_DYNAMIC UINT32_C(2) /*!< Grows when full, one view. */
+#define VMNL_NET_BUFFER_RING    UINT32_C(3) /*!< Fixed capacity, wraps around, up to two views. */
+#define VMNL_NET_BUFFER_CHUNKS  UINT32_C(4) /*!< Grows by chunks, one view per chunk. */
 
 /**
- * \brief Creates a dynamic buffer.
- * \param capacity Bytes allocated up front, 0 to allocate on the first write.
+ * \brief Creates a buffer.
+ * \param kind Kind of the buffer, one of the VMNL_NET_BUFFER_* constants.
+ * \param capacity Bytes allocated up front, 0 to allocate on the first write of a dynamic or chunk buffer.
  * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EINVAL: \p kind is unknown, or \p capacity is 0 for a flat or ring buffer.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created buffer on success, NULL otherwise.
- * \remark Grows to 1.5 times its capacity, or to the bytes needed if more, when vmnl_net_buffer_prepare() lacks room.
+ * \remark A flat buffer never changes its capacity.
+ * \remark A dynamic buffer grows to 1.5 times its capacity, or to the bytes needed if more, and to 256 bytes at least, when vmnl_net_buffer_prepare() lacks room.
+ * \remark A ring buffer wraps its stored bytes around the end of its memory instead of moving them to the front.
+ * \remark A chunk buffer rounds \p capacity up to whole chunks, each one allocation, so growing adds chunks without copying the stored bytes.
  */
-VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create_dynamic(const size_t capacity, VmnlNetError *error);
-
-/**
- * \brief Creates a ring buffer.
- * \param capacity Bytes allocated.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p capacity is 0.
- * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return Created buffer on success, NULL otherwise.
- * \remark The stored bytes wrap around the end of its memory instead of moving to the front.
- */
-VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create_ring(const size_t capacity, VmnlNetError *error);
-
-/**
- * \brief Creates a chunk buffer.
- * \param nchunks Chunks allocated up front, 0 to allocate on the first write.
- * \param chunk_size Bytes of every chunk.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p chunk_size is 0, or \p nchunks * \p chunk_size overflows a size_t.
- * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return Created buffer on success, NULL otherwise.
- * \remark Each chunk is one allocation, so growing adds chunks without copying the stored bytes.
- */
-VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create_chunks(const size_t nchunks, const size_t chunk_size, VmnlNetError *error);
+VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create(const VmnlNetBufferKind kind, const size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Gets the stored bytes of a buffer.
@@ -142,11 +126,12 @@ VMNL_NET_API void vmnl_net_buffer_clear(VmnlNetBuffer *buffer);
 /**
  * \brief Resizes the capacity of a buffer.
  * \param buffer Buffer to grow.
- * \param capacity New buffer's capacity, nothing done if \p capacity is less than actual buffer's capacity.
+ * \param capacity Capacity to grow to.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOTSUP: \p buffer is flat.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
+ * \remark Nothing is done, successfully, if the capacity is already \p capacity or more.
  * \remark A ring buffer copies its stored bytes to the front of its new memory, unwrapped.
  * \remark A chunk buffer rounds \p capacity up to whole chunks.
  */
@@ -155,14 +140,15 @@ VMNL_NET_API bool vmnl_net_buffer_resize(VmnlNetBuffer *buffer, const size_t cap
 /**
  * \brief Reduces the capacity of a buffer.
  * \param buffer Buffer to shrink.
- * \param capacity Bytes kept, nothing done if \p buffer already has fewer.
+ * \param capacity Capacity to reduce to.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p capacity is less than vmnl_net_buffer_size().
  * - #VMNL_NET_ENOTSUP: \p buffer is flat.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
+ * \remark Nothing is done, successfully, if the capacity is already \p capacity or less.
  * \remark A ring buffer copies its stored bytes to the front of its new memory, unwrapped.
- * \remark A chunk buffer frees its free chunks beyond \p capacity, rounded up to whole chunks.
+ * \remark A chunk buffer frees only its free chunks, from the end: its capacity is rounded up to whole chunks, and can stay above \p capacity while bytes are stored past it.
  */
 VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
 
@@ -211,18 +197,22 @@ VMNL_NET_API bool vmnl_net_buffer_consume(VmnlNetBuffer *buffer, const size_t nb
  * \param offset Stored bytes to skip.
  * \param views Stored bytes from \p offset, in order.
  * \param nviews Size of \p views on input, views filled on output.
- * \return Number of bytes described, fewer than the stored ones when \p views is too small, 0 if \p offset is at least vmnl_net_buffer_size().
+ * \return Number of bytes described by \p views, 0 if \p offset is at least vmnl_net_buffer_size().
  * \remark Nothing is dropped until vmnl_net_buffer_consume().
- * \remark Sending the bytes after the ones waiting for an ack:
+ * \remark Too few \p views describe only the first bytes, calling again past them gets the rest:
  * \code
  * VmnlNetBufferView views[4];
  * size_t nviews = 4;
- * size_t nbytes = vmnl_net_buffer_data(buffer, in_flight, views, &nviews); // skips the bytes in flight
+ * size_t nbytes;
  *
- * for (size_t it = 0; it < nviews; it++) {
- *     send_packet(peer, views[it].data, views[it].size);
+ * // skips the bytes in flight, 4 views at a time, until none is left
+ * while ((nbytes = vmnl_net_buffer_data(buffer, in_flight, views, &nviews)) > 0) {
+ *     for (size_t it = 0; it < nviews; it++) {
+ *         send_packet(peer, views[it].data, views[it].size);
+ *     }
+ *     in_flight += nbytes;
+ *     nviews = 4;
  * }
- * in_flight += nbytes;
  * \endcode
  */
 VMNL_NET_API size_t vmnl_net_buffer_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);

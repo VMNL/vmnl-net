@@ -64,11 +64,7 @@ target_sources(vmnl_net
         src/buffer/buffer_clear.c
         src/buffer/buffer_commit.c
         src/buffer/buffer_consume.c
-        src/buffer/buffer_create_contiguous.c
-        src/buffer/buffer_create_chunks.c
-        src/buffer/buffer_create_dynamic.c
-        src/buffer/buffer_create_flat.c
-        src/buffer/buffer_create_ring.c
+        src/buffer/buffer_create.c
         src/buffer/buffer_data.c
         src/buffer/buffer_destroy.c
         src/buffer/buffer_is_empty.c
@@ -76,15 +72,31 @@ target_sources(vmnl_net
         src/buffer/buffer_resize.c
         src/buffer/buffer_shrink.c
         src/buffer/buffer_size.c
-        src/buffer/ops/chunks/buffer_chunks_clear.c
-        src/buffer/ops/chunks/buffer_chunks_resize.c
-        src/buffer/ops/chunks/buffer_chunks_shrink.c
-        src/buffer/ops/chunks/buffer_chunks_data.c
-        src/buffer/ops/chunks/buffer_chunks_consume.c
-        src/buffer/ops/chunks/buffer_chunks_prepare.c
-        src/buffer/ops/chunks/buffer_chunks_commit.c
-        src/buffer/ops/chunks/buffer_chunks_destroy_list.c
-        src/buffer/ops/chunks/buffer_chunks_destroy.c
+        src/buffer/chunked/buffer_chunked_create.c
+        src/buffer/chunked/buffer_chunked_clear.c
+        src/buffer/chunked/buffer_chunked_resize.c
+        src/buffer/chunked/buffer_chunked_shrink.c
+        src/buffer/chunked/buffer_chunked_data.c
+        src/buffer/chunked/buffer_chunked_consume.c
+        src/buffer/chunked/buffer_chunked_prepare.c
+        src/buffer/chunked/buffer_chunked_commit.c
+        src/buffer/chunked/buffer_chunked_destroy.c
+        src/buffer/contiguous/buffer_contiguous_create.c
+        src/buffer/contiguous/buffer_contiguous_clear.c
+        src/buffer/contiguous/buffer_contiguous_data.c
+        src/buffer/contiguous/buffer_contiguous_consume.c
+        src/buffer/contiguous/buffer_contiguous_destroy.c
+        src/buffer/dynamic/buffer_dynamic_resize.c
+        src/buffer/dynamic/buffer_dynamic_shrink.c
+        src/buffer/dynamic/buffer_dynamic_prepare.c
+        src/buffer/flat/buffer_flat_create.c
+        src/buffer/flat/buffer_flat_prepare.c
+        src/buffer/flat/buffer_flat_commit.c
+        src/buffer/ring/buffer_ring_create.c
+        src/buffer/ring/buffer_ring_resize.c
+        src/buffer/ring/buffer_ring_shrink.c
+        src/buffer/ring/buffer_ring_prepare.c
+        src/buffer/ring/buffer_ring_commit.c
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS include ${PROJECT_BINARY_DIR}/include

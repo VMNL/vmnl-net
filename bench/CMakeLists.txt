@@ -37,21 +37,6 @@ target_sources(vmnl_net_benchmarks
     context/context_destroy_benchmarks.cpp
     clock/clock_elapsed_benchmarks.cpp
     clock/clock_now_benchmarks.cpp
-    buffer/buffer_capacity_benchmarks.cpp
-    buffer/buffer_clear_benchmarks.cpp
-    buffer/buffer_commit_benchmarks.cpp
-    buffer/buffer_consume_benchmarks.cpp
-    buffer/buffer_create_chunks_benchmarks.cpp
-    buffer/buffer_create_dynamic_benchmarks.cpp
-    buffer/buffer_create_flat_benchmarks.cpp
-    buffer/buffer_create_ring_benchmarks.cpp
-    buffer/buffer_data_benchmarks.cpp
-    buffer/buffer_destroy_benchmarks.cpp
-    buffer/buffer_is_empty_benchmarks.cpp
-    buffer/buffer_prepare_benchmarks.cpp
-    buffer/buffer_reserve_benchmarks.cpp
-    buffer/buffer_shrink_benchmarks.cpp
-    buffer/buffer_size_benchmarks.cpp
 )
 
 target_link_libraries(vmnl_net_benchmarks
