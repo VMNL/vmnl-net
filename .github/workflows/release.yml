@@ -1,20 +1,33 @@
-# Builds the release archives and publishes them on every v* tag.
 name: Release
 
 on:
   push:
     tags: ['v*']
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
+permissions:
+  contents: read
 
 jobs:
+  check-tag-version:
+    name: Check tag version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+        timeout-minutes: 5
+
+      - name: Check that the tag matches the project version
+        run: |
+          cmake --preset release
+          grep -Fx "CMAKE_PROJECT_VERSION:STATIC=${GITHUB_REF_NAME#v}" build/release/CMakeCache.txt > /dev/null
+        timeout-minutes: 5
+
   build:
     name: Build (${{ matrix.target.platform }}, ${{ matrix.type }})
     runs-on: ${{ matrix.target.os }}
-    permissions:
-      contents: read
+    needs: check-tag-version
     defaults:
       run:
         shell: bash
@@ -24,8 +37,11 @@ jobs:
       matrix:
         target:
           - { platform: windows-x86_64, os: windows-latest }
+          - { platform: windows-arm64, os: windows-11-arm }
+          - { platform: macos-x86_64, os: macos-15-intel }
           - { platform: macos-arm64, os: macos-latest }
           - { platform: linux-x86_64, os: ubuntu-latest }
+          - { platform: linux-arm64, os: ubuntu-24.04-arm }
         type: [static, shared]
     steps:
       - name: Check out the repository
@@ -36,17 +52,13 @@ jobs:
 
       - name: Build the ${{ matrix.type }} library
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=${{ matrix.type == 'shared' }} -DVMNL_NET_BUILD_TESTS=OFF -DVMNL_NET_BUILD_EXAMPLES=OFF && cmake --build build --config Release
+          cmake --preset release -DBUILD_SHARED_LIBS=${{ matrix.type == 'shared' }}
+          cmake --build --preset release
         timeout-minutes: 30
-
-      # The cache may have CRLF line endings on Windows.
-      - name: Check that the tag matches the project version
-        run: tr -d '\r' < build/CMakeCache.txt | grep -Fx "CMAKE_PROJECT_VERSION:STATIC=${GITHUB_REF_NAME#v}" > /dev/null
-        timeout-minutes: 5
 
       - name: Package the library
         run: |
-          cmake --install build --config Release --prefix "$PACKAGE"
+          cmake --install build/release --config Release --prefix "$PACKAGE"
           cp LICENSE README.md "$PACKAGE"
           tar -czf "$PACKAGE.tar.gz" "$PACKAGE"
         timeout-minutes: 5
