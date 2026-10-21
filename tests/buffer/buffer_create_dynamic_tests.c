@@ -5,22 +5,22 @@
 
 #include <stdlib.h>
 
-UTEST(vmnl_net_buffer_create_dynamic, success)
+UTEST(vmnl_net_buffer_create_dynamic, creates_dynamic_buffer)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_create_dynamic, zero_capacity)
+UTEST(vmnl_net_buffer_create_dynamic, accepts_zero_capacity)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_create_dynamic, allocation_failure)
+UTEST(vmnl_net_buffer_create_dynamic, fails_without_memory)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_create_dynamic, null_error)
+UTEST(vmnl_net_buffer_create_dynamic, accepts_null_error)
 {
     UTEST_SKIP("not written");
 }

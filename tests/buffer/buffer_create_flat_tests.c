@@ -5,22 +5,22 @@
 
 #include <stdlib.h>
 
-UTEST(vmnl_net_buffer_create_flat, success)
+UTEST(vmnl_net_buffer_create_flat, creates_flat_buffer)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_create_flat, zero_capacity)
+UTEST(vmnl_net_buffer_create_flat, rejects_zero_capacity)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_create_flat, allocation_failure)
+UTEST(vmnl_net_buffer_create_flat, fails_without_memory)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_create_flat, null_error)
+UTEST(vmnl_net_buffer_create_flat, accepts_null_error)
 {
     UTEST_SKIP("not written");
 }

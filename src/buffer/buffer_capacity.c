@@ -2,6 +2,5 @@
 
 size_t vmnl_net_buffer_capacity(const VmnlNetBuffer *buffer)
 {
-    (void) buffer;
-    return 0;
+    return buffer->capacity;
 }

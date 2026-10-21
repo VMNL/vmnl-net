@@ -2,17 +2,17 @@
 
 #include "utest.h"
 
-UTEST(vmnl_net_buffer_commit, success)
+UTEST(vmnl_net_buffer_commit, stores_prepared_bytes)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_commit, more_than_free_space)
+UTEST(vmnl_net_buffer_commit, rejects_more_than_free_space)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_commit, null_error)
+UTEST(vmnl_net_buffer_commit, accepts_null_error)
 {
     UTEST_SKIP("not written");
 }

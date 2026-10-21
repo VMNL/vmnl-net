@@ -1,10 +1,6 @@
 #include "buffer/buffer_internal.h"
-#include "error/error_internal.h"
 
 bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error)
 {
-    (void) buffer;
-    (void) capacity;
-    (void) error;
-    return false;
+    return buffer->ops->shrink(buffer, capacity, error);
 }

@@ -2,9 +2,5 @@
 
 size_t vmnl_net_buffer_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews)
 {
-    (void) buffer;
-    (void) offset;
-    (void) views;
-    (void) nviews;
-    return 0;
+    return buffer->ops->data(buffer, offset, views, nviews);
 }

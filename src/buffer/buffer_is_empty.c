@@ -2,6 +2,5 @@
 
 bool vmnl_net_buffer_is_empty(const VmnlNetBuffer *buffer)
 {
-    (void) buffer;
-    return false;
+    return buffer->size == 0;
 }

@@ -5,27 +5,27 @@
 
 #include <stdlib.h>
 
-UTEST(vmnl_net_buffer_prepare, success)
+UTEST(vmnl_net_buffer_prepare, describes_free_space)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_prepare, too_few_views)
+UTEST(vmnl_net_buffer_prepare, rejects_too_few_views)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_prepare, no_room)
+UTEST(vmnl_net_buffer_prepare, fails_without_room)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_prepare, allocation_failure)
+UTEST(vmnl_net_buffer_prepare, fails_without_memory)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_prepare, null_error)
+UTEST(vmnl_net_buffer_prepare, accepts_null_error)
 {
     UTEST_SKIP("not written");
 }

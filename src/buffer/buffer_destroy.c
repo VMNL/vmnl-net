@@ -2,5 +2,8 @@
 
 void vmnl_net_buffer_destroy(VmnlNetBuffer *buffer)
 {
-    (void) buffer;
+    if (buffer == NULL) {
+        return;
+    }
+    buffer->ops->destroy(buffer);
 }

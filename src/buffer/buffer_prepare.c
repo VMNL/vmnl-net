@@ -1,12 +1,6 @@
 #include "buffer/buffer_internal.h"
-#include "error/error_internal.h"
 
 bool vmnl_net_buffer_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error)
 {
-    (void) buffer;
-    (void) nbytes;
-    (void) views;
-    (void) nviews;
-    (void) error;
-    return false;
+    return buffer->ops->prepare(buffer, nbytes, views, nviews, error);
 }

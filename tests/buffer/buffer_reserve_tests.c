@@ -5,27 +5,27 @@
 
 #include <stdlib.h>
 
-UTEST(vmnl_net_buffer_reserve, success)
+UTEST(vmnl_net_buffer_reserve, grows_capacity)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_reserve, smaller_capacity)
+UTEST(vmnl_net_buffer_reserve, keeps_larger_capacity)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_reserve, flat)
+UTEST(vmnl_net_buffer_reserve, rejects_flat_buffer)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_reserve, allocation_failure)
+UTEST(vmnl_net_buffer_reserve, fails_without_memory)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_reserve, null_error)
+UTEST(vmnl_net_buffer_reserve, accepts_null_error)
 {
     UTEST_SKIP("not written");
 }

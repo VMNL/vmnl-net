@@ -16,7 +16,7 @@
  * | Ring    | Fails       | Up to 2     | Streams in bounded memory     |
  * | Chunks  | Adds chunks | 1 per chunk | Large streams                 |
  *
- * Every kind but flat can be resized with vmnl_net_buffer_reserve() and vmnl_net_buffer_shrink().
+ * Every kind but flat can be resized with vmnl_net_buffer_resize() and vmnl_net_buffer_shrink().
  *
  * \par Example
  * \code
@@ -64,7 +64,7 @@ typedef struct VmnlNetBuffer VmnlNetBuffer;
  * \attention A view **MUST** not be used after a call that modifies its buffer: the bytes may have moved, or been dropped.
  */
 typedef struct VmnlNetBufferView {
-    uint8_t *data; /*!< First byte. */
+    uint8_t *data; /*!< Pointer to a contiguous memory region. */
     size_t size; /*!< Number of bytes. */
 } VmnlNetBufferView;
 
@@ -140,9 +140,9 @@ VMNL_NET_API bool vmnl_net_buffer_is_empty(const VmnlNetBuffer *buffer);
 VMNL_NET_API void vmnl_net_buffer_clear(VmnlNetBuffer *buffer);
 
 /**
- * \brief Grows the capacity of a buffer.
+ * \brief Resizes the capacity of a buffer.
  * \param buffer Buffer to grow.
- * \param capacity Bytes needed, nothing done if \p buffer already has them.
+ * \param capacity New buffer's capacity, nothing done if \p capacity is less than actual buffer's capacity.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOTSUP: \p buffer is flat.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
@@ -150,7 +150,7 @@ VMNL_NET_API void vmnl_net_buffer_clear(VmnlNetBuffer *buffer);
  * \remark A ring buffer copies its stored bytes to the front of its new memory, unwrapped.
  * \remark A chunk buffer rounds \p capacity up to whole chunks.
  */
-VMNL_NET_API bool vmnl_net_buffer_reserve(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+VMNL_NET_API bool vmnl_net_buffer_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Reduces the capacity of a buffer.
@@ -174,7 +174,7 @@ VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, const size_t cap
  * \param nviews Size of \p views on input, views filled on output.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
- * - #VMNL_NET_ENOBUFS: \p buffer is flat or ring and lacks room.
+ * - #VMNL_NET_ENOBUFS: \p flat buffer or ring buffer lacks room.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
  * \remark The views describe at least \p nbytes, and as much free space as they can, so one recv() can receive more.

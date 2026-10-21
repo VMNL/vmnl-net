@@ -34,7 +34,7 @@ extern "C" {
  */
 struct VmnlNetBufferOps {
     void (*clear)(VmnlNetBuffer *buffer); /*!< Implements vmnl_net_buffer_clear(). */
-    bool (*reserve)(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_reserve(). */
+    bool (*resize)(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_resize(). */
     bool (*shrink)(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_shrink(). */
     size_t (*data)(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews); /*!< Implements vmnl_net_buffer_data(). */
     bool (*consume)(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error); /*!< Implements vmnl_net_buffer_consume(). */
@@ -81,6 +81,53 @@ struct VmnlNetBufferChunk {
     size_t offset; /*!< Index of the first stored byte. */
     size_t size; /*!< Stored bytes. */
 };
+
+/**
+ * \brief Creates a contiguous buffer.
+ * \param ops Pointer to a VmnlNetBufferOps struct.
+ * \param capacity Bytes allocated.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EINVAL: \p capacity is 0.
+ * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * \return Created buffer on success, NULL otherwise.
+ */
+VmnlNetBuffer *vmnl_net_buffer_create_contiguous(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error);
+
+// contiguous ops
+void vmnl_net_buffer_contiguous_clear(VmnlNetBuffer *buffer);
+
+bool vmnl_net_buffer_contiguous_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+
+bool vmnl_net_buffer_contiguous_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+
+size_t vmnl_net_buffer_contiguous_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
+
+bool vmnl_net_buffer_contiguous_consume(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
+
+bool vmnl_net_buffer_contiguous_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
+
+bool vmnl_net_buffer_contiguous_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
+
+void vmnl_net_buffer_contiguous_destroy(VmnlNetBuffer *buffer);
+
+// chunks ops
+void vmnl_net_buffer_chunks_clear(VmnlNetBuffer *buffer);
+
+bool vmnl_net_buffer_chunks_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+
+bool vmnl_net_buffer_chunks_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+
+size_t vmnl_net_buffer_chunks_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
+
+bool vmnl_net_buffer_chunks_consume(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
+
+bool vmnl_net_buffer_chunks_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
+
+bool vmnl_net_buffer_chunks_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
+
+void vmnl_net_buffer_chunks_destroy_list(struct VmnlNetListLink *chunks);
+
+void vmnl_net_buffer_chunks_destroy(VmnlNetBuffer *buffer);
 
 #ifdef __cplusplus
 }

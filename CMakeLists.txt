@@ -64,6 +64,7 @@ target_sources(vmnl_net
         src/buffer/buffer_clear.c
         src/buffer/buffer_commit.c
         src/buffer/buffer_consume.c
+        src/buffer/buffer_create_contiguous.c
         src/buffer/buffer_create_chunks.c
         src/buffer/buffer_create_dynamic.c
         src/buffer/buffer_create_flat.c
@@ -72,9 +73,18 @@ target_sources(vmnl_net
         src/buffer/buffer_destroy.c
         src/buffer/buffer_is_empty.c
         src/buffer/buffer_prepare.c
-        src/buffer/buffer_reserve.c
+        src/buffer/buffer_resize.c
         src/buffer/buffer_shrink.c
         src/buffer/buffer_size.c
+        src/buffer/ops/chunks/buffer_chunks_clear.c
+        src/buffer/ops/chunks/buffer_chunks_resize.c
+        src/buffer/ops/chunks/buffer_chunks_shrink.c
+        src/buffer/ops/chunks/buffer_chunks_data.c
+        src/buffer/ops/chunks/buffer_chunks_consume.c
+        src/buffer/ops/chunks/buffer_chunks_prepare.c
+        src/buffer/ops/chunks/buffer_chunks_commit.c
+        src/buffer/ops/chunks/buffer_chunks_destroy_list.c
+        src/buffer/ops/chunks/buffer_chunks_destroy.c
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS include ${PROJECT_BINARY_DIR}/include

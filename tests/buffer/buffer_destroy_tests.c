@@ -2,12 +2,12 @@
 
 #include "utest.h"
 
-UTEST(vmnl_net_buffer_destroy, success)
+UTEST(vmnl_net_buffer_destroy, frees_buffer)
 {
     UTEST_SKIP("not written");
 }
 
-UTEST(vmnl_net_buffer_destroy, null_buffer)
+UTEST(vmnl_net_buffer_destroy, ignores_null_buffer)
 {
     UTEST_SKIP("not written");
 }

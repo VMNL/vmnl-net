@@ -232,6 +232,21 @@ static inline void vmnl_net_list_remove(struct VmnlNetListLink *link)
     vmnl_net_list_init(link);
 }
 
+/**
+ * \brief Merges a list to another.
+ * \param head First list.
+ * \param link List to merge.
+ */
+static inline void vmnl_net_list_merge(struct VmnlNetListLink *head, struct VmnlNetListLink *link)
+{
+    if (vmnl_net_list_is_empty(link) == true) {
+        return;
+    }
+    head->prev->next = link->next;
+    link->prev->next = head;
+    vmnl_net_list_init(link);
+}
+
 #ifdef __cplusplus
 }
 #endif
