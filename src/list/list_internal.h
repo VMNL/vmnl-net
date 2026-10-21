@@ -233,18 +233,24 @@ static inline void vmnl_net_list_remove(struct VmnlNetListLink *link)
 }
 
 /**
- * \brief Merges a list to another.
- * \param head First list.
- * \param link List to merge.
+ * \brief Moves every link of a list to the end of another one, in O(1).
+ * \param head Head of the list that receives the links.
+ * \param other Head of the list to move, empty afterwards.
+ * \remark Moving the waiting clients after the connected ones:
+ * \code
+ * vmnl_net_list_splice(&connected, &waiting); // connected: alice, bob, carol; waiting: empty
+ * \endcode
  */
-static inline void vmnl_net_list_merge(struct VmnlNetListLink *head, struct VmnlNetListLink *link)
+static inline void vmnl_net_list_splice(struct VmnlNetListLink *head, struct VmnlNetListLink *other)
 {
-    if (vmnl_net_list_is_empty(link) == true) {
+    if (vmnl_net_list_is_empty(other) == true) {
         return;
     }
-    head->prev->next = link->next;
-    link->prev->next = head;
-    vmnl_net_list_init(link);
+    other->next->prev = head->prev;
+    head->prev->next = other->next;
+    other->prev->next = head;
+    head->prev = other->prev;
+    vmnl_net_list_init(other);
 }
 
 #ifdef __cplusplus
