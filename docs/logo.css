@@ -1,0 +1,5 @@
+/* The logo is drawn at twice its displayed size, so it stays sharp on high density screens */
+
+#projectlogo img {
+    height: 55px;
+}

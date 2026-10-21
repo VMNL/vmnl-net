@@ -1,6 +1,8 @@
 PROJECT_NAME           = "VMNL / Network"
 PROJECT_NUMBER         = @PROJECT_VERSION@
 PROJECT_BRIEF          = "@PROJECT_DESCRIPTION@"
+PROJECT_LOGO           = docs/logo.png
+PROJECT_ICON           = docs/logo.png
 OUTPUT_DIRECTORY       = @PROJECT_BINARY_DIR@/docs
 INPUT                  = README.md CONTRIBUTING.md include/vmnl docs
 FILE_PATTERNS          = *.h *.md *.dox
@@ -29,6 +31,6 @@ GENERATE_TREEVIEW      = YES
 DISABLE_INDEX          = NO
 FULL_SIDEBAR           = NO
 HTML_COLORSTYLE        = LIGHT
-HTML_EXTRA_STYLESHEET  = $(DOXYGEN_THEME) docs/mermaid.css
+HTML_EXTRA_STYLESHEET  = $(DOXYGEN_THEME) docs/mermaid.css docs/logo.css
 SEARCHENGINE           = YES
 HAVE_DOT               = NO

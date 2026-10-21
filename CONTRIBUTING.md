@@ -44,14 +44,15 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 | Element | Form | Example |
 | --- | --- | --- |
 | Type | `VmnlNet<Name>` | `VmnlNetBuffer` |
-| Function | `vmnl_net_<module>_<action>` | `vmnl_net_buffer_create_flat` |
+| Function | `vmnl_net_<module>_<action>` | `vmnl_net_buffer_create` |
 | Macro | `VMNL_NET_<NAME>` | `VMNL_NET_EINVAL` |
 | Predicate | `vmnl_net_<module>_is_<state>` | `vmnl_net_buffer_is_empty` |
 | Conversion | `vmnl_net_<module>_as_<type>` | `vmnl_net_error_as_string` |
 
 ### Files
 
-- one public function per file, named without the `vmnl_net_` prefix: `src/buffer/buffer_create_flat.c`
+- one public function per file, named without the `vmnl_net_` prefix: `src/buffer/buffer_create.c`
+- the operations behind a public function in one folder per kind or family, each named after the widest group that shares it: `src/buffer/contiguous/buffer_contiguous_data.c` for the flat, dynamic and ring buffers, `src/buffer/ring/buffer_ring_prepare.c` for the ring buffer only
 - private code in `src/<module>/<module>_internal.h`
 - an internal module used by several others in its own folder, like `src/list/`
 - platform code in `posix/` or `win32/`
@@ -83,18 +84,19 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake, and the formatting check skips them.
 
 - one file per public function, named like its source: `tests/<module>/<name>_tests.c`, listed in `tests/CMakeLists.txt`
-- the suite is the name of the function: `vmnl_net_buffer_create_flat`
+- the generic containers, like the list and later a hash map or a dynamic array, are tested directly through their internal header, one file per function or macro: `tests/list/list_splice_tests.c`; the other internal functions are covered through the public ones
+- the suite is the name of the function or the macro: `vmnl_net_buffer_create`, `VMNL_NET_LIST_FOREACH`
 - each test says what the function does, in snake case, starting with a verb and without article: `creates_flat_buffer`, `rejects_zero_capacity`, `accepts_null_error`
 - the tests go from the nominal case to the properties, the limits, the allocation failures and the nullable parameters, the NULL error last
 - a `VmnlNetError` starts at `UINT32_MAX`, so the test proves the function writes it
 - a test that replaces the allocator restores the default one before its first `ASSERT`, since the test binary run on its own runs every test in the same process
 
 ```c
-UTEST(vmnl_net_buffer_create_flat, creates_flat_buffer)
+UTEST(vmnl_net_buffer_create, creates_flat_buffer)
 {
     const size_t capacity = 64;
     VmnlNetError error = UINT32_MAX;
-    VmnlNetBuffer *buffer = vmnl_net_buffer_create_flat(capacity, &error);
+    VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_FLAT, capacity, &error);
 
     ASSERT_TRUE(buffer != NULL);
     EXPECT_EQ(error, VMNL_NET_SUCCESS);
