@@ -92,7 +92,6 @@ target_sources(vmnl_net
         src/buffer/flat/buffer_flat_create.c
         src/buffer/flat/buffer_flat_prepare.c
         src/buffer/flat/buffer_flat_commit.c
-        src/buffer/ring/buffer_ring_create.c
         src/buffer/ring/buffer_ring_resize.c
         src/buffer/ring/buffer_ring_shrink.c
         src/buffer/ring/buffer_ring_prepare.c

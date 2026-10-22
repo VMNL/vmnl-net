@@ -26,7 +26,7 @@ static const struct VmnlNetBufferOps vmnl_net_buffer_dynamic_ops = {
 };
 
 static const struct VmnlNetBufferOps vmnl_net_buffer_ring_ops = {
-    .create     = vmnl_net_buffer_ring_create,
+    .create     = vmnl_net_buffer_flat_create,
     .clear      = vmnl_net_buffer_contiguous_clear,
     .resize     = vmnl_net_buffer_ring_resize,
     .shrink     = vmnl_net_buffer_ring_shrink,
@@ -56,11 +56,11 @@ static const struct VmnlNetBufferOps *const vmnl_net_buffer_ops[] = {
     [VMNL_NET_BUFFER_CHUNKS]    = &vmnl_net_buffer_chunks_ops,
 };
 
-VmnlNetBuffer *vmnl_net_buffer_create(const VmnlNetBufferKind kind, const size_t capacity, VmnlNetError *error)
+VmnlNetBuffer *vmnl_net_buffer_create(const VmnlNetBufferType type, const size_t capacity, VmnlNetError *error)
 {
-    if (kind < VMNL_NET_BUFFER_FLAT || kind > VMNL_NET_BUFFER_CHUNKS) {
+    if (type < VMNL_NET_BUFFER_FLAT || type > VMNL_NET_BUFFER_CHUNKS) {
         vmnl_net_error_set(error, VMNL_NET_EINVAL);
         return NULL;
     }
-    return vmnl_net_buffer_ops[kind]->create(vmnl_net_buffer_ops[kind], capacity, error);
+    return vmnl_net_buffer_ops[type]->create(vmnl_net_buffer_ops[type], capacity, error);
 }

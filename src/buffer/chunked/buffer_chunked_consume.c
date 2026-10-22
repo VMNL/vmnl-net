@@ -1,9 +1,7 @@
 #include "buffer/buffer_internal.h"
 
-bool vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error)
+void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, const size_t nbytes)
 {
     (void) buffer;
     (void) nbytes;
-    (void) error;
-    return false;
 }

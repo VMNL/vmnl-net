@@ -1,6 +1,7 @@
 #include "buffer/buffer_internal.h"
 
-bool vmnl_net_buffer_contiguous_consume(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error)
+void vmnl_net_buffer_contiguous_consume(VmnlNetBuffer *buffer, const size_t nbytes)
 {
-    return false;
+    buffer->size -= nbytes;
+    ((struct VmnlNetBufferContiguous *) buffer)->offset = (((const struct VmnlNetBufferContiguous *) buffer)->offset + nbytes) % buffer->capacity;
 }

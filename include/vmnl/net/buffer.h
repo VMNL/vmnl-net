@@ -8,15 +8,15 @@
  * A buffer is a queue of bytes accessed through views of its own memory, without copy: vmnl_net_buffer_prepare() and vmnl_net_buffer_commit() write into its free space, vmnl_net_buffer_data() and vmnl_net_buffer_consume() read its stored bytes in the same order.
  * Buffers are allocated with the global allocator, see vmnl_net_allocator_set().
  *
- * \par Kinds
- * | Kind                     | When full   | Views       | Capacity 0               | Use                           |
+ * \par Types
+ * | Type                     | When full   | Views       | Capacity 0               | Use                           |
  * | ------------------------ | ----------- | ----------- | ------------------------ | ----------------------------- |
  * | #VMNL_NET_BUFFER_FLAT    | Fails       | 1           | Rejected                 | Packets of known maximum size |
  * | #VMNL_NET_BUFFER_DYNAMIC | Grows       | 1           | Allocates on first write | Messages of unknown size      |
  * | #VMNL_NET_BUFFER_RING    | Fails       | Up to 2     | Rejected                 | Streams in bounded memory     |
  * | #VMNL_NET_BUFFER_CHUNKS  | Adds chunks | 1 per chunk | Allocates on first write | Large streams                 |
  *
- * Every kind but flat can be resized with vmnl_net_buffer_resize() and vmnl_net_buffer_shrink().
+ * Every type but flat can be resized with vmnl_net_buffer_resize() and vmnl_net_buffer_shrink().
  *
  * \par Example
  * \code
@@ -70,10 +70,10 @@ typedef struct VmnlNetBufferView {
 } VmnlNetBufferView;
 
 /**
- * \brief Kind of a buffer, see the kinds of the \ref Buffer module.
- * \remark The kinds start at 1: a zeroed value is rejected instead of being taken for a kind.
+ * \brief Type of a buffer, see the types of the \ref Buffer module.
+ * \remark The types start at 1: a zeroed value is rejected instead of being taken for a type.
  */
-typedef uint32_t VmnlNetBufferKind;
+typedef uint32_t VmnlNetBufferType;
 
 #define VMNL_NET_BUFFER_FLAT    UINT32_C(1) /*!< Fixed capacity, one view. */
 #define VMNL_NET_BUFFER_DYNAMIC UINT32_C(2) /*!< Grows when full, one view. */
@@ -82,10 +82,10 @@ typedef uint32_t VmnlNetBufferKind;
 
 /**
  * \brief Creates a buffer.
- * \param kind Kind of the buffer, one of the VMNL_NET_BUFFER_* constants.
+ * \param type Type of the buffer, one of the VMNL_NET_BUFFER_* constants.
  * \param capacity Bytes allocated up front, 0 to allocate on the first write of a dynamic or chunk buffer.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p kind is unknown, or \p capacity is 0 for a flat or ring buffer.
+ * - #VMNL_NET_EINVAL: \p type is unknown, or \p capacity is 0 for a flat or ring buffer.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created buffer on success, NULL otherwise.
  * \remark A flat buffer never changes its capacity.
@@ -93,7 +93,7 @@ typedef uint32_t VmnlNetBufferKind;
  * \remark A ring buffer wraps its stored bytes around the end of its memory instead of moving them to the front.
  * \remark A chunk buffer rounds \p capacity up to whole chunks, each one allocation, so growing adds chunks without copying the stored bytes.
  */
-VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create(const VmnlNetBufferKind kind, const size_t capacity, VmnlNetError *error);
+VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create(const VmnlNetBufferType type, const size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Gets the stored bytes of a buffer.

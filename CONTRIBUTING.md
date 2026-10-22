@@ -52,7 +52,7 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 ### Files
 
 - one public function per file, named without the `vmnl_net_` prefix: `src/buffer/buffer_create.c`
-- the operations behind a public function in one folder per kind or family, each named after the widest group that shares it: `src/buffer/contiguous/buffer_contiguous_data.c` for the flat, dynamic and ring buffers, `src/buffer/ring/buffer_ring_prepare.c` for the ring buffer only
+- the operations behind a public function in one folder per type or family: an operation shared by a whole family takes its name, like `src/buffer/contiguous/buffer_contiguous_data.c`, and one shared by some types keeps the name of the type that defines it, the others pointing to it or calling it, like the dynamic buffer committing with `vmnl_net_buffer_flat_commit()`
 - private code in `src/<module>/<module>_internal.h`
 - an internal module used by several others in its own folder, like `src/list/`
 - platform code in `posix/` or `win32/`
