@@ -133,7 +133,7 @@ if(VMNL_NET_BUILD_BENCHMARKS)
 endif()
 
 # if(VMNL_NET_BUILD_EXAMPLES)
-#     add_subdirectory(examples)
+    add_subdirectory(examples)
 # endif()
 
 if(VMNL_NET_INSTALL)
