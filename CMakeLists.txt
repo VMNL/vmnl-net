@@ -163,7 +163,7 @@ endif()
 
 if(VMNL_NET_BUILD_TESTS)
     enable_testing()
-    add_subdirectory(tests)
+    add_subdirectory(tests/utest)
     include(${PROJECT_SOURCE_DIR}/cmake/coverage.cmake)
 endif()
 
