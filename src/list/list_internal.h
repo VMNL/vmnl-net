@@ -80,26 +80,26 @@ struct VmnlNetListLink {
  * \param head Head of the list.
  * \param type Type of the structure.
  * \param member Name of the link in the structure.
- * \attention \p head **MUST** not be empty: \p head itself would be converted, giving an invalid pointer.
- * \remark Checking for an empty list first:
+ * \return First structure, NULL if the list is empty.
+ * \attention \p head **MUST** have no side effect: it is evaluated twice.
+ * \remark Getting both ends of a list:
  * \code
- * if (vmnl_net_list_is_empty(&clients) == false) {
- *     struct Client *first = VMNL_NET_LIST_FRONT(&clients, struct Client, link); // &alice
- *     struct Client *last = VMNL_NET_LIST_BACK(&clients, struct Client, link);   // &bob
- * }
+ * struct Client *first = VMNL_NET_LIST_FRONT(&clients, struct Client, link); // &alice, NULL if empty
+ * struct Client *last = VMNL_NET_LIST_BACK(&clients, struct Client, link);   // &bob, NULL if empty
  * \endcode
  */
-#define VMNL_NET_LIST_FRONT(head, type, member) VMNL_NET_LIST_ENTRY((head)->next, type, member)
+#define VMNL_NET_LIST_FRONT(head, type, member) ((vmnl_net_list_is_empty(head) == true) ? NULL : VMNL_NET_LIST_ENTRY((head)->next, type, member))
 
 /**
  * \brief Gets the last structure of a list.
  * \param head Head of the list.
  * \param type Type of the structure.
  * \param member Name of the link in the structure.
- * \attention \p head **MUST** not be empty: \p head itself would be converted, giving an invalid pointer.
+ * \return Last structure, NULL if the list is empty.
+ * \attention \p head **MUST** have no side effect: it is evaluated twice.
  * \remark See the example of #VMNL_NET_LIST_FRONT.
  */
-#define VMNL_NET_LIST_BACK(head, type, member) VMNL_NET_LIST_ENTRY((head)->prev, type, member)
+#define VMNL_NET_LIST_BACK(head, type, member) ((vmnl_net_list_is_empty(head) == true) ? NULL : VMNL_NET_LIST_ENTRY((head)->prev, type, member))
 
 /**
  * \brief Iterates over the structures of a list.
