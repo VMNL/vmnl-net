@@ -3,32 +3,24 @@
 
 bool vmnl_net_buffer_chunked_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error)
 {
-    struct VmnlNetBufferChunked *chunked = (struct VmnlNetBufferChunked *) buffer;
-    struct VmnlNetBufferChunk *first = VMNL_NET_LIST_FRONT(&chunked->chunks, struct VmnlNetBufferChunk, link);
-    struct VmnlNetBufferChunk *chunk = (chunked->last_used != NULL) ? chunked->last_used : first;
-    size_t free_space = buffer->capacity - buffer->size;
-    size_t bytes = nbytes;
-    size_t room;
-    size_t committed;
+    struct VmnlNetBufferChunked *chunked_buffer = (struct VmnlNetBufferChunked *) buffer;
+    struct VmnlNetBufferChunk *front_chunk = VMNL_NET_LIST_FRONT(&chunked_buffer->chunks, struct VmnlNetBufferChunk, link);
+    struct VmnlNetBufferChunk *chunk = (chunked_buffer->commit_tail == NULL) ? front_chunk : chunked_buffer->commit_tail;
+    size_t chunk_available_space;
+    size_t chunk_committed_bytes;
 
-    if (first != NULL) {
-        free_space -= first->offset;
-    }
-    if (nbytes > free_space) {
+    if (nbytes > buffer->capacity - buffer->size - ((front_chunk == NULL) ? 0 : front_chunk->offset)) {
         vmnl_net_error_set(error, VMNL_NET_EINVAL);
         return false;
     }
-    while (bytes > 0) {
-        if (chunk->offset + chunk->size == VMNL_NET_BUFFER_CHUNK_SIZE) {
-            chunk = VMNL_NET_LIST_ENTRY(chunk->link.next, struct VmnlNetBufferChunk, link);
-        }
-        room = VMNL_NET_BUFFER_CHUNK_SIZE - chunk->offset - chunk->size;
-        committed = (bytes < room) ? bytes : room;
-        chunk->size += committed;
-        bytes -= committed;
-        chunked->last_used = chunk;
+    for (size_t nbytes_to_commit = nbytes; nbytes_to_commit > 0; chunk = VMNL_NET_LIST_ENTRY(chunk->link.next, struct VmnlNetBufferChunk, link)) {
+        chunk_available_space = VMNL_NET_BUFFER_CHUNK_SIZE - chunk->offset - chunk->size;
+        chunk_committed_bytes = (nbytes_to_commit < chunk_available_space) ? nbytes_to_commit : chunk_available_space;
+        nbytes_to_commit -= chunk_committed_bytes;
+        chunk->size += chunk_committed_bytes;
+        buffer->size += chunk_committed_bytes;
+        chunked_buffer->commit_tail = chunk;
     }
-    buffer->size += nbytes;
     vmnl_net_error_set(error, VMNL_NET_SUCCESS);
     return true;
 }

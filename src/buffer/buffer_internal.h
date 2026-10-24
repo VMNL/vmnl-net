@@ -80,7 +80,7 @@ struct VmnlNetBufferContiguous {
 struct VmnlNetBufferChunked {
     struct VmnlNetBuffer base; /*!< Common part, first so that a VmnlNetBuffer pointer converts to it. */
     struct VmnlNetListLink chunks; /*!< Head of the chunks, from the first stored byte to the free space. */
-    struct VmnlNetBufferChunk *last_used; /*!< Last chunk holding stored bytes, where writing starts, NULL when the buffer stores none. */
+    struct VmnlNetBufferChunk *commit_tail; /*!< Last chunk holding stored bytes, where writing starts, NULL when the buffer stores none. */
 };
 
 /**
@@ -291,7 +291,7 @@ VmnlNetBuffer *vmnl_net_buffer_chunked_create(const struct VmnlNetBufferOps *ops
 /**
  * \brief Drops every stored byte of a chunked buffer, in O(n).
  * \param buffer Buffer to clear.
- * \remark Resets the offset and the size of every chunk, keeps them allocated, and sets last_used to NULL.
+ * \remark Resets the offset and the size of every chunk, keeps them allocated, and sets commit_tail to NULL.
  */
 void vmnl_net_buffer_chunked_clear(VmnlNetBuffer *buffer);
 
@@ -323,6 +323,7 @@ bool vmnl_net_buffer_chunked_shrink(VmnlNetBuffer *buffer, const size_t capacity
  * \param views Stored bytes from \p offset, one view per chunk, in order.
  * \param nviews Number of elements of \p views on input, number of views filled on output.
  * \return Number of bytes described, fewer than the stored ones when \p views is too small.
+ * \remark Skips the chunks before \p offset from the first one, in O(n), and stops at the first empty chunk: the stored bytes have no gap.
  */
 size_t vmnl_net_buffer_chunked_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
 
@@ -331,7 +332,7 @@ size_t vmnl_net_buffer_chunked_data(const VmnlNetBuffer *buffer, const size_t of
  * \param buffer Buffer read from.
  * \param nbytes Bytes to drop, at most the stored ones, 0 when the buffer has no chunk.
  * \attention A chunk it empties **MUST** move to the end of the list with its offset back to 0: the stored bytes start in the first chunk, and the empty chunks come last.
- * \attention last_used **MUST** be set to NULL once the buffer is empty: the chunk it pointed to moved to the end.
+ * \attention commit_tail **MUST** be set to NULL once the buffer is empty: the chunk it pointed to moved to the end.
  */
 void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, const size_t nbytes);
 
@@ -345,7 +346,7 @@ void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, const size_t nbytes)
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
- * \remark Starts at last_used, or at the first chunk when the buffer is empty: the room after its stored bytes, then the empty chunks after it.
+ * \remark Starts at commit_tail, or at the first chunk when the buffer is empty: the room after its stored bytes, then the empty chunks after it.
  */
 bool vmnl_net_buffer_chunked_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 
@@ -358,7 +359,16 @@ bool vmnl_net_buffer_chunked_prepare(VmnlNetBuffer *buffer, const size_t nbytes,
  * \return true on success, false otherwise.
  * \remark The free space leaves out the bytes consumed from the first chunk: they stay unusable until the chunk is recycled.
  * \remark Checks \p nbytes in O(1), the stored bytes having no gap: the free space is the capacity minus the stored bytes and the offset of the first chunk.
- * \remark Fills the chunks from last_used, or from the first chunk when the buffer is empty, then points last_used to the last chunk filled.
+ * \remark Fills the chunks from commit_tail, or from the first chunk when the buffer is empty, then points commit_tail to the last chunk filled.
+ * \remark With chunks of 10 bytes, 9 stored and 4 already read from A, the free space is 30 - 9 - 4 = 17, and committing 12 fills B, then 5 bytes of C:
+ * \code
+ *            A                        B                        C
+ * before  [ r r r r s s s s s s ]  [ s s s . . . . . . . ]  [ . . . . . . . . . . ]
+ *                                    ^ commit_tail
+ * after   [ r r r r s s s s s s ]  [ s s s s s s s s s s ]  [ s s s s s . . . . . ]
+ *                                                             ^ commit_tail
+ * r: read, unusable until A is recycled   s: stored   .: free
+ * \endcode
  */
 bool vmnl_net_buffer_chunked_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
 

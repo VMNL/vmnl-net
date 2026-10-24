@@ -10,5 +10,5 @@ void vmnl_net_buffer_chunked_clear(VmnlNetBuffer *buffer)
         chunk->offset = 0;
         chunk->size = 0;
     }
-    ((struct VmnlNetBufferChunked *) buffer)->last_used = NULL;
+    ((struct VmnlNetBufferChunked *) buffer)->commit_tail = NULL;
 }
