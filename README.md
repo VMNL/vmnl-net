@@ -49,7 +49,7 @@ It is developed as the networking module of the [VMNL](https://github.com/VMNL/v
 
 A multiplayer game needs several network layers: UDP for the gameplay, reliable UDP for the events that must arrive, TCP and HTTP for the services around it, chat and voice between the players.
 Most libraries cover one of them, so a game combines several, each with its own threads, allocator and error codes.
-`vmnl_net` aims to cover them all in one C library, and says here what it will not do, so that you know before investing time in it.
+`vmnl_net` aims to cover them all in one C library.
 
 Made for:
 
@@ -128,8 +128,8 @@ block-beta
         columns 10
         BUFFERS_TITLE["Buffers"]
         FLAT["<sup>0.3</sup> flat"]
-        DYNAMIC["<sup>0.2</sup> dynamic"]
         RING["<sup>0.2</sup> ring"]
+        DYNAMIC["<sup>0.2</sup> dynamic"]
         CHUNKS["<sup>0.3</sup> chunks"]
         space:5
     end
@@ -199,7 +199,7 @@ block-beta
 
 ### From GitHub releases
 
-Each release ships with two prebuilt archives, static and shared libraries, for Windows x86_64, macOS arm64 and Linux x86_64.
+Each release ships with two prebuilt archives, static and shared libraries, for Windows, macOS and Linux, on x86_64 and arm64.
 Both contain the headers, the CMake package and the pkg-config file, and can be downloaded from the [releases page](https://github.com/VMNL/vmnl-net/releases).
 
 Extract the archive with `tar`, which ships with Windows, macOS and Linux:
@@ -277,7 +277,7 @@ Each version keeps its target month, and gets its release date once it is implem
 | --- | --- | --- | --- |
 | `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | October 4, 2026 |
 | `0.2.0` | Dynamic and ring byte buffers; monotonic clock and application-driven timers | November 2026 | October 11, 2026 |
-| `0.3.0` | Non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 |  |
+| `0.3.0` | Flat and chunked buffers, reworked buffer API; non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 |  |
 | `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 |  |
 | `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgments and retransmission, round-trip time and packet loss statistics | March 2027 |  |
 | `0.6.0` | Polling for many sockets with WSAPoll, kqueue or epoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 |  |

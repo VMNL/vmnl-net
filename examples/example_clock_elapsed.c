@@ -23,5 +23,5 @@ int main(void)
     uint64_t last_packet = vmnl_net_clock_now();
 
     measure();
-    return timed_out(last_packet) ? 1 : 0;
+    return (timed_out(last_packet) == true) ? 1 : 0;
 }

@@ -52,7 +52,7 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 ### Files
 
 - one public function per file, named without the `vmnl_net_` prefix: `src/buffer/buffer_create.c`
-- the operations behind a public function in one folder per type or family: an operation shared by a whole family takes its name, like `src/buffer/contiguous/buffer_contiguous_data.c`, and one shared by some types keeps the name of the type that defines it, the others pointing to it or calling it, like the dynamic buffer committing with `vmnl_net_buffer_flat_commit()`
+- the operations behind a public function in one folder per type or family: an operation shared by a whole family takes its name, like `src/buffer/contiguous/buffer_contiguous_clear.c`, and one shared by some types keeps the name of the type that defines it, the others pointing to it or calling it, like the dynamic buffer committing with `vmnl_net_buffer_flat_commit()`
 - private code in `src/<module>/<module>_internal.h`
 - an internal module used by several others in its own folder, like `src/list/`
 - platform code in `posix/` or `win32/`
@@ -70,10 +70,13 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 - `sizeof` without parentheses on an expression: `sizeof *context`
 - counters with `it++` and `it--`, not `++it` and `--it`, unless the expression needs the updated value
 - comparisons written out for readability: booleans with `== true` or `== false`, pointers with `== NULL` or `!= NULL`, not `!value` nor `value` alone
+- the condition of a ternary in parentheses: `(now > start) ? now - start : 0`
 
 ### Doxygen
 
 - short and technical, with snippets that compile
+- in the public headers, what the caller needs, said once, without implementation detail
+- in the internal headers, the implementation details the next developer needs too
 - `nullable` for optional pointers
 - the error codes listed under the `error` parameter
 - the contracts in `\attention`, with `**MUST**` and a short reason
