@@ -1,13 +1,12 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
-#include "allocator/allocator_internal.h"
 
 #include <string.h>
 
 bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error)
 {
-    VmnlNetBufferView views[2] = {0};
     uint8_t *pointer = vmnl_net_allocator.allocate(capacity);
+    VmnlNetBufferView views[2] = {0};
 
     if (pointer == NULL) {
         vmnl_net_error_set(error, VMNL_NET_ENOMEM);

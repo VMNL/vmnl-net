@@ -3,8 +3,8 @@
  * \brief Internal definition of the buffers.
  *
  * Every type of buffer starts with a VmnlNetBuffer that points to its VmnlNetBufferOps: a public function checks its arguments, then calls the operation of the type.
- * An operation that cannot fail once the arguments are checked returns nothing, and its public function writes the error code.
- * The operations fit together like blocks: one shared by a whole family takes its name, like vmnl_net_buffer_contiguous_data() for the flat, dynamic and ring buffers, and one shared by some types keeps the name of the type that defines it, the others pointing to it or calling it, like the dynamic buffer committing with vmnl_net_buffer_flat_commit().
+ * An operation whose implementations cannot fail once the arguments are checked returns nothing, and its public function writes the error code.
+ * The operations fit together like blocks: one shared by a whole family takes its name, like vmnl_net_buffer_contiguous_clear() for the flat, ring and dynamic buffers, and one shared by some types keeps the name of the type that defines it, the others pointing to it or calling it, like the dynamic buffer committing with vmnl_net_buffer_flat_commit().
  *
  * \par Example
  * \code
@@ -26,6 +26,7 @@
 
 #include <vmnl/net/buffer.h> /* IWYU pragma: export */
 
+#include "allocator/allocator_internal.h"
 #include "list/list_internal.h"
 
 #ifdef __cplusplus
@@ -33,7 +34,7 @@ extern "C" {
 #endif
 
 /**
- * \brief Bytes of every chunk of a chunk buffer, until the chunks come from a pool of the context.
+ * \brief Bytes of every chunk of a chunked buffer, until the chunks come from a pool of the context.
  */
 #define VMNL_NET_BUFFER_CHUNK_SIZE ((size_t) 16384)
 
@@ -42,7 +43,7 @@ extern "C" {
  * \attention An operation **MUST** be called once its public function checked the arguments: it does not check them again.
  */
 struct VmnlNetBufferOps {
-    VmnlNetBuffer *(*create)(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_create(), ops being this very table. */
+    VmnlNetBuffer *(*create)(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_create(), receiving this table as ops. */
     void (*clear)(VmnlNetBuffer *buffer); /*!< Implements vmnl_net_buffer_clear(). */
     bool (*resize)(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_resize(), NULL if the type cannot grow. */
     bool (*shrink)(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error); /*!< Implements vmnl_net_buffer_shrink(), NULL if the type cannot shrink. */
@@ -63,8 +64,8 @@ struct VmnlNetBuffer {
 };
 
 /**
- * \brief Flat, dynamic or ring buffer, its bytes in one block.
- * \remark The stored bytes run from offset, and in a ring buffer continue at the start of the block once they reach its end.
+ * \brief Flat, ring or dynamic buffer, its bytes in one block.
+ * \remark The stored bytes run from offset, and wrap around the end of the block in a ring buffer.
  */
 struct VmnlNetBufferContiguous {
     struct VmnlNetBuffer base; /*!< Common part, first so that a VmnlNetBuffer pointer converts to it. */
@@ -73,21 +74,22 @@ struct VmnlNetBufferContiguous {
 };
 
 /**
- * \brief Chunk buffer, its bytes in a list of chunks.
+ * \brief Chunked buffer, its bytes in a list of chunks.
+ * \remark The stored bytes follow each other without gap, in the order of the list: from the offset of the first chunk, through full chunks, to the last used chunk, followed by the empty chunks.
  */
 struct VmnlNetBufferChunked {
     struct VmnlNetBuffer base; /*!< Common part, first so that a VmnlNetBuffer pointer converts to it. */
     struct VmnlNetListLink chunks; /*!< Head of the chunks, from the first stored byte to the free space. */
-    size_t chunk_size; /*!< Bytes of every chunk. */
+    struct VmnlNetBufferChunk *last_used; /*!< Last chunk holding stored bytes, where writing starts, NULL when the buffer stores none. */
 };
 
 /**
- * \brief Chunk of a chunk buffer, allocated in one block with its bytes right after it.
- * \remark Allocated with sizeof(struct VmnlNetBufferChunk) + chunk_size bytes, and freed in one call: its bytes are not a separate allocation.
+ * \brief Chunk of a chunked buffer, allocated in one block with its bytes right after it.
+ * \remark Allocated with sizeof(struct VmnlNetBufferChunk) + #VMNL_NET_BUFFER_CHUNK_SIZE bytes, and freed in one call: its bytes are not a separate allocation.
  */
 struct VmnlNetBufferChunk {
     struct VmnlNetListLink link; /*!< Link in the chunks of its buffer. */
-    size_t offset; /*!< Index of the first stored byte. */
+    size_t offset; /*!< Index of the first stored byte, 0 except in the first chunk. */
     size_t size; /*!< Stored bytes of the chunk. */
     uint8_t bytes[]; /*!< Bytes of the chunk, allocated with it. */
 };
@@ -99,7 +101,6 @@ struct VmnlNetBufferChunk {
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created buffer on success, NULL otherwise.
- * \remark Creates the dynamic buffer, and the flat and ring buffers once vmnl_net_buffer_flat_create() rejected a capacity of 0.
  */
 VmnlNetBuffer *vmnl_net_buffer_contiguous_create(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error);
 
@@ -108,24 +109,6 @@ VmnlNetBuffer *vmnl_net_buffer_contiguous_create(const struct VmnlNetBufferOps *
  * \param buffer Buffer to clear.
  */
 void vmnl_net_buffer_contiguous_clear(VmnlNetBuffer *buffer);
-
-/**
- * \brief Gets the stored bytes of a contiguous buffer from an offset.
- * \param buffer Buffer to read.
- * \param offset Stored bytes to skip, at most the stored ones.
- * \param views Stored bytes from \p offset, in order.
- * \param nviews Size of \p views on input, views filled on output.
- * \return Number of bytes described, fewer than the stored ones when \p views is too small, 0 with no view filled when \p offset is the number of stored bytes.
- * \remark Describes a second view only when the stored bytes of a ring buffer wrap around the end of the block: the bytes of a flat or dynamic buffer never do, so the same code serves them. */
-size_t vmnl_net_buffer_contiguous_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
-
-/**
- * \brief Drops the first stored bytes of a contiguous buffer, in O(1).
- * \param buffer Buffer read from.
- * \param nbytes Bytes to drop, at most the stored ones.
- * \remark Moves the offset past the dropped bytes, back to the start of the block when it reaches its end: a ring buffer wraps, a flat or dynamic buffer only reaches the end once empty.
- */
-void vmnl_net_buffer_contiguous_consume(VmnlNetBuffer *buffer, const size_t nbytes);
 
 /**
  * \brief Destroys a contiguous buffer and its bytes.
@@ -141,16 +124,36 @@ void vmnl_net_buffer_contiguous_destroy(VmnlNetBuffer *buffer);
  * - #VMNL_NET_EINVAL: \p capacity is 0.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created buffer on success, NULL otherwise.
- * \remark Also creates the ring buffer: both reject a capacity of 0, then call vmnl_net_buffer_contiguous_create().
+ * \remark Rejects a capacity of 0, then calls vmnl_net_buffer_contiguous_create().
  */
 VmnlNetBuffer *vmnl_net_buffer_flat_create(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error);
 
 /**
- * \brief Gets the free space of a flat buffer, after its stored bytes.
+ * \brief Describes the stored bytes of a flat or dynamic buffer from an offset.
+ * \param buffer Buffer to read.
+ * \param offset Stored bytes to skip, at most the stored ones.
+ * \param views Stored bytes from \p offset, in one view.
+ * \param nviews Number of elements of \p views on input, number of views filled on output, at most 1.
+ * \return Number of bytes described, 0 with no view filled when \p views has no element or \p offset is the number of stored bytes.
+ * \remark The stored bytes of a flat or dynamic buffer never wrap around the end of the block, so one view describes them all.
+ */
+size_t vmnl_net_buffer_flat_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
+
+/**
+ * \brief Drops the first stored bytes of a flat or dynamic buffer, in O(1).
+ * \param buffer Buffer read from.
+ * \param nbytes Bytes to drop, at most the stored ones.
+ * \remark Moves the offset past the dropped bytes, without wrapping around the end of the block: the stored bytes of a flat or dynamic buffer end there at the latest.
+ * \remark Moves the offset back to 0 once the buffer is empty, so that the next writes have no byte to move.
+ */
+void vmnl_net_buffer_flat_consume(VmnlNetBuffer *buffer, const size_t nbytes);
+
+/**
+ * \brief Describes the free space of a flat buffer, after its stored bytes.
  * \param buffer Buffer to write to.
  * \param nbytes Bytes needed.
  * \param views Free space, in one view.
- * \param nviews Size of \p views on input, 1 on output.
+ * \param nviews Number of elements of \p views on input, 1 on output.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p nviews is 0.
  * - #VMNL_NET_ENOBUFS: the free space is less than \p nbytes, even with the stored bytes moved to the front.
@@ -166,54 +169,18 @@ bool vmnl_net_buffer_flat_prepare(VmnlNetBuffer *buffer, const size_t nbytes, Vm
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p nbytes is more than the room after the stored bytes.
  * \return true on success, false otherwise.
- * \remark Shared with the dynamic buffer: both keep their free space after their stored bytes, never before them.
+ * \remark The flat and dynamic buffers keep their free space after their stored bytes, never before them.
  */
 bool vmnl_net_buffer_flat_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
 
 /**
- * \brief Grows a dynamic buffer to a capacity, exactly.
- * \param buffer Buffer to grow.
- * \param capacity Capacity to grow to, more than the current one.
+ * \brief Grows or shrinks a ring buffer, and shrinks a dynamic buffer, to a capacity, exactly.
+ * \param buffer Buffer to resize.
+ * \param capacity Capacity to resize to, at least the stored bytes, more than 0 and other than the current one.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
- * \remark Reallocates the bytes, which moves them when the allocator cannot grow the block in place.
- */
-bool vmnl_net_buffer_dynamic_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
-
-/**
- * \brief Reduces the capacity of a dynamic buffer.
- * \param buffer Buffer to shrink.
- * \param capacity Capacity to reduce to, at least the stored bytes and less than the current capacity.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return true on success, false otherwise.
- * \remark Moves the stored bytes to the front of the block first, so that the reallocation keeps them all.
- */
-bool vmnl_net_buffer_dynamic_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
-
-/**
- * \brief Gets the free space of a dynamic buffer, growing it when needed.
- * \param buffer Buffer to write to.
- * \param nbytes Bytes needed.
- * \param views Free space, in one view.
- * \param nviews Size of \p views on input, 1 on output.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p nviews is 0.
- * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return true on success, false otherwise.
- * \remark Moves the stored bytes to the front first when that makes enough room, and grows only otherwise, as vmnl_net_buffer_create() describes.
- */
-bool vmnl_net_buffer_dynamic_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
-
-/**
- * \brief Grows a ring buffer to a capacity, exactly.
- * \param buffer Buffer to grow.
- * \param capacity Capacity to grow to, more than the current one.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return true on success, false otherwise.
- * \remark Copies the stored bytes to the front of a new block, unwrapped: growing in place would leave a gap in the middle of wrapped bytes.
+ * \remark Copies the stored bytes to the front of a new block, unwrapped: growing in place would leave a gap in the middle of wrapped bytes, and shrinking in place would cut them.
  */
 bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
 
@@ -222,18 +189,40 @@ bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, const size_t capacity, V
  * \param buffer Buffer to shrink.
  * \param capacity Capacity to reduce to, at least the stored bytes and less than the current capacity.
  * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EINVAL: \p capacity is 0.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
- * \remark Copies the stored bytes like vmnl_net_buffer_ring_resize().
+ * \remark Rejects a capacity of 0, like the creation of a ring buffer, then calls vmnl_net_buffer_ring_resize(): the operations of a ring buffer never handle an empty block.
  */
 bool vmnl_net_buffer_ring_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
 
 /**
- * \brief Gets the free space of a ring buffer, after its stored bytes and around the end of the block.
+ * \brief Describes the stored bytes of a ring buffer from an offset.
+ * \param buffer Buffer to read.
+ * \param offset Stored bytes to skip, at most the stored ones.
+ * \param views Stored bytes from \p offset, in order: a second view when they wrap around the end of the block.
+ * \param nviews Number of elements of \p views on input, number of views filled on output, at most 2.
+ * \return Number of bytes described, fewer than the stored ones after \p offset when \p views is too small, 0 with no view filled when \p views has no element or \p offset is the number of stored bytes.
+ * \remark Calls vmnl_net_buffer_flat_data() when the stored bytes do not wrap around the end of the block, or when \p views has no element.
+ * \remark Otherwise the stored bytes run to the end of the block, then from its index 0: one view when \p offset skips past the end of the block, two views otherwise, the second one starting at the index 0.
+ */
+size_t vmnl_net_buffer_ring_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
+
+/**
+ * \brief Drops the first stored bytes of a ring buffer, in O(1).
+ * \param buffer Buffer read from.
+ * \param nbytes Bytes to drop, at most the stored ones.
+ * \remark Calls vmnl_net_buffer_flat_consume(), which moves the offset back to 0 once the buffer is empty, so that its free space fits in one view.
+ * \remark Then subtracts the capacity when the offset passed the end of the block.
+ */
+void vmnl_net_buffer_ring_consume(VmnlNetBuffer *buffer, const size_t nbytes);
+
+/**
+ * \brief Describes the free space of a ring buffer, after its stored bytes and around the end of the block.
  * \param buffer Buffer to write to.
  * \param nbytes Bytes needed.
  * \param views Free space, in order: a second view when it wraps around the end of the block.
- * \param nviews Size of \p views on input, views filled on output.
+ * \param nviews Number of elements of \p views on input, number of views filled on output.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
  * - #VMNL_NET_ENOBUFS: the free space is less than \p nbytes.
@@ -253,90 +242,146 @@ bool vmnl_net_buffer_ring_prepare(VmnlNetBuffer *buffer, const size_t nbytes, Vm
 bool vmnl_net_buffer_ring_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
 
 /**
- * \brief Creates a chunk buffer.
- * \param ops Operations of the chunk buffer, stored in it.
- * \param capacity Bytes allocated, rounded up to whole chunks of #VMNL_NET_BUFFER_CHUNK_SIZE bytes, 0 to allocate on the first write.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return Created buffer on success, NULL otherwise.
- */
-VmnlNetBuffer *vmnl_net_buffer_chunked_create(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error);
-
-/**
- * \brief Drops every stored byte of a chunk buffer, in O(n).
- * \param buffer Buffer to clear.
- * \remark Resets the offset and the size of every chunk, and keeps them allocated.
- */
-void vmnl_net_buffer_chunked_clear(VmnlNetBuffer *buffer);
-
-/**
- * \brief Grows a chunk buffer by whole chunks.
+ * \brief Grows a dynamic buffer to a capacity, exactly.
  * \param buffer Buffer to grow.
  * \param capacity Capacity to grow to, more than the current one.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
- * \remark Allocates the new chunks in a list of their own, then splices it in O(1): a failed allocation frees them and leaves the buffer as it was.
+ * \remark Reallocates the block with vmnl_net_allocator.reallocate().
+ */
+bool vmnl_net_buffer_dynamic_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+
+/**
+ * \brief Reduces the capacity of a dynamic buffer.
+ * \param buffer Buffer to shrink.
+ * \param capacity Capacity to reduce to, at least the stored bytes and less than the current capacity.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * \return true on success, false otherwise.
+ * \remark Frees the block for a capacity of 0, the buffer being empty, and calls vmnl_net_buffer_ring_resize() otherwise.
+ */
+bool vmnl_net_buffer_dynamic_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+
+/**
+ * \brief Describes the free space of a dynamic buffer, growing it when needed.
+ * \param buffer Buffer to write to.
+ * \param nbytes Bytes needed.
+ * \param views Free space, in one view.
+ * \param nviews Number of elements of \p views on input, 1 on output.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EINVAL: \p nviews is 0.
+ * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * \return true on success, false otherwise.
+ * \remark Grows only when moving the stored bytes to the front leaves too little room, to 1.5 times its capacity, or to the bytes needed if more, and to 256 bytes at least.
+ */
+bool vmnl_net_buffer_dynamic_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
+
+/**
+ * \brief Creates a chunked buffer.
+ * \param ops Operations of the chunked buffer, stored in it.
+ * \param capacity Bytes allocated, rounded up to whole chunks of #VMNL_NET_BUFFER_CHUNK_SIZE bytes, 0 to allocate on the first write.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * \return Created buffer on success, NULL otherwise.
+ * \remark Creates the buffer without chunk, then adds them with vmnl_net_buffer_chunked_resize().
+ */
+VmnlNetBuffer *vmnl_net_buffer_chunked_create(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error);
+
+/**
+ * \brief Drops every stored byte of a chunked buffer, in O(n).
+ * \param buffer Buffer to clear.
+ * \remark Resets the offset and the size of every chunk, keeps them allocated, and sets last_used to NULL.
+ */
+void vmnl_net_buffer_chunked_clear(VmnlNetBuffer *buffer);
+
+/**
+ * \brief Grows a chunked buffer by whole chunks.
+ * \param buffer Buffer to grow.
+ * \param capacity Capacity to grow to, more than the current one.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * \return true on success, false otherwise.
+ * \remark Allocates the new chunks in a list of their own, then splices it at the end in O(1): a failed allocation frees them and leaves the buffer as it was.
  */
 bool vmnl_net_buffer_chunked_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
 
 /**
- * \brief Frees the free chunks of a chunk buffer, from the end.
+ * \brief Frees the free chunks of a chunked buffer, from the end.
  * \param buffer Buffer to shrink.
  * \param capacity Capacity to reduce to, at least the stored bytes and less than the current capacity.
  * \param error Error code of the call, nullable.
  * \return true, freeing chunks cannot fail.
- * \attention A chunk holding bytes **MUST** be kept: when the first chunk starts at an offset, the stored bytes span more chunks than \p capacity rounds up to.
+ * \attention A chunk holding bytes **MUST** be kept: when the first chunk has an offset, the stored bytes span more chunks than \p capacity rounds up to.
  */
 bool vmnl_net_buffer_chunked_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
 
 /**
- * \brief Gets the stored bytes of a chunk buffer from an offset.
+ * \brief Describes the stored bytes of a chunked buffer from an offset.
  * \param buffer Buffer to read.
  * \param offset Stored bytes to skip, fewer than the stored ones.
  * \param views Stored bytes from \p offset, one view per chunk, in order.
- * \param nviews Size of \p views on input, views filled on output.
+ * \param nviews Number of elements of \p views on input, number of views filled on output.
  * \return Number of bytes described, fewer than the stored ones when \p views is too small.
  */
 size_t vmnl_net_buffer_chunked_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
 
 /**
- * \brief Drops the first stored bytes of a chunk buffer.
+ * \brief Drops the first stored bytes of a chunked buffer.
  * \param buffer Buffer read from.
- * \param nbytes Bytes to drop, at most the stored ones.
- * \attention A chunk it empties **MUST** move to the end of the list with its offset back to 0: vmnl_net_buffer_chunked_commit() and vmnl_net_buffer_chunked_shrink() rely on the stored bytes starting in the first chunk and the empty chunks coming last.
+ * \param nbytes Bytes to drop, at most the stored ones, 0 when the buffer has no chunk.
+ * \attention A chunk it empties **MUST** move to the end of the list with its offset back to 0: the stored bytes start in the first chunk, and the empty chunks come last.
+ * \attention last_used **MUST** be set to NULL once the buffer is empty: the chunk it pointed to moved to the end.
  */
 void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, const size_t nbytes);
 
 /**
- * \brief Gets the free space of a chunk buffer, adding chunks when needed.
+ * \brief Describes the free space of a chunked buffer, adding chunks when needed.
  * \param buffer Buffer to write to.
  * \param nbytes Bytes needed.
  * \param views Free space, one view per chunk, in order.
- * \param nviews Size of \p views on input, views filled on output.
+ * \param nviews Number of elements of \p views on input, number of views filled on output.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
+ * \remark Starts at last_used, or at the first chunk when the buffer is empty: the room after its stored bytes, then the empty chunks after it.
  */
 bool vmnl_net_buffer_chunked_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 
 /**
- * \brief Stores the first prepared bytes of a chunk buffer.
+ * \brief Stores the first prepared bytes of a chunked buffer.
  * \param buffer Buffer written to.
  * \param nbytes Bytes written at the start of the views of the last prepare.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p nbytes is more than the free space.
  * \return true on success, false otherwise.
  * \remark The free space leaves out the bytes consumed from the first chunk: they stay unusable until the chunk is recycled.
+ * \remark Checks \p nbytes in O(1), the stored bytes having no gap: the free space is the capacity minus the stored bytes and the offset of the first chunk.
+ * \remark Fills the chunks from last_used, or from the first chunk when the buffer is empty, then points last_used to the last chunk filled.
  */
 bool vmnl_net_buffer_chunked_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
 
 /**
- * \brief Destroys a chunk buffer and its chunks.
+ * \brief Destroys a chunked buffer and its chunks.
  * \param buffer Buffer to destroy.
  */
 void vmnl_net_buffer_chunked_destroy(VmnlNetBuffer *buffer);
+
+/**
+ * \brief Frees every chunk of a list.
+ * \param head Head of the chunks.
+ * \attention \p head **MUST** be initialized again before any use: it still points to the freed chunks.
+ */
+static inline void vmnl_net_buffer_chunked_destroy_internal_chunks(struct VmnlNetListLink *head)
+{
+    struct VmnlNetBufferChunk *chunk;
+
+    VMNL_NET_LIST_FOREACH(chunk, head, link)
+    {
+        vmnl_net_allocator.deallocate(chunk);
+    }
+}
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,5 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
-#include "allocator/allocator_internal.h"
 
 bool vmnl_net_buffer_dynamic_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error)
 {
