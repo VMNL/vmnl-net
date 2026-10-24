@@ -7,8 +7,7 @@
  *
  * A function that can fail gives its failure value in its documented return, and writes its code to a nullable #VmnlNetError pointer, its last parameter.
  *
- * \attention A pointer parameter **MUST** not be NULL unless documented as nullable: like the libc, the library dereferences it without checking, so passing the unchecked result of a failed call is a bug of the caller, not an error code.
- * \remark A function given by the caller, such as an allocator or a callback, never comes from another call: a NULL one is checked and gives #VMNL_NET_EINVAL.
+ * \attention A pointer parameter **MUST** not be NULL unless documented as nullable: like the libc, the library uses it without checking, so a NULL one is a bug of the caller, not an error code.
  * \remark A destroy function accepts NULL and does nothing, like free().
  *
  * \par Codes
@@ -41,7 +40,6 @@ extern "C" {
 
 /**
  * \brief Error code written by the functions that can fail.
- * \remark Unsigned 32 bits on every platform.
  */
 typedef uint32_t VmnlNetError;
 
@@ -82,7 +80,7 @@ typedef uint32_t VmnlNetError;
  * \brief Gets the message of an error code.
  * \param error Error code.
  * \return Static string, cannot be NULL, "Unknown error" for a code the library does not define.
- * \remark The message is read from a table indexed by \p error: O(1), no allocation, thread-safe.
+ * \remark O(1), no allocation, thread-safe.
  */
 VMNL_NET_API const char *vmnl_net_error_as_string(const VmnlNetError error);
 

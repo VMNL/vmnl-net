@@ -24,9 +24,9 @@ UTEST(vmnl_net_context_create, allocation_failure)
     VmnlNetError error = UINT32_MAX;
     VmnlNetContext *context;
 
-    vmnl_net_allocator_set(failing_allocator, realloc, free, NULL);
+    vmnl_net_allocator_set(failing_allocator, realloc, free);
     context = vmnl_net_context_create(&error);
-    vmnl_net_allocator_set(malloc, realloc, free, NULL);
+    vmnl_net_allocator_set(malloc, realloc, free);
     EXPECT_EQ(context, NULL);
     EXPECT_EQ(error, VMNL_NET_ENOMEM);
 }

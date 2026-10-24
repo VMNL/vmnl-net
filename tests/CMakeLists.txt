@@ -39,6 +39,7 @@ target_sources(vmnl_net_tests
 )
 
 target_include_directories(vmnl_net_tests SYSTEM PRIVATE ${utest_SOURCE_DIR})
+target_include_directories(vmnl_net_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
 
 target_link_libraries(vmnl_net_tests
   PRIVATE
