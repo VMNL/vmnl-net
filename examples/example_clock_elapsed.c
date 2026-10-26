@@ -1,5 +1,7 @@
-#include <stdbool.h>
 #include <vmnl/net/clock.h>
+
+#include <stdbool.h>
+#include <stdint.h>
 
 //! [elapsed]
 static uint64_t measure(void)

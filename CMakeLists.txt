@@ -132,9 +132,9 @@ if(VMNL_NET_BUILD_BENCHMARKS)
     add_subdirectory(bench)
 endif()
 
-# if(VMNL_NET_BUILD_EXAMPLES)
+if(VMNL_NET_BUILD_EXAMPLES)
     add_subdirectory(examples)
-# endif()
+endif()
 
 if(VMNL_NET_INSTALL)
     include(${PROJECT_SOURCE_DIR}/cmake/install.cmake)
