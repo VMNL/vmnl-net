@@ -4,7 +4,9 @@
 
 static void version(benchmark::State &state)
 {
-    state.SkipWithMessage("not written");
+    for (auto _ : state) {
+        benchmark::DoNotOptimize(vmnl_net_version());
+    }
 }
 
 BENCHMARK(version);
