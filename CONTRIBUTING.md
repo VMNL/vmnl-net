@@ -76,8 +76,8 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 ### Doxygen
 
 - short and technical, with snippets that compile
-- in the public headers, what the caller needs, said once, without implementation detail
-- in the internal headers, the implementation details the next developer needs too
+- in the public headers, the operation as the caller sees it: what it does, its parameters, its errors and its conditions of use, said once, without implementation detail
+- in the internal headers, the contract of the implementation: what the public function already checked, what the operation must do and keep true, the cases it must handle, and the details the next developer needs
 - `nullable` for optional pointers
 - the error codes listed under the `error` parameter
 - the contracts in `\attention`, with `**MUST**` and a short reason

@@ -168,6 +168,7 @@ void vmnl_net_buffer_flat_consume(VmnlNetBuffer *buffer, const size_t nbytes);
  * - #VMNL_NET_EINVAL: \p nviews is 0.
  * - #VMNL_NET_ENOBUFS: the free space is less than \p nbytes, even with the stored bytes moved to the front.
  * \return true on success, false otherwise.
+ * \remark Checks the free space, then calls vmnl_net_buffer_dynamic_prepare(), which never grows a buffer that has room for \p nbytes.
  * \remark Moves the stored bytes to the front of the block only when the room after them lacks \p nbytes and the bytes consumed before them make up for it.
  */
 bool vmnl_net_buffer_flat_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
@@ -335,7 +336,7 @@ bool vmnl_net_buffer_chunked_shrink(VmnlNetBuffer *buffer, const size_t capacity
  * \param offset Stored bytes to skip, fewer than the stored ones.
  * \param views Stored bytes from \p offset, one view per chunk, in order.
  * \param nviews Number of elements of \p views on input, number of views filled on output.
- * \return Number of bytes described, fewer than the stored ones when \p views is too small.
+ * \return Number of bytes described, fewer than the stored ones when \p views is too small, 0 with no view filled when \p views has no element.
  * \remark Skips the chunks before \p offset from the first one, in O(n), and stops at the first empty chunk: the stored bytes have no gap.
  */
 size_t vmnl_net_buffer_chunked_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);

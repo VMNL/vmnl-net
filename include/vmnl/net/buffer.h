@@ -30,15 +30,20 @@
  * Buffers are allocated with the global allocator, see vmnl_net_allocator_set().
  *
  * \par Types
- * |                 | Flat                          | Ring                    | Dynamic                  | Chunks                       |
- * | --------------- | :---------------------------: | :---------------------: | :----------------------: | :--------------------------: |
- * | When full       | Fails, fixed memory           | Fails, fixed memory     | Grows, copies its bytes  | Adds a 16 KiB chunk, no copy |
- * | Views returned  | 1                             | 1, or 2 when wrapped    | 1                        | 1 per chunk                  |
- * | Operation speed | Constant                      | Constant                | Constant                 | Slows with each chunk        |
- * | Resizable       | No                            | Yes                     | Yes                      | Yes                          |
- * | Best use case   | Packets of known maximum size | Streams in fixed memory | Messages of unknown size | Large transfers, like files  |
+ * |                      | Flat                          | Ring                    | Dynamic                         | Chunks                       |
+ * | -------------------- | :---------------------------: | :---------------------: | :-----------------------------: | :--------------------------: |
+ * | When full            | Fails, fixed memory           | Fails, fixed memory     | Grows, copies its bytes         | Adds a 16 KiB chunk, no copy |
+ * | Views returned       | 1                             | 1, or 2 when wrapped    | 1                               | 1 per chunk                  |
+ * | Reading at an offset | Constant                      | Constant                | Constant                        | Walks the chunks before it   |
+ * | Bytes moved on write | To the front, when needed     | Never                   | To the front, or to a new block | Never                        |
+ * | Resizable            | No                            | Yes                     | Yes                             | Yes                          |
+ * | Best use case        | Packets of known maximum size | Streams in fixed memory | Messages of unknown size        | Large transfers, like files  |
  *
  * Dynamic suits most uses: flat and ring keep a fixed memory, chunks grow without copying.
+ *
+ * \remark No function erases bytes: consuming, clearing and destroying only move offsets or free memory.
+ * To hold a secret, erase its bytes through the views of vmnl_net_buffer_data() before dropping them, with a call the compiler cannot remove, like explicit_bzero(), memset_s() or SecureZeroMemory().
+ * Keep it in a chunked buffer, or in a ring buffer never resized: flat and dynamic buffers move their stored bytes, and resizing leaves a copy of them in the memory it frees, out of reach of the views.
  *
  * \par Example
  * Example to be written.
@@ -166,7 +171,7 @@ VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, const size_t cap
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
  * - #VMNL_NET_ENOBUFS: \p buffer is flat or ring, and lacks \p nbytes of free space.
- * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * - #VMNL_NET_ENOMEM: memory allocation failure, or \p nbytes too large to ever fit.
  * \return true on success, false otherwise.
  * \attention The return value **MUST** be checked: \p views describes nothing after a failure.
  * \remark The views describe at least \p nbytes, and as much free space as they can, so one recv() can receive more.
@@ -180,7 +185,7 @@ VMNL_NET_API VMNL_NET_NODISCARD bool vmnl_net_buffer_prepare(VmnlNetBuffer *buff
  * \param buffer Buffer written to.
  * \param nbytes Bytes written at the start of the views of the last vmnl_net_buffer_prepare(), in order.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p nbytes is more than the free space described by the last vmnl_net_buffer_prepare().
+ * - #VMNL_NET_EINVAL: \p nbytes is more than the free space after the stored bytes.
  * \return true on success, false otherwise.
  * \attention The bytes **MUST** be written in the views of the last vmnl_net_buffer_prepare(): nothing is copied, they are only counted as stored.
  */
