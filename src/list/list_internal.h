@@ -236,6 +236,7 @@ static inline void vmnl_net_list_remove(struct VmnlNetListLink *link)
  * \brief Moves every link of a list to the end of another one, in O(1).
  * \param head Head of the list that receives the links.
  * \param other Head of the list to move, empty afterwards.
+ * \attention \p other **MUST** be another list than \p head: moving a list into itself would unlink its head.
  * \remark Moving the waiting clients after the connected ones:
  * \code
  * vmnl_net_list_splice(&connected, &waiting); // connected: alice, bob, carol; waiting: empty

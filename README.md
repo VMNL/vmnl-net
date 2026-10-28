@@ -174,25 +174,25 @@ block-beta
     SOCKET -.-> POLL
     SOCKET -.-> BUFFER
     SER -.-> BUFFER
-    BUFFER -.-> FLAT
+    BUFFER --> FLAT
     BUFFER --> DYNAMIC
     BUFFER --> RING
-    BUFFER -.-> CHUNKS
+    BUFFER --> CHUNKS
     POLL -.-> CONTEXT
-    TIMER --> CONTEXT
-    TIMER --> CLOCK
+    TIMER -.-> CONTEXT
+    TIMER -.-> CLOCK
     CONTEXT --> ALLOCATOR
     CONTEXT --> LIST
-    FLAT -.-> ALLOCATOR
+    FLAT --> ALLOCATOR
     DYNAMIC --> ALLOCATOR
     RING --> ALLOCATOR
-    CHUNKS -.-> ALLOCATOR
-    CHUNKS -.-> LIST
+    CHUNKS --> ALLOCATOR
+    CHUNKS --> LIST
 
     classDef title fill:none,stroke:none
     classDef planned fill:none,stroke-dasharray: 4 3
     class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
-    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,FLAT,CHUNKS,SER,LOG planned
+    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,TIMER,SER,LOG planned
 ```
 
 ## Installation
