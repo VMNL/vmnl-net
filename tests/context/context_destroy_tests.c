@@ -1,37 +1,33 @@
-#include <vmnl/net/allocator.h>
 #include <vmnl/net/context.h>
+#include <vmnl/net/allocator.h>
 
 #include "utest.h"
 
-#include <stddef.h>
-#include <stdlib.h>
+static size_t deallocations;
 
-static int ndeallocations;
-
-static void count_deallocation(void *pointer)
+static void deallocator(void *pointer)
 {
-    ndeallocations++;
+    deallocations++;
     free(pointer);
 }
 
-UTEST(vmnl_net_context_destroy, success)
+UTEST(vmnl_net_context_destroy, frees_context)
 {
-    VmnlNetContext *context;
+    VmnlNetContext *context = vmnl_net_context_create(NULL);
 
-    ndeallocations = 0;
-    vmnl_net_allocator_set(malloc, realloc, count_deallocation, NULL);
-    context = vmnl_net_context_create(NULL);
-    EXPECT_NE(context, NULL);
+    ASSERT_NE(context, NULL);
+    vmnl_net_allocator_set(malloc, realloc, deallocator);
+    deallocations = 0;
     vmnl_net_context_destroy(context);
-    vmnl_net_allocator_set(malloc, realloc, free, NULL);
-    EXPECT_EQ(ndeallocations, 1);
+    vmnl_net_allocator_set(malloc, realloc, free);
+    EXPECT_EQ((int) deallocations, 1);
 }
 
-UTEST(vmnl_net_context_destroy, null_context)
+UTEST(vmnl_net_context_destroy, ignores_null_context)
 {
-    ndeallocations = 0;
-    vmnl_net_allocator_set(malloc, realloc, count_deallocation, NULL);
+    vmnl_net_allocator_set(malloc, realloc, deallocator);
+    deallocations = 0;
     vmnl_net_context_destroy(NULL);
-    vmnl_net_allocator_set(malloc, realloc, free, NULL);
-    EXPECT_EQ(ndeallocations, 0);
+    vmnl_net_allocator_set(malloc, realloc, free);
+    EXPECT_EQ((int) deallocations, 0);
 }

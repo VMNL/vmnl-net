@@ -2,30 +2,34 @@
 
 #include "utest.h"
 
-#include <stddef.h>
-#include <stdint.h>
-#include <time.h>
-
-UTEST(vmnl_net_clock_now, never_goes_backwards)
+UTEST(vmnl_net_clock_now, ticks_forward)
 {
+    const size_t nseconds = 3;
     uint64_t previous = vmnl_net_clock_now();
+    uint64_t start = previous;
     uint64_t now;
 
-    for (size_t it = 0; it < 1000; it++) {
+    for (size_t it = 0; it < nseconds; it++) {
+#ifdef _WIN32
+        Sleep(1000);
+#else
+        sleep(1);
+#endif
         now = vmnl_net_clock_now();
         EXPECT_GE(now, previous);
         previous = now;
     }
+    EXPECT_GE(vmnl_net_clock_now() - start, nseconds * VMNL_NET_NANOSECONDS_PER_SECOND);
 }
 
-UTEST(vmnl_net_clock_now, counts_nanoseconds)
+UTEST(vmnl_net_clock_now, advances_by_slept_time)
 {
-    const uint64_t start = vmnl_net_clock_now();
-    const clock_t time = clock();
+    const uint64_t previous = vmnl_net_clock_now();
 
-    ASSERT_NE(time, (clock_t) -1);
-    // clock() rounds down, one more tick covers it
-    while (clock() - time < CLOCKS_PER_SEC / 100 + 1)
-        ;
-    EXPECT_GE(vmnl_net_clock_now() - start, VMNL_NET_NANOSECONDS_PER_SECOND / 100);
+#ifdef _WIN32
+    Sleep(1000);
+#else
+    sleep(1);
+#endif
+    EXPECT_GE(vmnl_net_clock_now() - previous, VMNL_NET_NANOSECONDS_PER_SECOND);
 }

@@ -60,6 +60,44 @@ target_sources(vmnl_net
         # src/timer/timer_start.c
         # src/timer/timer_stop.c
         # src/timer/timer_update.c
+        src/buffer/buffer_capacity.c
+        src/buffer/buffer_clear.c
+        src/buffer/buffer_commit.c
+        src/buffer/buffer_consume.c
+        src/buffer/buffer_create.c
+        src/buffer/buffer_data.c
+        src/buffer/buffer_destroy.c
+        src/buffer/buffer_is_empty.c
+        src/buffer/buffer_prepare.c
+        src/buffer/buffer_resize.c
+        src/buffer/buffer_shrink.c
+        src/buffer/buffer_size.c
+        src/buffer/chunked/buffer_chunked_clear.c
+        src/buffer/chunked/buffer_chunked_commit.c
+        src/buffer/chunked/buffer_chunked_consume.c
+        src/buffer/chunked/buffer_chunked_create.c
+        src/buffer/chunked/buffer_chunked_data.c
+        src/buffer/chunked/buffer_chunked_destroy.c
+        src/buffer/chunked/buffer_chunked_prepare.c
+        src/buffer/chunked/buffer_chunked_resize.c
+        src/buffer/chunked/buffer_chunked_shrink.c
+        src/buffer/contiguous/buffer_contiguous_clear.c
+        src/buffer/contiguous/buffer_contiguous_create.c
+        src/buffer/contiguous/buffer_contiguous_destroy.c
+        src/buffer/dynamic/buffer_dynamic_prepare.c
+        src/buffer/dynamic/buffer_dynamic_resize.c
+        src/buffer/dynamic/buffer_dynamic_shrink.c
+        src/buffer/flat/buffer_flat_commit.c
+        src/buffer/flat/buffer_flat_consume.c
+        src/buffer/flat/buffer_flat_create.c
+        src/buffer/flat/buffer_flat_data.c
+        src/buffer/flat/buffer_flat_prepare.c
+        src/buffer/ring/buffer_ring_commit.c
+        src/buffer/ring/buffer_ring_consume.c
+        src/buffer/ring/buffer_ring_data.c
+        src/buffer/ring/buffer_ring_prepare.c
+        src/buffer/ring/buffer_ring_resize.c
+        src/buffer/ring/buffer_ring_shrink.c
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS include ${PROJECT_BINARY_DIR}/include
@@ -72,6 +110,7 @@ target_sources(vmnl_net
             include/vmnl/net/allocator.h
             include/vmnl/net/clock.h
             # include/vmnl/net/timer.h
+            include/vmnl/net/buffer.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)

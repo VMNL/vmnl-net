@@ -2,35 +2,38 @@
 
 #include "utest.h"
 
-#include <stdint.h>
-#include <stdio.h>
-
-UTEST(vmnl_net_version, success)
+UTEST(vmnl_net_version, returns_current_version)
 {
     const uint32_t version = vmnl_net_version();
-    const uint32_t major = VMNL_NET_TEST_VERSION_MAJOR;
-    const uint32_t minor = VMNL_NET_TEST_VERSION_MINOR;
-    const uint32_t patch = VMNL_NET_TEST_VERSION_PATCH;
 
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MAJOR(version), major);
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MINOR(version), minor);
-    EXPECT_EQ(VMNL_NET_VERSION_GET_PATCH(version), patch);
+    EXPECT_EQ(VMNL_NET_VERSION_GET_MAJOR(version), (uint32_t) 0);
+    EXPECT_EQ(VMNL_NET_VERSION_GET_MINOR(version), (uint32_t) 2);
+    EXPECT_EQ(VMNL_NET_VERSION_GET_PATCH(version), (uint32_t) 0);
 }
 
-UTEST(vmnl_net_version, matches_the_string)
+UTEST(vmnl_net_version, matches_version_string)
 {
     const uint32_t version = vmnl_net_version();
-    char text[16];
+    char buffer[64] = {0};
 
-    snprintf(text, sizeof text, "%u.%u.%u", (unsigned) VMNL_NET_VERSION_GET_MAJOR(version), (unsigned) VMNL_NET_VERSION_GET_MINOR(version), (unsigned) VMNL_NET_VERSION_GET_PATCH(version));
-    EXPECT_STREQ(text, vmnl_net_version_string());
+    snprintf(buffer, sizeof buffer, "%d.%d.%d",
+             (int) VMNL_NET_VERSION_GET_MAJOR(version),
+             (int) VMNL_NET_VERSION_GET_MINOR(version),
+             (int) VMNL_NET_VERSION_GET_PATCH(version));
+    EXPECT_STREQ(buffer, vmnl_net_version_string());
 }
 
-UTEST(vmnl_net_version, unpacks_with_the_macros)
+UTEST(VMNL_NET_VERSION_GET_MAJOR, returns_major_number)
 {
-    const uint32_t version = UINT32_C(0x010203);
+    EXPECT_EQ(VMNL_NET_VERSION_GET_MAJOR(UINT32_C(0x010203)), UINT32_C(1));
+}
 
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MAJOR(version), UINT32_C(1));
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MINOR(version), UINT32_C(2));
-    EXPECT_EQ(VMNL_NET_VERSION_GET_PATCH(version), UINT32_C(3));
+UTEST(VMNL_NET_VERSION_GET_MINOR, returns_minor_number)
+{
+    EXPECT_EQ(VMNL_NET_VERSION_GET_MINOR(UINT32_C(0x010203)), UINT32_C(2));
+}
+
+UTEST(VMNL_NET_VERSION_GET_PATCH, returns_patch_number)
+{
+    EXPECT_EQ(VMNL_NET_VERSION_GET_PATCH(UINT32_C(0x010203)), UINT32_C(3));
 }
