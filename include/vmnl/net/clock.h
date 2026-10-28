@@ -7,13 +7,13 @@
  *
  * vmnl_net_clock_now() counts nanoseconds from an unspecified origin, vmnl_net_clock_elapsed() measures from one of its readings, and the constants convert them, all as uint64_t.
  *
- * \par Example
- * \code
- * uint64_t start = vmnl_net_clock_now();
+ * \par Measuring a duration
+ * \snippet{trimleft} example_clock_elapsed.c elapsed
  *
- * do_work();
- * printf("%" PRIu64 " ms\n", vmnl_net_clock_elapsed(start) / (VMNL_NET_NANOSECONDS_PER_SECOND / VMNL_NET_MILLISECONDS_PER_SECOND));
- * \endcode
+ * \par Checking a timeout
+ * \snippet{trimleft} example_clock_elapsed.c timeout
+ *
+ * \see \ref example_clock_elapsed.c
  * @{
  */
 
@@ -55,3 +55,8 @@ VMNL_NET_API uint64_t vmnl_net_clock_elapsed(uint64_t start);
 #endif /* !VMNL_NET_CLOCK_H */
 
 /** @} */
+
+/**
+ * \example example_clock_elapsed.c
+ * Measures a duration and checks a timeout with the monotonic clock.
+ */

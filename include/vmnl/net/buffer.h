@@ -41,28 +41,7 @@
  * Dynamic suits most uses: flat and ring keep a fixed memory, chunks grow without copying.
  *
  * \par Example
- * \code
- * VmnlNetError error;
- * VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_DYNAMIC, 0, &error);
- * VmnlNetBufferView view;
- * size_t nviews = 1;
- *
- * if (buffer == NULL) {
- *     printf("%s\n", vmnl_net_error_as_string(error)); // Cannot allocate memory
- *     return 1;
- * }
- * if (vmnl_net_buffer_prepare(buffer, 5, &view, &nviews, &error) == false) {
- *     printf("%s\n", vmnl_net_error_as_string(error)); // Cannot allocate memory
- *     vmnl_net_buffer_destroy(buffer);
- *     return 1;
- * }
- * memcpy(view.data, "hello", 5);                   // written in the free space
- * vmnl_net_buffer_commit(buffer, 5, NULL);         // "hello"
- * vmnl_net_buffer_data(buffer, 0, &view, &nviews); // view: "hello"
- * fwrite(view.data, 1, view.size, stdout);
- * vmnl_net_buffer_consume(buffer, 5, NULL);        // ""
- * vmnl_net_buffer_destroy(buffer);
- * \endcode
+ * Example to be written.
  * @{
  */
 

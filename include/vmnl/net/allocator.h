@@ -8,18 +8,7 @@
  * Every allocation of the library goes through one global allocator: malloc(), realloc() and free() until vmnl_net_allocator_set() replaces them.
  *
  * \par Example
- * \code
- * void *my_malloc(size_t size);
- * void *my_realloc(void *pointer, size_t size);
- * void my_free(void *pointer);
- *
- * int main(void)
- * {
- *     vmnl_net_allocator_set(my_malloc, my_realloc, my_free); // before any other call
- *     app_run();
- *     return 0;
- * }
- * \endcode
+ * Example to be written.
  * @{
  */
 

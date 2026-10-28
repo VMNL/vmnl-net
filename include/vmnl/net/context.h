@@ -8,16 +8,7 @@
  * A context holds the state shared by the objects of one thread, such as its timers.
  *
  * \par Example
- * \code
- * VmnlNetError error;
- * VmnlNetContext *context = vmnl_net_context_create(&error);
- *
- * if (context == NULL) {
- *     printf("%s\n", vmnl_net_error_as_string(error)); // Cannot allocate memory
- *     return 1;
- * }
- * vmnl_net_context_destroy(context);
- * \endcode
+ * Example to be written.
  * @{
  */
 

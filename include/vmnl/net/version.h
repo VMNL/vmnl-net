@@ -9,15 +9,7 @@
  * Before 1.0.0, a new minor version may break the API.
  *
  * \par Example
- * \code
- * uint32_t version = vmnl_net_version();
- *
- * printf("%s\n", vmnl_net_version_string());                      // 0.2.0
- * printf("%u\n", (unsigned) VMNL_NET_VERSION_GET_MINOR(version)); // 2
- * if (VMNL_NET_VERSION_GET_MAJOR(version) > 0 || VMNL_NET_VERSION_GET_MINOR(version) >= 2) {
- *     printf("0.2.0 or later\n");
- * }
- * \endcode
+ * Example to be written.
  * @{
  */
 

@@ -16,14 +16,7 @@
  * - A code keeps its value on every platform and in every version, and the value of a removed code is never reused.
  *
  * \par Example
- * \code
- * VmnlNetError error;
- *
- * if (vmnl_net_buffer_consume(buffer, 64, &error) == false) { // buffer holds less than 64 bytes
- *     printf("%s\n", vmnl_net_error_as_string(error));        // Invalid argument
- * }
- * vmnl_net_buffer_consume(buffer, 64, NULL);                  // fails too, without writing a code
- * \endcode
+ * Example to be written.
  * @{
  */
 
