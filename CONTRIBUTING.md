@@ -84,27 +84,48 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 
 ## Tests
 
-Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake, and the formatting check skips them.
+Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake, and follow the formatting of the library.
 
-- one file per public function, named like its source: `tests/<module>/<name>_tests.c`, listed in `tests/CMakeLists.txt`
+- one file per public function, named like its source, for the behavior every type shares: `tests/buffer/buffer_prepare_tests.c`
+- one file per type and public function, in a folder per type, for the behavior of that type only: `tests/buffer/ring/buffer_ring_prepare_tests.c`
+- the files listed in `tests/CMakeLists.txt`, and the helpers of a module in `tests/<module>/<module>_tests.h`
+- the C library comes from `utest.h`, which the tests do not include again
 - the generic containers, like the list and later a hash map or a dynamic array, are tested directly through their internal header, one file per function or macro: `tests/list/list_splice_tests.c`; the other internal functions are covered through the public ones
-- the suite is the name of the function or the macro: `vmnl_net_buffer_create`, `VMNL_NET_LIST_FOREACH`
-- each test says what the function does, in snake case, starting with a verb and without article: `creates_flat_buffer`, `rejects_zero_capacity`, `accepts_null_error`
-- the tests go from the nominal case to the properties, the limits, the allocation failures and the nullable parameters, the NULL error last
+- the suite is the name of the function or the macro, with the type for the behavior of one type: `vmnl_net_buffer_prepare`, `vmnl_net_buffer_ring_prepare`, `VMNL_NET_LIST_FOREACH`
+- the behavior every type shares runs once per type with `UTEST_I`, its index following the `types` of `tests/buffer/buffer_tests.h`: `vmnl_net_buffer_prepare.keeps_stored_bytes/1` is the ring buffer
+- each test says what the function does, `<verb>_<object>_<condition>`, in snake case, the verb first, without article, `vmnl_net` nor the type of the suite, the condition optional and starting with `when`, `with`, `without` or `after`: `returns_null_when_empty`, `prepares_two_views_when_free_space_wraps`
+- the recurring cases keep the same name:
+
+| Case | Name |
+| --- | --- |
+| Value returned | `returns_<value>`: `returns_zero_when_empty` |
+| Property kept | `keeps_<property>`: `keeps_stored_bytes` |
+| Documented no-op | `ignores_<argument>`: `ignores_zero_bytes` |
+| `VMNL_NET_EINVAL` | `rejects_<argument>`: `rejects_zero_capacity` |
+| `VMNL_NET_ENOTSUP` | `fails_as_unsupported` |
+| `VMNL_NET_ENOBUFS` | `fails_when_full`, `fails_with_more_than_free_space` |
+| `VMNL_NET_ENOMEM` | `fails_without_memory`, `fails_without_memory_for_<allocation>` |
+| NULL error | `accepts_null_error` |
+
+- the tests go from the nominal case to the properties, the limits, the errors and the nullable parameters, the NULL error last
+- the tests check the documented contract, not the implementation: a behavior without documentation is documented before it is tested
+- every documented limit is tested exactly at the limit and one past it: a capacity, the free space, the end of a chunk or of a block, an offset equal to the size
+- one behavior per test, with `ASSERT` for the steps that set the case up and `EXPECT` for what the test checks
+- the tests are independent: each one frees what it creates, its fixture resets the global state, and the `sanitize` preset runs them under AddressSanitizer and UndefinedBehaviorSanitizer
 - a `VmnlNetError` starts at `UINT32_MAX`, so the test proves the function writes it
-- a test that replaces the allocator restores the default one before its first `ASSERT`, since the test binary run on its own runs every test in the same process
+- a test that replaces the allocator restores the default one before its first `ASSERT`, or leaves it to the teardown of its fixture, which runs even after a failed `ASSERT`, since the test binary run on its own runs every test in the same process
 
 ```c
-UTEST(vmnl_net_buffer_create, creates_flat_buffer)
-{
-    const size_t capacity = 64;
-    VmnlNetError error = UINT32_MAX;
-    VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_FLAT, capacity, &error);
+BUFFER_FIXTURE_I(vmnl_net_buffer_consume, types, 16)
 
-    ASSERT_TRUE(buffer != NULL);
+UTEST_I(vmnl_net_buffer_consume, drops_first_bytes, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+
+    ASSERT_TRUE(append(utest_fixture->buffer, "hello"));
+    EXPECT_TRUE(vmnl_net_buffer_consume(utest_fixture->buffer, 2, &error));
     EXPECT_EQ(error, VMNL_NET_SUCCESS);
-    EXPECT_EQ(vmnl_net_buffer_capacity(buffer), capacity);
-    vmnl_net_buffer_destroy(buffer);
+    EXPECT_TRUE(data_equals(utest_fixture->buffer, "llo"));
 }
 ```
 

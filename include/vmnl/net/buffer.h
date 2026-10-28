@@ -90,6 +90,7 @@ typedef struct VmnlNetBuffer VmnlNetBuffer;
  * \brief Contiguous bytes in the memory of a buffer.
  * \attention A view does not own its bytes: they **MUST** not be freed, the buffer frees them with vmnl_net_buffer_destroy().
  * \attention A view **MUST** not be used after a call that modifies its buffer: the bytes may have moved, or been dropped.
+ * \remark The views returned by the buffer functions are never empty.
  */
 typedef struct VmnlNetBufferView {
     uint8_t *data; /*!< First byte. */
@@ -190,6 +191,7 @@ VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, const size_t cap
  * \return true on success, false otherwise.
  * \attention The return value **MUST** be checked: \p views describes nothing after a failure.
  * \remark The views describe at least \p nbytes, and as much free space as they can, so one recv() can receive more.
+ * \remark Describes no view, successfully, when \p nbytes is 0.
  * \remark Nothing is stored until vmnl_net_buffer_commit().
  */
 VMNL_NET_API VMNL_NET_NODISCARD bool vmnl_net_buffer_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);

@@ -9,6 +9,8 @@ file(GLOB_RECURSE format_files CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/src/*.c
     ${PROJECT_SOURCE_DIR}/src/*.h
     ${PROJECT_SOURCE_DIR}/bench/*.cpp
+    ${PROJECT_SOURCE_DIR}/tests/*.c
+    ${PROJECT_SOURCE_DIR}/tests/*.h
     ${PROJECT_SOURCE_DIR}/examples/*.c
 )
 
