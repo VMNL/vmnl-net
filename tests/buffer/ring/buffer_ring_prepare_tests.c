@@ -32,16 +32,16 @@ UTEST_F(vmnl_net_buffer_ring_prepare, prepares_two_views_when_free_space_wraps)
 
 UTEST_F(vmnl_net_buffer_ring_prepare, prepares_one_view_before_wrapped_bytes)
 {
-    VmnlNetBufferView views[2];
-    size_t nviews = 2;
+    VmnlNetBufferView view;
+    size_t nviews = 1;
 
     ASSERT_TRUE(append(utest_fixture->buffer, "abcdef"));
     ASSERT_TRUE(vmnl_net_buffer_consume(utest_fixture->buffer, 5, NULL));
     ASSERT_TRUE(append(utest_fixture->buffer, "ghij"));
-    EXPECT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, 3, views, &nviews, NULL));
+    EXPECT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, 3, &view, &nviews, NULL));
     EXPECT_EQ(nviews, (size_t) 1);
-    EXPECT_EQ(views[0].data, data_start(utest_fixture->buffer) - 3);
-    EXPECT_EQ(views[0].size, (size_t) 3);
+    EXPECT_EQ(view.data, data_start(utest_fixture->buffer) - 3);
+    EXPECT_EQ(view.size, (size_t) 3);
 }
 
 UTEST_F(vmnl_net_buffer_ring_prepare, writes_around_end_of_block)

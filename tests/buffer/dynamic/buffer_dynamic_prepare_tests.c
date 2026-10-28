@@ -81,3 +81,15 @@ UTEST_F(vmnl_net_buffer_dynamic_prepare, fails_without_memory)
     EXPECT_EQ(error, VMNL_NET_ENOMEM);
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), (size_t) 256);
 }
+
+UTEST_F(vmnl_net_buffer_dynamic_prepare, fails_without_memory_with_overflowing_size)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetBufferView view;
+    size_t nviews = 1;
+
+    ASSERT_TRUE(append(utest_fixture->buffer, "hello"));
+    EXPECT_FALSE(vmnl_net_buffer_prepare(utest_fixture->buffer, SIZE_MAX, &view, &nviews, &error));
+    EXPECT_EQ(error, VMNL_NET_ENOMEM);
+    EXPECT_TRUE(data_equals(utest_fixture->buffer, "hello"));
+}

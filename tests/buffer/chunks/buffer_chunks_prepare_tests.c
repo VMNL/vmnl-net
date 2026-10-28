@@ -89,6 +89,18 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, keeps_capacity_with_exactly_free_space)
     EXPECT_EQ(nviews, (size_t) 1);
 }
 
+UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_first_chunks_with_fewer_views)
+{
+    VmnlNetBufferView view;
+    size_t nviews = 1;
+
+    ASSERT_TRUE(append(utest_fixture->buffer, "abc"));
+    ASSERT_TRUE(vmnl_net_buffer_resize(utest_fixture->buffer, 3 * VMNL_NET_BUFFER_CHUNK_SIZE, NULL));
+    EXPECT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, 1, &view, &nviews, NULL));
+    EXPECT_EQ(nviews, (size_t) 1);
+    EXPECT_EQ(view.size, VMNL_NET_BUFFER_CHUNK_SIZE - 3);
+}
+
 UTEST_F(vmnl_net_buffer_chunks_prepare, rejects_too_few_views)
 {
     VmnlNetError error = UINT32_MAX;
@@ -109,4 +121,16 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, fails_without_memory)
     EXPECT_FALSE(vmnl_net_buffer_prepare(utest_fixture->buffer, 1, views, &nviews, &error));
     EXPECT_EQ(error, VMNL_NET_ENOMEM);
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), (size_t) 0);
+}
+
+UTEST_F(vmnl_net_buffer_chunks_prepare, fails_without_memory_with_overflowing_size)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetBufferView views[8];
+    size_t nviews = 8;
+
+    ASSERT_TRUE(append(utest_fixture->buffer, "hello"));
+    EXPECT_FALSE(vmnl_net_buffer_prepare(utest_fixture->buffer, SIZE_MAX, views, &nviews, &error));
+    EXPECT_EQ(error, VMNL_NET_ENOMEM);
+    EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), VMNL_NET_BUFFER_CHUNK_SIZE);
 }

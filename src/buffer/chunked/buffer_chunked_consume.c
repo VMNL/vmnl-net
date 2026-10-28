@@ -8,7 +8,7 @@ void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, const size_t nbytes)
     size_t chunk_consumed_bytes;
 
     while (nbytes_to_consume > 0) {
-        chunk = VMNL_NET_LIST_FRONT(&chunked_buffer->chunks, struct VmnlNetBufferChunk, link);
+        chunk = VMNL_NET_LIST_ENTRY(chunked_buffer->chunks.next, struct VmnlNetBufferChunk, link);
         chunk_consumed_bytes = (nbytes_to_consume < chunk->size) ? nbytes_to_consume : chunk->size;
         nbytes_to_consume -= chunk_consumed_bytes;
         buffer->size -= chunk_consumed_bytes;

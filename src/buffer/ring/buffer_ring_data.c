@@ -10,24 +10,18 @@ size_t vmnl_net_buffer_ring_data(const VmnlNetBuffer *buffer, const size_t offse
         return vmnl_net_buffer_flat_data(buffer, offset, views, nviews);
     }
     if (offset >= wrap_offset) {
-        views[0] = (VmnlNetBufferView) {
-            .data = contiguous_buffer->pointer + (offset - wrap_offset),
-            .size = nbytes,
-        };
+        views[0].data = contiguous_buffer->pointer + (offset - wrap_offset);
+        views[0].size = nbytes;
         *nviews = 1;
         return nbytes;
     }
-    views[0] = (VmnlNetBufferView) {
-        .data = contiguous_buffer->pointer + contiguous_buffer->offset + offset,
-        .size = wrap_offset - offset,
-    };
+    views[0].data = contiguous_buffer->pointer + contiguous_buffer->offset + offset;
+    views[0].size = wrap_offset - offset;
     if (*nviews == 1) {
         return views[0].size;
     }
-    views[1] = (VmnlNetBufferView) {
-        .data = contiguous_buffer->pointer,
-        .size = nbytes - views[0].size,
-    };
+    views[1].data = contiguous_buffer->pointer;
+    views[1].size = nbytes - views[0].size;
     *nviews = 2;
     return nbytes;
 }

@@ -45,6 +45,7 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 | --- | --- | --- |
 | Type | `VmnlNet<Name>` | `VmnlNetBuffer` |
 | Function | `vmnl_net_<module>_<action>` | `vmnl_net_buffer_create` |
+| Static function | `<action>`, without the prefix | `count_needed_views` |
 | Macro | `VMNL_NET_<NAME>` | `VMNL_NET_EINVAL` |
 | Predicate | `vmnl_net_<module>_is_<state>` | `vmnl_net_buffer_is_empty` |
 | Conversion | `vmnl_net_<module>_as_<type>` | `vmnl_net_error_as_string` |

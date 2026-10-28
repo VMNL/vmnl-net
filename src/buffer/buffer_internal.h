@@ -34,6 +34,16 @@ extern "C" {
 #endif
 
 /**
+ * \brief Factor a dynamic buffer grows its capacity by, when it lacks room.
+ */
+#define VMNL_NET_BUFFER_REALLOCATION_FACTOR 1.5
+
+/**
+ * \brief Capacity a dynamic buffer grows to at least, so that small writes do not reallocate at each byte.
+ */
+#define VMNL_NET_BUFFER_MINIMUM_CAPACITY ((size_t) 256)
+
+/**
  * \brief Bytes of every chunk of a chunked buffer, until the chunks come from a pool of the context.
  */
 #define VMNL_NET_BUFFER_CHUNK_SIZE ((size_t) 16384)
@@ -227,6 +237,8 @@ void vmnl_net_buffer_ring_consume(VmnlNetBuffer *buffer, const size_t nbytes);
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
  * - #VMNL_NET_ENOBUFS: the free space is less than \p nbytes.
  * \return true on success, false otherwise.
+ * \remark Never moves the stored bytes: when they wrap around or reach the end of the block, the free space lies before them, in one view.
+ * \remark Otherwise the free space runs from the stored bytes to the end of the block, then from the index 0 to the first stored byte: two views, or one when \p views has one element and the first part holds \p nbytes.
  */
 bool vmnl_net_buffer_ring_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 
@@ -271,9 +283,10 @@ bool vmnl_net_buffer_dynamic_shrink(VmnlNetBuffer *buffer, const size_t capacity
  * \param nviews Number of elements of \p views on input, 1 on output.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p nviews is 0.
- * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * - #VMNL_NET_ENOMEM: memory allocation failure, or the stored bytes and \p nbytes count past SIZE_MAX.
  * \return true on success, false otherwise.
  * \remark Grows only when moving the stored bytes to the front leaves too little room, to 1.5 times its capacity, or to the bytes needed if more, and to 256 bytes at least.
+ * \remark Grows before moving the stored bytes: the reallocation copies the block anyway, and the room it adds may spare the move.
  */
 bool vmnl_net_buffer_dynamic_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 
@@ -344,9 +357,11 @@ void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, const size_t nbytes)
  * \param nviews Number of elements of \p views on input, number of views filled on output.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
- * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * - #VMNL_NET_ENOMEM: memory allocation failure, or the capacity and \p nbytes count past SIZE_MAX.
  * \return true on success, false otherwise.
  * \remark Starts at commit_tail, or at the first chunk when the buffer is empty: the room after its stored bytes, then the empty chunks after it.
+ * \remark Counts the views needed in O(1) before adding any chunk, the chunks after commit_tail being empty, so a failure leaves the buffer as it was.
+ * \remark Skips commit_tail when it is full: a view is never empty.
  */
 bool vmnl_net_buffer_chunked_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 

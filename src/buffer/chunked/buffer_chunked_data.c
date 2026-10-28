@@ -16,10 +16,8 @@ size_t vmnl_net_buffer_chunked_data(const VmnlNetBuffer *buffer, const size_t of
             nbytes_to_skip -= chunk->size;
             continue;
         }
-        views[written_views] = (VmnlNetBufferView) {
-            .data = chunk->bytes + chunk->offset + nbytes_to_skip,
-            .size = chunk->size - nbytes_to_skip,
-        };
+        views[written_views].data = chunk->bytes + chunk->offset + nbytes_to_skip;
+        views[written_views].size = chunk->size - nbytes_to_skip;
         nbytes += views[written_views].size;
         nbytes_to_skip = 0;
         written_views++;

@@ -30,6 +30,14 @@ UTEST_F(vmnl_net_buffer_chunks_commit, continues_in_next_chunk_after_filling_one
     EXPECT_EQ(memcmp(views[0].data, "abc", 3), 0);
 }
 
+UTEST_F(vmnl_net_buffer_chunks_commit, rejects_bytes_without_chunk)
+{
+    VmnlNetError error = UINT32_MAX;
+
+    EXPECT_FALSE(vmnl_net_buffer_commit(utest_fixture->buffer, 1, &error));
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
+}
+
 UTEST_F(vmnl_net_buffer_chunks_commit, rejects_consumed_space_of_first_chunk)
 {
     VmnlNetError error = UINT32_MAX;
