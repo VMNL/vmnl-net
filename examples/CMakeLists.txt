@@ -1,4 +1,4 @@
-foreach(example buffer_dynamic buffer_ring buffer_view clock_elapsed context_allocator error_handling timer_loop)
+foreach(example clock_elapsed)
     add_executable(vmnl_net_example_${example} example_${example}.c)
 
     target_link_libraries(vmnl_net_example_${example}
