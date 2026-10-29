@@ -46,7 +46,7 @@
  * Keep it in a chunked buffer, or in a ring buffer never resized: flat and dynamic buffers move their stored bytes, and resizing leaves a copy of them in the memory it frees, out of reach of the views.
  *
  * \par Example
- * Example to be written.
+ * \snippet{trimleft} example_buffer_read_write.c read_write
  * @{
  */
 
@@ -242,3 +242,8 @@ VMNL_NET_API void vmnl_net_buffer_destroy(VmnlNetBuffer *buffer);
 #endif /* !VMNL_NET_BUFFER_H */
 
 /** @} */
+
+/**
+ * \example example_buffer_read_write.c
+ * Writes bytes into a buffer, then reads and drops them.
+ */
