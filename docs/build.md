@@ -25,3 +25,5 @@ Several presets of `CMakePresets.json` build and check the library, each run fro
 | `format-check` | Checks the formatting, like the CI | All |
 
 `cmake --list-presets=all` lists them with the names shown in the IDEs.
+
+To add the internal headers to the documentation, configure the `docs` preset with `-DVMNL_NET_BUILD_DOCS_INTERNAL=ON`, then build it with `cmake --build --preset docs`.

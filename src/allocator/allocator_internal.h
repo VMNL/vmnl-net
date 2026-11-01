@@ -1,17 +1,6 @@
 /**
  * \file allocator_internal.h
  * \brief Global allocator of the library.
- *
- * \par Example
- * \code
- * VmnlNetContext *context = vmnl_net_allocator.allocate(sizeof *context);
- *
- * if (context == NULL) {
- *     vmnl_net_error_set(error, VMNL_NET_ENOMEM);
- *     return NULL;
- * }
- * vmnl_net_allocator.deallocate(context);
- * \endcode
  */
 
 /**
