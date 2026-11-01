@@ -7,7 +7,7 @@ UTEST(vmnl_net_version, returns_current_version)
     uint32_t version = vmnl_net_version();
 
     EXPECT_EQ(VMNL_NET_VERSION_MAJOR(version), (uint32_t) 0);
-    EXPECT_EQ(VMNL_NET_VERSION_MINOR(version), (uint32_t) 2);
+    EXPECT_EQ(VMNL_NET_VERSION_MINOR(version), (uint32_t) 3);
     EXPECT_EQ(VMNL_NET_VERSION_PATCH(version), (uint32_t) 0);
 }
 

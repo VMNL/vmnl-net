@@ -18,9 +18,20 @@ target_sources(vmnl_net_tests
     error/error_as_string_tests.c
     allocator/allocator_set_tests.c
     context/context_create_tests.c
+    context/context_remaining_tests.c
+    context/context_advance_tests.c
     context/context_destroy_tests.c
     clock/clock_now_tests.c
     clock/clock_elapsed_tests.c
+    timer/timer_create_tests.c
+    timer/timer_is_active_tests.c
+    timer/timer_interval_tests.c
+    timer/timer_remaining_tests.c
+    timer/timer_set_callback_tests.c
+    timer/timer_set_interval_tests.c
+    timer/timer_start_tests.c
+    timer/timer_stop_tests.c
+    timer/timer_destroy_tests.c
     list/list_entry_tests.c
     list/list_front_tests.c
     list/list_back_tests.c
@@ -76,7 +87,7 @@ target_sources(vmnl_net_tests
 )
 
 target_include_directories(vmnl_net_tests SYSTEM PRIVATE ${utest_SOURCE_DIR})
-target_include_directories(vmnl_net_tests PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_include_directories(vmnl_net_tests PRIVATE ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/tests)
 
 target_link_libraries(vmnl_net_tests
   PRIVATE
