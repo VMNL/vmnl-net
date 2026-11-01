@@ -47,8 +47,8 @@ target_sources(vmnl_net_tests
     buffer/buffer_shrink_tests.c
     buffer/buffer_prepare_tests.c
     buffer/buffer_commit_tests.c
-    buffer/buffer_consume_tests.c
     buffer/buffer_data_tests.c
+    buffer/buffer_consume_tests.c
     buffer/buffer_destroy_tests.c
     buffer/flat/buffer_flat_create_tests.c
     buffer/flat/buffer_flat_resize_tests.c
@@ -60,8 +60,8 @@ target_sources(vmnl_net_tests
     buffer/ring/buffer_ring_shrink_tests.c
     buffer/ring/buffer_ring_prepare_tests.c
     buffer/ring/buffer_ring_commit_tests.c
-    buffer/ring/buffer_ring_consume_tests.c
     buffer/ring/buffer_ring_data_tests.c
+    buffer/ring/buffer_ring_consume_tests.c
     buffer/dynamic/buffer_dynamic_create_tests.c
     buffer/dynamic/buffer_dynamic_resize_tests.c
     buffer/dynamic/buffer_dynamic_shrink_tests.c
@@ -71,8 +71,8 @@ target_sources(vmnl_net_tests
     buffer/chunked/buffer_chunked_shrink_tests.c
     buffer/chunked/buffer_chunked_prepare_tests.c
     buffer/chunked/buffer_chunked_commit_tests.c
-    buffer/chunked/buffer_chunked_consume_tests.c
     buffer/chunked/buffer_chunked_data_tests.c
+    buffer/chunked/buffer_chunked_consume_tests.c
 )
 
 target_include_directories(vmnl_net_tests SYSTEM PRIVATE ${utest_SOURCE_DIR})
