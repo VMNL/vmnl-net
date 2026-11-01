@@ -81,7 +81,8 @@
       "displayName": "Documentation",
       "inherits": "release",
       "cacheVariables": {
-        "VMNL_NET_BUILD_DOCS": "ON"
+        "VMNL_NET_BUILD_DOCS": "ON",
+        "VMNL_NET_BUILD_DOCS_INTERNAL": "OFF"
       }
     }
   ],

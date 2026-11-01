@@ -1,4 +1,6 @@
-/* Mermaid diagrams take the colors of the page, so they read in light and dark mode */
+#projectlogo img {
+    height: 55px;
+}
 
 pre.mermaid svg .node rect,
 pre.mermaid svg .node circle,
