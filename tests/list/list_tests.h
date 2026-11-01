@@ -8,13 +8,21 @@
 
 #include "list/list_internal.h"
 
-/** \brief Structure linked in the lists of the tests. */
+/**
+ * \brief Structure linked in the lists of the tests.
+ */
 struct Player {
-    struct VmnlNetListLink link;
-    int id;
+    struct VmnlNetListLink link; /*!< Link in a list. */
+    int id; /*!< Identifier checked by list_equals(). */
 };
 
-/** \brief Checks that \p head links the players of \p ids in order, forwards and backwards. */
+/**
+ * \brief Checks the players of a list.
+ * \param head Head of the list.
+ * \param ids Expected identifiers, in order.
+ * \param nids Number of elements of \p ids.
+ * \return true if \p head links the players of \p ids in order, forwards and backwards, false otherwise.
+ */
 static inline bool list_equals(const struct VmnlNetListLink *head, const int *ids, size_t nids)
 {
     const struct VmnlNetListLink *link = head;
