@@ -28,7 +28,7 @@ extern "C" {
  * \param allocate Replacement of malloc().
  * \param reallocate Replacement of realloc().
  * \param deallocate Replacement of free().
- * \attention The 3 functions **MUST** not be NULL: the library calls them without checking.
+ * \attention The 3 functions **MUST** not be NULL: NULL does not restore the default allocator, see the remark.
  * \attention It **MUST** be called before any other function, or once no object is alive: an object allocated by the previous allocator would be freed by the new one.
  * \attention It **MUST** be called while no other thread uses the library: the allocator is a global variable, written without lock.
  * \attention The functions **MUST** be thread-safe and keep the contract of their standard counterpart, alignment included: the library stores any type in the memory they return.

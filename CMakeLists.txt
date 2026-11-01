@@ -52,63 +52,63 @@ target_sources(vmnl_net
         src/allocator/allocator_set.c
         src/context/context_create.c
         src/context/context_destroy.c
-        src/clock/clock_elapsed.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/clock_now.c>
         $<$<PLATFORM_ID:Windows>:src/clock/win32/clock_now.c>
+        src/clock/clock_elapsed.c
         # src/timer/timer_create.c
         # src/timer/timer_destroy.c
         # src/timer/timer_remaining.c
         # src/timer/timer_start.c
         # src/timer/timer_stop.c
         # src/timer/timer_update.c
-        src/buffer/buffer_capacity.c
-        src/buffer/buffer_clear.c
-        src/buffer/buffer_commit.c
-        src/buffer/buffer_consume.c
         src/buffer/buffer_create.c
-        src/buffer/buffer_data.c
-        src/buffer/buffer_destroy.c
+        src/buffer/buffer_size.c
+        src/buffer/buffer_capacity.c
         src/buffer/buffer_is_empty.c
-        src/buffer/buffer_prepare.c
+        src/buffer/buffer_clear.c
         src/buffer/buffer_resize.c
         src/buffer/buffer_shrink.c
-        src/buffer/buffer_size.c
-        src/buffer/chunked/buffer_chunked_clear.c
-        src/buffer/chunked/buffer_chunked_commit.c
-        src/buffer/chunked/buffer_chunked_consume.c
-        src/buffer/chunked/buffer_chunked_create.c
-        src/buffer/chunked/buffer_chunked_data.c
-        src/buffer/chunked/buffer_chunked_destroy.c
-        src/buffer/chunked/buffer_chunked_prepare.c
-        src/buffer/chunked/buffer_chunked_resize.c
-        src/buffer/chunked/buffer_chunked_shrink.c
-        src/buffer/contiguous/buffer_contiguous_clear.c
+        src/buffer/buffer_prepare.c
+        src/buffer/buffer_commit.c
+        src/buffer/buffer_data.c
+        src/buffer/buffer_consume.c
+        src/buffer/buffer_destroy.c
         src/buffer/contiguous/buffer_contiguous_create.c
+        src/buffer/contiguous/buffer_contiguous_clear.c
         src/buffer/contiguous/buffer_contiguous_destroy.c
-        src/buffer/dynamic/buffer_dynamic_prepare.c
-        src/buffer/dynamic/buffer_dynamic_resize.c
-        src/buffer/dynamic/buffer_dynamic_shrink.c
-        src/buffer/flat/buffer_flat_commit.c
-        src/buffer/flat/buffer_flat_consume.c
         src/buffer/flat/buffer_flat_create.c
-        src/buffer/flat/buffer_flat_data.c
         src/buffer/flat/buffer_flat_prepare.c
-        src/buffer/ring/buffer_ring_commit.c
-        src/buffer/ring/buffer_ring_consume.c
-        src/buffer/ring/buffer_ring_data.c
-        src/buffer/ring/buffer_ring_prepare.c
+        src/buffer/flat/buffer_flat_commit.c
+        src/buffer/flat/buffer_flat_data.c
+        src/buffer/flat/buffer_flat_consume.c
         src/buffer/ring/buffer_ring_resize.c
         src/buffer/ring/buffer_ring_shrink.c
+        src/buffer/ring/buffer_ring_prepare.c
+        src/buffer/ring/buffer_ring_commit.c
+        src/buffer/ring/buffer_ring_data.c
+        src/buffer/ring/buffer_ring_consume.c
+        src/buffer/dynamic/buffer_dynamic_resize.c
+        src/buffer/dynamic/buffer_dynamic_shrink.c
+        src/buffer/dynamic/buffer_dynamic_prepare.c
+        src/buffer/chunked/buffer_chunked_create.c
+        src/buffer/chunked/buffer_chunked_clear.c
+        src/buffer/chunked/buffer_chunked_resize.c
+        src/buffer/chunked/buffer_chunked_shrink.c
+        src/buffer/chunked/buffer_chunked_prepare.c
+        src/buffer/chunked/buffer_chunked_commit.c
+        src/buffer/chunked/buffer_chunked_data.c
+        src/buffer/chunked/buffer_chunked_consume.c
+        src/buffer/chunked/buffer_chunked_destroy.c
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS include ${PROJECT_BINARY_DIR}/include
         FILES
             ${PROJECT_BINARY_DIR}/include/vmnl/net_api.h
             include/vmnl/net/attribute.h
-            include/vmnl/net/context.h
             include/vmnl/net/version.h
             include/vmnl/net/error.h
             include/vmnl/net/allocator.h
+            include/vmnl/net/context.h
             include/vmnl/net/clock.h
             # include/vmnl/net/timer.h
             include/vmnl/net/buffer.h
@@ -133,9 +133,9 @@ target_compile_features(vmnl_net PUBLIC c_std_11)
 target_compile_definitions(vmnl_net
   PRIVATE
     VMNL_NET_VERSION="${PROJECT_VERSION}"
-    VMNL_NET_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
-    VMNL_NET_VERSION_MINOR=${PROJECT_VERSION_MINOR}
-    VMNL_NET_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+    VMNL_NET_PROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+    VMNL_NET_PROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+    VMNL_NET_PROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH}
     $<$<NOT:$<PLATFORM_ID:Windows>>:_POSIX_C_SOURCE=200809L>
     $<$<PLATFORM_ID:Windows>:WIN32_LEAN_AND_MEAN>
 )

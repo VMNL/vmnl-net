@@ -1,7 +1,5 @@
 # Testing
 
-This page describes how the library is tested and measured.
-
 ## Tests
 
 Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake, and follow the formatting of the library.
@@ -10,7 +8,7 @@ Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake, and 
 - one file per type and public function, in a folder per type, for the behavior of that type only: `tests/buffer/ring/buffer_ring_prepare_tests.c`
 - the files listed in `tests/CMakeLists.txt`, and the helpers of a module in `tests/<module>/<module>_tests.h`
 - the C library comes from `utest.h`, which the tests do not include again
-- the generic containers, like the list and later a hash map or a dynamic array, are tested directly through their internal header, one file per function or macro: `tests/list/list_splice_tests.c`; the other internal functions are covered through the public ones
+- the generic containers, like the list, are tested directly through their internal header, one file per function or macro: `tests/list/list_splice_tests.c`; the other internal functions are covered through the public ones
 - the suite is the name of the function or the macro, with the type for the behavior of one type: `vmnl_net_buffer_prepare`, `vmnl_net_buffer_ring_prepare`, `VMNL_NET_LIST_FOREACH`
 - the behavior every type shares runs once per type with `UTEST_I`, its index following the `types` of `tests/buffer/buffer_tests.h`: `vmnl_net_buffer_prepare.keeps_stored_bytes/1` is the ring buffer
 - each test says what the function does, `<verb>_<object>_<condition>`, in snake case, the verb first, without article, `vmnl_net` nor the type of the suite, the condition optional and starting with `when`, `with`, `without` or `after`: `returns_null_when_empty`, `prepares_two_views_when_free_space_wraps`
@@ -33,7 +31,8 @@ Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake, and 
 - one behavior per test, with `ASSERT` for the steps that set the case up and `EXPECT` for what the test checks
 - the tests are independent: each one frees what it creates, its fixture resets the global state, and the `sanitize` preset runs them under AddressSanitizer and UndefinedBehaviorSanitizer
 - a `VmnlNetError` starts at `UINT32_MAX`, so the test proves the function writes it
-- a test that replaces the allocator restores the default one before its first `ASSERT`, or leaves it to the teardown of its fixture, which runs even after a failed `ASSERT`, since the test binary run on its own runs every test in the same process
+- a test that replaces the allocator restores the default one before its first `ASSERT`, or lets the teardown of its fixture do it
+- the teardown runs even after a failed `ASSERT`, which matters because every test runs in the same process
 
 ```c
 BUFFER_FIXTURE_I(vmnl_net_buffer_consume, types, 16)

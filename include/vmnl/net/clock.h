@@ -36,7 +36,7 @@ extern "C" {
  * \brief Gets the current time of a monotonic clock.
  * \return Nanoseconds since an unspecified origin.
  * \remark Only the difference between two calls is meaningful: the clock never goes back, unlike the wall clock.
- * \remark Read with clock_gettime(), CLOCK_BOOTTIME when available and CLOCK_MONOTONIC otherwise, and with QueryPerformanceCounter() on Windows. Thread-safe.
+ * \remark Keeps counting while the machine is asleep, on Linux, macOS and Windows. Thread-safe.
  */
 VMNL_NET_API uint64_t vmnl_net_clock_now(void);
 

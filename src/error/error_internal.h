@@ -1,14 +1,6 @@
 /**
  * \file error_internal.h
  * \brief Internal helpers of the error codes.
- *
- * \par Example
- * \code
- * if (nbytes > buffer->size) {
- *     vmnl_net_error_set(error, VMNL_NET_EINVAL);
- *     return false;
- * }
- * \endcode
  */
 
 /**

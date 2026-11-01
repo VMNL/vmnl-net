@@ -28,7 +28,7 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 ## Errors and NULL
 
 - a function that can fail takes a nullable `VmnlNetError *error` last, sets it on every call, and tells the failure through its return value
-- NULL is accepted only where it means something: an `error` the caller does not read, a `user_data` it does not need, or nothing to destroy
+- NULL is accepted only where it means something: an `error` the caller does not read, a `data` it does not need, or nothing to destroy
 - any other pointer is used without check, like `strlen(NULL)` in the libc, so a NULL one is a bug of the caller
 
 ## Not checked by clang-format
@@ -48,6 +48,8 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 - short and technical, with snippets that compile
 - in the public headers, the operation as the caller sees it: what it does, its parameters, its errors and its conditions of use, said once, without implementation detail
 - in the internal headers, the contract of the implementation: what the public function already checked, what the operation must do and keep true, the cases it must handle, and the details the next developer needs
+- each fact said once on a page, not repeated by a remark, a table or the documentation of a type
+- in the public headers, the behavior the caller can rely on, not the system call behind it, and no number copied from an internal constant nor any plan for later, which would go stale
 - `nullable` for optional pointers
 - the error codes listed under the `error` parameter
 - the contracts in `\attention`, with `**MUST**` and a short reason

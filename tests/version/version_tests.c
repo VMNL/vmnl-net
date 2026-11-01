@@ -6,9 +6,9 @@ UTEST(vmnl_net_version, returns_current_version)
 {
     uint32_t version = vmnl_net_version();
 
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MAJOR(version), (uint32_t) 0);
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MINOR(version), (uint32_t) 2);
-    EXPECT_EQ(VMNL_NET_VERSION_GET_PATCH(version), (uint32_t) 0);
+    EXPECT_EQ(VMNL_NET_VERSION_MAJOR(version), (uint32_t) 0);
+    EXPECT_EQ(VMNL_NET_VERSION_MINOR(version), (uint32_t) 2);
+    EXPECT_EQ(VMNL_NET_VERSION_PATCH(version), (uint32_t) 0);
 }
 
 UTEST(vmnl_net_version, matches_version_string)
@@ -17,23 +17,23 @@ UTEST(vmnl_net_version, matches_version_string)
     char buffer[64] = {0};
 
     snprintf(buffer, sizeof buffer, "%d.%d.%d",
-             (int) VMNL_NET_VERSION_GET_MAJOR(version),
-             (int) VMNL_NET_VERSION_GET_MINOR(version),
-             (int) VMNL_NET_VERSION_GET_PATCH(version));
+             (int) VMNL_NET_VERSION_MAJOR(version),
+             (int) VMNL_NET_VERSION_MINOR(version),
+             (int) VMNL_NET_VERSION_PATCH(version));
     EXPECT_STREQ(buffer, vmnl_net_version_string());
 }
 
-UTEST(VMNL_NET_VERSION_GET_MAJOR, returns_major_number)
+UTEST(VMNL_NET_VERSION_MAJOR, returns_major_number)
 {
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MAJOR(UINT32_C(0x010203)), UINT32_C(1));
+    EXPECT_EQ(VMNL_NET_VERSION_MAJOR(UINT32_C(0x010203)), UINT32_C(1));
 }
 
-UTEST(VMNL_NET_VERSION_GET_MINOR, returns_minor_number)
+UTEST(VMNL_NET_VERSION_MINOR, returns_minor_number)
 {
-    EXPECT_EQ(VMNL_NET_VERSION_GET_MINOR(UINT32_C(0x010203)), UINT32_C(2));
+    EXPECT_EQ(VMNL_NET_VERSION_MINOR(UINT32_C(0x010203)), UINT32_C(2));
 }
 
-UTEST(VMNL_NET_VERSION_GET_PATCH, returns_patch_number)
+UTEST(VMNL_NET_VERSION_PATCH, returns_patch_number)
 {
-    EXPECT_EQ(VMNL_NET_VERSION_GET_PATCH(UINT32_C(0x010203)), UINT32_C(3));
+    EXPECT_EQ(VMNL_NET_VERSION_PATCH(UINT32_C(0x010203)), UINT32_C(3));
 }

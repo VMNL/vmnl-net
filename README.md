@@ -290,8 +290,6 @@ Each version keeps its target month, and gets its release date once it is implem
 ## References
 
 The papers and articles the library is built on, in roadmap order.
-Most of them describe old and proven designs, so about once a month I check what changed around them: a new system API, the same design done in another language, or a flaw found in a similar library.
-When a source changes a decision, the issue of that decision cites it.
 
 ### Buffers (0.2.0, 0.3.0)
 

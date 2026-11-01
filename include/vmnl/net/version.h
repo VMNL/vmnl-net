@@ -28,23 +28,23 @@ extern "C" {
  * \brief Gets the major number of a packed version.
  * \param version Version packed like vmnl_net_version().
  */
-#define VMNL_NET_VERSION_GET_MAJOR(version) ((version) >> 16 & 0xFF)
+#define VMNL_NET_VERSION_MAJOR(version) ((version) >> 16 & 0xFF)
 
 /**
  * \brief Gets the minor number of a packed version.
  * \param version Version packed like vmnl_net_version().
  */
-#define VMNL_NET_VERSION_GET_MINOR(version) ((version) >> 8 & 0xFF)
+#define VMNL_NET_VERSION_MINOR(version) ((version) >> 8 & 0xFF)
 
 /**
  * \brief Gets the patch number of a packed version.
  * \param version Version packed like vmnl_net_version().
  */
-#define VMNL_NET_VERSION_GET_PATCH(version) ((version) & 0xFF)
+#define VMNL_NET_VERSION_PATCH(version) ((version) & 0xFF)
 
 /**
  * \brief Gets the version of the library.
- * \return Version as (MAJOR << 16) | (MINOR << 8) | PATCH.
+ * \return Packed version.
  * \remark Each number takes 8 bits, up to 255.
  */
 VMNL_NET_API uint32_t vmnl_net_version(void);

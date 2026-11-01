@@ -1,6 +1,5 @@
 # Contributing
 
-This page describes what a change brings and how to propose it, with the guides of the repository.
 Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Guides
