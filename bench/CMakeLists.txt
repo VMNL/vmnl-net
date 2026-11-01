@@ -35,8 +35,8 @@ target_sources(vmnl_net_benchmarks
     allocator/allocator_set_benchmarks.cpp
     context/context_create_benchmarks.cpp
     context/context_destroy_benchmarks.cpp
-    clock/clock_elapsed_benchmarks.cpp
     clock/clock_now_benchmarks.cpp
+    clock/clock_elapsed_benchmarks.cpp
 )
 
 target_link_libraries(vmnl_net_benchmarks
