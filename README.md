@@ -130,7 +130,7 @@ block-beta
         FLAT["<sup>0.3</sup> flat"]
         RING["<sup>0.2</sup> ring"]
         DYNAMIC["<sup>0.2</sup> dynamic"]
-        CHUNKS["<sup>0.3</sup> chunks"]
+        CHUNKED["<sup>0.3</sup> chunked"]
         space:5
     end
 
@@ -177,7 +177,7 @@ block-beta
     BUFFER --> FLAT
     BUFFER --> DYNAMIC
     BUFFER --> RING
-    BUFFER --> CHUNKS
+    BUFFER --> CHUNKED
     POLL -.-> CONTEXT
     TIMER -.-> CONTEXT
     TIMER -.-> CLOCK
@@ -186,8 +186,8 @@ block-beta
     FLAT --> ALLOCATOR
     DYNAMIC --> ALLOCATOR
     RING --> ALLOCATOR
-    CHUNKS --> ALLOCATOR
-    CHUNKS --> LIST
+    CHUNKED --> ALLOCATOR
+    CHUNKED --> LIST
 
     classDef title fill:none,stroke:none
     classDef planned fill:none,stroke-dasharray: 4 3
@@ -235,7 +235,7 @@ cmake --install build/release --config Release --prefix <prefix>
 The `release` preset builds the static library in Release.
 For the shared library, configure it with `cmake --preset release -DBUILD_SHARED_LIBS=ON`, then build it with `cmake --build --preset release`.
 Added to another CMake project with `add_subdirectory` or `FetchContent`, the library generates no install rules unless `VMNL_NET_INSTALL` is `ON`.
-The other presets, for the tests, the sanitizers, the coverage, the benchmarks and the documentation, are listed in [CONTRIBUTING.md](CONTRIBUTING.md).
+The other presets, for the tests, the sanitizers, the coverage, the benchmarks and the documentation, are listed in [docs/build.md](docs/build.md).
 
 ### Using the library
 
@@ -277,7 +277,7 @@ Each version keeps its target month, and gets its release date once it is implem
 | --- | --- | --- | --- |
 | `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | October 4, 2026 |
 | `0.2.0` | Dynamic and ring byte buffers; monotonic clock and application-driven timers | November 2026 | October 11, 2026 |
-| `0.3.0` | Flat and chunked buffers, reworked buffer API; non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 |  |
+| `0.3.0` | Flat and chunked buffers, reworked buffer API and timers; non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 |  |
 | `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 |  |
 | `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgments and retransmission, round-trip time and packet loss statistics | March 2027 |  |
 | `0.6.0` | Polling for many sockets with WSAPoll, kqueue or epoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 |  |
@@ -293,16 +293,18 @@ The papers and articles the library is built on, in roadmap order.
 Most of them describe old and proven designs, so about once a month I check what changed around them: a new system API, the same design done in another language, or a flaw found in a similar library.
 When a source changes a decision, the issue of that decision cites it.
 
-### Buffers (0.2.0)
+### Buffers (0.2.0, 0.3.0)
 
-- [Dynamic buffer requirements](https://www.boost.org/doc/libs/latest/doc/html/boost_asio/reference/DynamicBuffer_v1.html) of Boost.Asio and [Networking TS changes to enable better DynamicBuffer composition](https://open-std.org/jtc1/sc22/WG21/docs/papers/2020/p1790r1.html) by Christopher Kohlhoff (WG21, 2020): the prepare, commit, data and consume model, the offset reads of its version 2, and the copy problem behind it, which a C handle does not have.
+- [Dynamic buffer requirements](https://www.boost.org/doc/libs/latest/doc/html/boost_asio/reference/DynamicBuffer_v2.html) of Boost.Asio and [Networking TS changes to enable better DynamicBuffer composition](https://open-std.org/jtc1/sc22/WG21/docs/papers/2020/p1790r1.html) by Christopher Kohlhoff (WG21, 2020): the prepare, commit, data and consume model, the offset reads of its version 2, and the copy problem behind it, which a C handle does not have.
 - [ByteBuf](https://netty.io/4.1/api/io/netty/buffer/ByteBuf.html) of Netty: the same model in Java, with reader and writer indices, and an explicit compaction that the library does in prepare().
+- [basic_multi_buffer](https://www.boost.org/doc/libs/latest/libs/beast/doc/html/beast/ref/boost__beast__basic_multi_buffer.html) of Boost.Beast: the same model over a list of blocks, which grows without copying its bytes, like the chunked buffer.
 - [The Growth Factor Debate: 1.5x, 2x, or Something Else?](https://pablogs.dev/posts/growth-factor-dynamic-array-1.5-vs-2/) by pablo (2026): why the dynamic buffer grows by 1.5 rather than 2.
 
-### Timers (0.2.0)
+### Timers (0.2.0, 0.3.0)
 
 - [Hashed and Hierarchical Timing Wheels](http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf) by George Varghese and Tony Lauck (SOSP, 1987): the timer wheels I compare with the sorted list and the heap.
 - [Reinventing the timer wheel](https://lwn.net/Articles/646950/) by Jonathan Corbet (LWN, 2015): how Linux removed the cascading from its timer wheel, trading accuracy for timeouts that are almost always canceled before they expire.
+- [The high-resolution timer API](https://lwn.net/Articles/167897/) by Jonathan Corbet (LWN, 2006): the timers of Linux that must not run late, kept in a red-black tree, whose periodic ones count the periods they missed, and which a cancel cannot stop while their callback runs.
 
 ### Sockets (0.3.0)
 
