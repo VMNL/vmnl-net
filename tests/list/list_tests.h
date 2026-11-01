@@ -15,7 +15,7 @@ struct Player {
 };
 
 /** \brief Checks that \p head links the players of \p ids in order, forwards and backwards. */
-static inline bool list_equals(const struct VmnlNetListLink *head, const int *ids, const size_t nids)
+static inline bool list_equals(const struct VmnlNetListLink *head, const int *ids, size_t nids)
 {
     const struct VmnlNetListLink *link = head;
 

@@ -3,6 +3,11 @@
  * \brief Internal definition of the context.
  */
 
+/**
+ * \addtogroup Context
+ * @{
+ */
+
 #ifndef VMNL_NET_CONTEXT_INTERNAL_H
 #define VMNL_NET_CONTEXT_INTERNAL_H
 
@@ -26,3 +31,5 @@ struct VmnlNetContext {
 #endif
 
 #endif /* !VMNL_NET_CONTEXT_INTERNAL_H */
+
+/** @} */

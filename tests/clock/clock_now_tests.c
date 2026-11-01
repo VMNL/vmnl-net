@@ -4,7 +4,7 @@
 
 UTEST(vmnl_net_clock_now, ticks_forward)
 {
-    const size_t nseconds = 3;
+    size_t nseconds = 3;
     uint64_t previous = vmnl_net_clock_now();
     uint64_t start = previous;
     uint64_t now;
@@ -24,7 +24,7 @@ UTEST(vmnl_net_clock_now, ticks_forward)
 
 UTEST(vmnl_net_clock_now, advances_by_slept_time)
 {
-    const uint64_t previous = vmnl_net_clock_now();
+    uint64_t previous = vmnl_net_clock_now();
 
 #ifdef _WIN32
     Sleep(1000);

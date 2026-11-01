@@ -14,6 +14,11 @@
  * \endcode
  */
 
+/**
+ * \addtogroup Allocator
+ * @{
+ */
+
 #ifndef VMNL_NET_ALLOCATOR_INTERNAL_H
 #define VMNL_NET_ALLOCATOR_INTERNAL_H
 
@@ -43,3 +48,5 @@ extern VmnlNetAllocator vmnl_net_allocator;
 #endif
 
 #endif /* !VMNL_NET_ALLOCATOR_INTERNAL_H */
+
+/** @} */

@@ -13,7 +13,7 @@ UTEST_I(vmnl_net_buffer_clear, drops_stored_bytes, NTYPES)
 
 UTEST_I(vmnl_net_buffer_clear, keeps_capacity, NTYPES)
 {
-    const size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
+    size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
 
     ASSERT_TRUE(append(utest_fixture->buffer, "hello"));
     vmnl_net_buffer_clear(utest_fixture->buffer);

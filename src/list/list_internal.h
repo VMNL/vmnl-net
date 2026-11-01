@@ -1,5 +1,7 @@
 /**
  * \file list_internal.h
+ * \defgroup Containers Containers
+ * \addtogroup Containers
  * \brief Intrusive circular doubly linked list.
  *
  * A structure joins a list through the link it embeds.
@@ -36,6 +38,7 @@
  * }
  * vmnl_net_list_remove(&alice.link);              // [bob]
  * \endcode
+ * @{
  */
 
 #ifndef VMNL_NET_LIST_INTERNAL_H
@@ -80,26 +83,26 @@ struct VmnlNetListLink {
  * \param head Head of the list.
  * \param type Type of the structure.
  * \param member Name of the link in the structure.
- * \return First structure, NULL if the list is empty.
- * \attention \p head **MUST** have no side effect: it is evaluated twice.
+ * \return First structure.
+ * \attention The list **MUST** not be empty: its head would be returned as a structure, so a caller that can meet an empty list checks it with vmnl_net_list_is_empty() first.
  * \remark Getting both ends of a list:
  * \code
- * struct Client *first = VMNL_NET_LIST_FRONT(&clients, struct Client, link); // &alice, NULL if empty
- * struct Client *last = VMNL_NET_LIST_BACK(&clients, struct Client, link);   // &bob, NULL if empty
+ * struct Client *first = VMNL_NET_LIST_FRONT(&clients, struct Client, link); // &alice
+ * struct Client *last = VMNL_NET_LIST_BACK(&clients, struct Client, link);   // &bob
  * \endcode
  */
-#define VMNL_NET_LIST_FRONT(head, type, member) ((vmnl_net_list_is_empty(head) == true) ? NULL : VMNL_NET_LIST_ENTRY((head)->next, type, member))
+#define VMNL_NET_LIST_FRONT(head, type, member) VMNL_NET_LIST_ENTRY((head)->next, type, member)
 
 /**
  * \brief Gets the last structure of a list.
  * \param head Head of the list.
  * \param type Type of the structure.
  * \param member Name of the link in the structure.
- * \return Last structure, NULL if the list is empty.
- * \attention \p head **MUST** have no side effect: it is evaluated twice.
+ * \return Last structure.
+ * \attention The list **MUST** not be empty: its head would be returned as a structure, so a caller that can meet an empty list checks it with vmnl_net_list_is_empty() first.
  * \remark See the example of #VMNL_NET_LIST_FRONT.
  */
-#define VMNL_NET_LIST_BACK(head, type, member) ((vmnl_net_list_is_empty(head) == true) ? NULL : VMNL_NET_LIST_ENTRY((head)->prev, type, member))
+#define VMNL_NET_LIST_BACK(head, type, member) VMNL_NET_LIST_ENTRY((head)->prev, type, member)
 
 /**
  * \brief Iterates over the structures of a list.
@@ -133,6 +136,39 @@ struct VmnlNetListLink {
  */
 #define VMNL_NET_LIST_FOREACH_REVERSE(it, head, member) \
     for (struct VmnlNetListLink *cursor_##it = (head)->prev; cursor_##it != (head) && ((it) = VMNL_NET_LIST_ENTRY(cursor_##it, __typeof__(*(it)), member), cursor_##it = cursor_##it->prev, true);)
+
+/**
+ * \brief Iterates over the structures of a list, from a given structure to the last one.
+ * \param it Pointer to the current structure, set beforehand to the first structure to visit.
+ * \param head Head of the list.
+ * \param member Name of the link in the structure.
+ * \attention The \p it parameter **MUST** be an identifier, pasted into the cursor name `cursor_<it>`.
+ * \attention The \p it parameter **MUST** point to a structure of the list, not NULL: the iteration starts from its link.
+ * \attention Only the current structure can be removed: the cursor already holds the next one, which would loop on itself once removed.
+ * \remark Iterating from bob, included, in [alice, bob]:
+ * \code
+ * struct Client *client = &bob;
+ *
+ * VMNL_NET_LIST_FOREACH_FROM(client, &clients, link) {
+ *     printf("%d\n", client->id); // 2
+ * }
+ * \endcode
+ */
+#define VMNL_NET_LIST_FOREACH_FROM(it, head, member) \
+    for (struct VmnlNetListLink *cursor_##it = &(it)->member; cursor_##it != (head) && ((it) = VMNL_NET_LIST_ENTRY(cursor_##it, __typeof__(*(it)), member), cursor_##it = cursor_##it->next, true);)
+
+/**
+ * \brief Iterates over the structures of a list backwards, from a given structure to the first one.
+ * \param it Pointer to the current structure, set beforehand to the first structure to visit.
+ * \param head Head of the list.
+ * \param member Name of the link in the structure.
+ * \attention The \p it parameter **MUST** be an identifier, pasted into the cursor name `cursor_<it>`.
+ * \attention The \p it parameter **MUST** point to a structure of the list, not NULL: the iteration starts from its link.
+ * \attention Only the current structure can be removed: the cursor already holds the previous one, which would loop on itself once removed.
+ * \remark See the example of #VMNL_NET_LIST_FOREACH_FROM.
+ */
+#define VMNL_NET_LIST_FOREACH_REVERSE_FROM(it, head, member) \
+    for (struct VmnlNetListLink *cursor_##it = &(it)->member; cursor_##it != (head) && ((it) = VMNL_NET_LIST_ENTRY(cursor_##it, __typeof__(*(it)), member), cursor_##it = cursor_##it->prev, true);)
 
 /**
  * \brief Initializes a list, or a link outside any list.
@@ -254,8 +290,30 @@ static inline void vmnl_net_list_splice(struct VmnlNetListLink *head, struct Vmn
     vmnl_net_list_init(other);
 }
 
+/**
+ * \brief Moves the first link of a list to its end, in O(1).
+ * \param head Head of the list.
+ * \remark Does nothing when the list is empty.
+ * \remark Sending the first client to the end of the queue:
+ * \code
+ * vmnl_net_list_rotate_left(&clients); // alice, bob, carol becomes bob, carol, alice
+ * \endcode
+ */
+static inline void vmnl_net_list_rotate_left(struct VmnlNetListLink *head)
+{
+    struct VmnlNetListLink *first = head->next;
+
+    if (vmnl_net_list_is_empty(head) == true) {
+        return;
+    }
+    vmnl_net_list_remove(first);
+    vmnl_net_list_push_back(head, first);
+}
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* !VMNL_NET_LIST_INTERNAL_H */
+
+/** @} */

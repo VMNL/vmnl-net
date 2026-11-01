@@ -39,14 +39,14 @@ UTEST(VMNL_NET_LIST_FRONT, follows_removals_at_front)
     EXPECT_EQ(VMNL_NET_LIST_FRONT(&team, struct Player, link), &players[1]);
     vmnl_net_list_remove(&players[1].link);
     EXPECT_EQ(VMNL_NET_LIST_FRONT(&team, struct Player, link), &players[2]);
-    vmnl_net_list_remove(&players[2].link);
-    EXPECT_EQ(VMNL_NET_LIST_FRONT(&team, struct Player, link), NULL);
 }
 
-UTEST(VMNL_NET_LIST_FRONT, returns_null_when_empty)
+UTEST(VMNL_NET_LIST_FRONT, returns_only_structure_when_single)
 {
+    struct Player player = {.id = 0};
     struct VmnlNetListLink team;
 
     vmnl_net_list_init(&team);
-    EXPECT_EQ(VMNL_NET_LIST_FRONT(&team, struct Player, link), NULL);
+    vmnl_net_list_push_back(&team, &player.link);
+    EXPECT_EQ(VMNL_NET_LIST_FRONT(&team, struct Player, link), &player);
 }

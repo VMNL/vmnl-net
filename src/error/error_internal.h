@@ -11,6 +11,11 @@
  * \endcode
  */
 
+/**
+ * \addtogroup Error
+ * @{
+ */
+
 #ifndef VMNL_NET_ERROR_INTERNAL_H
 #define VMNL_NET_ERROR_INTERNAL_H
 
@@ -41,3 +46,5 @@ static inline void vmnl_net_error_set(VmnlNetError *error, VmnlNetError value)
 #endif
 
 #endif /* !VMNL_NET_ERROR_INTERNAL_H */
+
+/** @} */

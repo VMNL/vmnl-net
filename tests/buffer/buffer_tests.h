@@ -55,18 +55,18 @@
     }
 
 /** \brief Every type, in the order of the UTEST_I indexes. */
-static const VmnlNetBufferType types[NTYPES] = {
+static VmnlNetBufferType types[NTYPES] = {
     VMNL_NET_BUFFER_FLAT,
     VMNL_NET_BUFFER_RING,
     VMNL_NET_BUFFER_DYNAMIC,
-    VMNL_NET_BUFFER_CHUNKS,
+    VMNL_NET_BUFFER_CHUNKED,
 };
 
 /** \brief Types that vmnl_net_buffer_resize() and vmnl_net_buffer_shrink() support. */
-static const VmnlNetBufferType resizable_types[NRESIZABLE_TYPES] = {
+static VmnlNetBufferType resizable_types[NRESIZABLE_TYPES] = {
     VMNL_NET_BUFFER_RING,
     VMNL_NET_BUFFER_DYNAMIC,
-    VMNL_NET_BUFFER_CHUNKS,
+    VMNL_NET_BUFFER_CHUNKED,
 };
 
 /** \brief Allocations left before counting_allocate() and counting_reallocate() return NULL. */
@@ -111,7 +111,7 @@ static inline void counting_deallocate(void *pointer)
 }
 
 /** \brief Sets the counting allocator, allowing \p nallocations allocations, and resets the counters. */
-static inline void allocator_limit(const size_t nallocations)
+static inline void allocator_limit(size_t nallocations)
 {
     allowed_allocations = nallocations;
     live_allocations = 0;
@@ -120,7 +120,7 @@ static inline void allocator_limit(const size_t nallocations)
 }
 
 /** \brief Sums the sizes of \p views. */
-static inline size_t views_size(const VmnlNetBufferView *views, const size_t nviews)
+static inline size_t views_size(const VmnlNetBufferView *views, size_t nviews)
 {
     size_t size = 0;
 
@@ -133,7 +133,7 @@ static inline size_t views_size(const VmnlNetBufferView *views, const size_t nvi
 /** \brief Prepares, writes and commits the characters of \p bytes. */
 static inline bool append(VmnlNetBuffer *buffer, const char *bytes)
 {
-    const size_t nbytes = strlen(bytes);
+    size_t nbytes = strlen(bytes);
     VmnlNetBufferView views[8];
     size_t nviews = 8;
     size_t written = 0;
@@ -151,7 +151,7 @@ static inline bool append(VmnlNetBuffer *buffer, const char *bytes)
 }
 
 /** \brief Prepares, writes and commits \p nbytes 'x'. */
-static inline bool commit(VmnlNetBuffer *buffer, const size_t nbytes)
+static inline bool commit(VmnlNetBuffer *buffer, size_t nbytes)
 {
     char *bytes = malloc(nbytes + 1);
     bool written;

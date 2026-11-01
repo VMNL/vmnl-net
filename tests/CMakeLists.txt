@@ -26,6 +26,8 @@ target_sources(vmnl_net_tests
     list/list_back_tests.c
     list/list_foreach_tests.c
     list/list_foreach_reverse_tests.c
+    list/list_foreach_from_tests.c
+    list/list_foreach_reverse_from_tests.c
     list/list_init_tests.c
     list/list_is_empty_tests.c
     list/list_size_tests.c
@@ -35,6 +37,7 @@ target_sources(vmnl_net_tests
     list/list_push_back_tests.c
     list/list_remove_tests.c
     list/list_splice_tests.c
+    list/list_rotate_left_tests.c
     buffer/buffer_create_tests.c
     buffer/buffer_size_tests.c
     buffer/buffer_capacity_tests.c
@@ -63,13 +66,13 @@ target_sources(vmnl_net_tests
     buffer/dynamic/buffer_dynamic_resize_tests.c
     buffer/dynamic/buffer_dynamic_shrink_tests.c
     buffer/dynamic/buffer_dynamic_prepare_tests.c
-    buffer/chunks/buffer_chunks_create_tests.c
-    buffer/chunks/buffer_chunks_resize_tests.c
-    buffer/chunks/buffer_chunks_shrink_tests.c
-    buffer/chunks/buffer_chunks_prepare_tests.c
-    buffer/chunks/buffer_chunks_commit_tests.c
-    buffer/chunks/buffer_chunks_consume_tests.c
-    buffer/chunks/buffer_chunks_data_tests.c
+    buffer/chunked/buffer_chunked_create_tests.c
+    buffer/chunked/buffer_chunked_resize_tests.c
+    buffer/chunked/buffer_chunked_shrink_tests.c
+    buffer/chunked/buffer_chunked_prepare_tests.c
+    buffer/chunked/buffer_chunked_commit_tests.c
+    buffer/chunked/buffer_chunked_consume_tests.c
+    buffer/chunked/buffer_chunked_data_tests.c
 )
 
 target_include_directories(vmnl_net_tests SYSTEM PRIVATE ${utest_SOURCE_DIR})

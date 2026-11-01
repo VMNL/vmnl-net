@@ -1,7 +1,7 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
-VmnlNetBuffer *vmnl_net_buffer_chunked_create(const struct VmnlNetBufferOps *ops, const size_t capacity, VmnlNetError *error)
+VmnlNetBuffer *vmnl_net_buffer_chunked_create(const struct VmnlNetBufferOps *ops, size_t capacity, VmnlNetError *error)
 {
     struct VmnlNetBufferChunked *buffer = vmnl_net_allocator.allocate(sizeof *buffer);
 
