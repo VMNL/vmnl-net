@@ -1,4 +1,4 @@
-foreach(example clock_elapsed error_as_string)
+foreach(example buffer_read_write clock_elapsed error_as_string)
     add_executable(vmnl_net_example_${example} example_${example}.c)
 
     target_link_libraries(vmnl_net_example_${example}

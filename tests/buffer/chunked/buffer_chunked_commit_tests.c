@@ -2,9 +2,9 @@
 
 #include "utest.h"
 
-BUFFER_FIXTURE_F(vmnl_net_buffer_chunks_commit, VMNL_NET_BUFFER_CHUNKS, 0)
+BUFFER_FIXTURE_F(vmnl_net_buffer_chunked_commit, VMNL_NET_BUFFER_CHUNKED, 0)
 
-UTEST_F(vmnl_net_buffer_chunks_commit, stores_bytes_across_chunks)
+UTEST_F(vmnl_net_buffer_chunked_commit, stores_bytes_across_chunks)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -16,7 +16,7 @@ UTEST_F(vmnl_net_buffer_chunks_commit, stores_bytes_across_chunks)
     EXPECT_EQ(nviews, (size_t) 2);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_commit, continues_in_next_chunk_after_filling_one)
+UTEST_F(vmnl_net_buffer_chunked_commit, continues_in_next_chunk_after_filling_one)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -30,7 +30,7 @@ UTEST_F(vmnl_net_buffer_chunks_commit, continues_in_next_chunk_after_filling_one
     EXPECT_EQ(memcmp(views[0].data, "abc", 3), 0);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_commit, rejects_bytes_without_chunk)
+UTEST_F(vmnl_net_buffer_chunked_commit, rejects_bytes_without_chunk)
 {
     VmnlNetError error = UINT32_MAX;
 
@@ -38,7 +38,7 @@ UTEST_F(vmnl_net_buffer_chunks_commit, rejects_bytes_without_chunk)
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_commit, rejects_consumed_space_of_first_chunk)
+UTEST_F(vmnl_net_buffer_chunked_commit, rejects_consumed_space_of_first_chunk)
 {
     VmnlNetError error = UINT32_MAX;
     VmnlNetBufferView views[8];

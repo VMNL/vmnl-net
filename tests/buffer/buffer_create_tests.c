@@ -39,7 +39,7 @@ UTEST(vmnl_net_buffer_create, rejects_unknown_type)
     EXPECT_EQ(vmnl_net_buffer_create(0, 16, &error), NULL);
     EXPECT_EQ(error, VMNL_NET_EINVAL);
     error = UINT32_MAX;
-    EXPECT_EQ(vmnl_net_buffer_create(VMNL_NET_BUFFER_CHUNKS + 1, 16, &error), NULL);
+    EXPECT_EQ(vmnl_net_buffer_create(VMNL_NET_BUFFER_CHUNKED + 1, 16, &error), NULL);
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 

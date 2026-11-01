@@ -11,7 +11,7 @@ UTEST_I(vmnl_net_buffer_capacity, covers_requested_capacity, NTYPES)
 
 UTEST_I(vmnl_net_buffer_capacity, keeps_value_while_writing_and_reading, NTYPES)
 {
-    const size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
+    size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
 
     ASSERT_TRUE(append(utest_fixture->buffer, "hello"));
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), capacity);

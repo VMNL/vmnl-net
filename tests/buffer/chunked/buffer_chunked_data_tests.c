@@ -2,9 +2,9 @@
 
 #include "utest.h"
 
-BUFFER_FIXTURE_F(vmnl_net_buffer_chunks_data, VMNL_NET_BUFFER_CHUNKS, 0)
+BUFFER_FIXTURE_F(vmnl_net_buffer_chunked_data, VMNL_NET_BUFFER_CHUNKED, 0)
 
-UTEST_F(vmnl_net_buffer_chunks_data, describes_one_view_per_chunk)
+UTEST_F(vmnl_net_buffer_chunked_data, describes_one_view_per_chunk)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -17,7 +17,7 @@ UTEST_F(vmnl_net_buffer_chunks_data, describes_one_view_per_chunk)
     EXPECT_EQ(memcmp(views[1].data, "abcde", 5), 0);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_data, skips_whole_chunks)
+UTEST_F(vmnl_net_buffer_chunked_data, skips_whole_chunks)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -29,7 +29,7 @@ UTEST_F(vmnl_net_buffer_chunks_data, skips_whole_chunks)
     EXPECT_EQ(memcmp(views[0].data, "cde", 3), 0);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_data, describes_first_chunks_with_too_few_views)
+UTEST_F(vmnl_net_buffer_chunked_data, describes_first_chunks_with_too_few_views)
 {
     VmnlNetBufferView views[2];
     size_t nviews = 2;
@@ -40,7 +40,7 @@ UTEST_F(vmnl_net_buffer_chunks_data, describes_first_chunks_with_too_few_views)
     EXPECT_EQ(nviews, (size_t) 2);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_data, describes_one_view_with_exactly_one_chunk)
+UTEST_F(vmnl_net_buffer_chunked_data, describes_one_view_with_exactly_one_chunk)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -50,7 +50,7 @@ UTEST_F(vmnl_net_buffer_chunks_data, describes_one_view_with_exactly_one_chunk)
     EXPECT_EQ(nviews, (size_t) 1);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_data, starts_at_next_chunk_with_offset_of_one_chunk)
+UTEST_F(vmnl_net_buffer_chunked_data, starts_at_next_chunk_with_offset_of_one_chunk)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -62,7 +62,7 @@ UTEST_F(vmnl_net_buffer_chunks_data, starts_at_next_chunk_with_offset_of_one_chu
     EXPECT_EQ(memcmp(views[0].data, "abcde", 5), 0);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_data, describes_last_byte_of_chunk_with_offset_one_before)
+UTEST_F(vmnl_net_buffer_chunked_data, describes_last_byte_of_chunk_with_offset_one_before)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;

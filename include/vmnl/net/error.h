@@ -77,7 +77,7 @@ typedef uint32_t VmnlNetError;
  * \return Static string, cannot be NULL, "Unknown error" for a code the library does not define.
  * \remark O(1), no allocation, thread-safe.
  */
-VMNL_NET_API const char *vmnl_net_error_as_string(const VmnlNetError error);
+VMNL_NET_API const char *vmnl_net_error_as_string(VmnlNetError error);
 
 #ifdef __cplusplus
 }

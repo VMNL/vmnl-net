@@ -37,7 +37,7 @@ static const char *const vmnl_net_error_table[] = {
     [VMNL_NET_FSYSTEM] = "System error",
 };
 
-const char *vmnl_net_error_as_string(const VmnlNetError error)
+const char *vmnl_net_error_as_string(VmnlNetError error)
 {
     if (error >= sizeof vmnl_net_error_table / sizeof vmnl_net_error_table[0] || vmnl_net_error_table[error] == NULL) {
         return "Unknown error";

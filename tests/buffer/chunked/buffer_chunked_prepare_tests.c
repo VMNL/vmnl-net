@@ -2,9 +2,9 @@
 
 #include "utest.h"
 
-BUFFER_FIXTURE_F(vmnl_net_buffer_chunks_prepare, VMNL_NET_BUFFER_CHUNKS, 0)
+BUFFER_FIXTURE_F(vmnl_net_buffer_chunked_prepare, VMNL_NET_BUFFER_CHUNKED, 0)
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, adds_chunks_for_requested_bytes)
+UTEST_F(vmnl_net_buffer_chunked_prepare, adds_chunks_for_requested_bytes)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -16,7 +16,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, adds_chunks_for_requested_bytes)
     EXPECT_EQ(views[1].size, VMNL_NET_BUFFER_CHUNK_SIZE);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_one_view_per_chunk)
+UTEST_F(vmnl_net_buffer_chunked_prepare, prepares_one_view_per_chunk)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -29,7 +29,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_one_view_per_chunk)
     EXPECT_EQ(views[1].size, VMNL_NET_BUFFER_CHUNK_SIZE);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, keeps_stored_bytes_in_place_when_growing)
+UTEST_F(vmnl_net_buffer_chunked_prepare, keeps_stored_bytes_in_place_when_growing)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -42,7 +42,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, keeps_stored_bytes_in_place_when_growing
     EXPECT_TRUE(data_equals(utest_fixture->buffer, "hello"));
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, skips_consumed_bytes_of_first_chunk)
+UTEST_F(vmnl_net_buffer_chunked_prepare, skips_consumed_bytes_of_first_chunk)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -55,7 +55,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, skips_consumed_bytes_of_first_chunk)
     EXPECT_EQ(views[0].size, VMNL_NET_BUFFER_CHUNK_SIZE);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_one_view_with_exactly_one_chunk)
+UTEST_F(vmnl_net_buffer_chunked_prepare, prepares_one_view_with_exactly_one_chunk)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -66,7 +66,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_one_view_with_exactly_one_chunk
     EXPECT_EQ(views[0].size, VMNL_NET_BUFFER_CHUNK_SIZE);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_next_chunk_when_last_one_is_full)
+UTEST_F(vmnl_net_buffer_chunked_prepare, prepares_next_chunk_when_last_one_is_full)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -77,7 +77,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_next_chunk_when_last_one_is_ful
     EXPECT_EQ(views[0].size, VMNL_NET_BUFFER_CHUNK_SIZE);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, keeps_capacity_with_exactly_free_space)
+UTEST_F(vmnl_net_buffer_chunked_prepare, keeps_capacity_with_exactly_free_space)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -89,7 +89,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, keeps_capacity_with_exactly_free_space)
     EXPECT_EQ(nviews, (size_t) 1);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_first_chunks_with_fewer_views)
+UTEST_F(vmnl_net_buffer_chunked_prepare, prepares_first_chunks_with_fewer_views)
 {
     VmnlNetBufferView view;
     size_t nviews = 1;
@@ -101,7 +101,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, prepares_first_chunks_with_fewer_views)
     EXPECT_EQ(view.size, VMNL_NET_BUFFER_CHUNK_SIZE - 3);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, rejects_too_few_views)
+UTEST_F(vmnl_net_buffer_chunked_prepare, rejects_too_few_views)
 {
     VmnlNetError error = UINT32_MAX;
     VmnlNetBufferView view;
@@ -111,7 +111,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, rejects_too_few_views)
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, fails_without_memory)
+UTEST_F(vmnl_net_buffer_chunked_prepare, fails_without_memory)
 {
     VmnlNetError error = UINT32_MAX;
     VmnlNetBufferView views[8];
@@ -123,7 +123,7 @@ UTEST_F(vmnl_net_buffer_chunks_prepare, fails_without_memory)
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), (size_t) 0);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_prepare, fails_without_memory_with_overflowing_size)
+UTEST_F(vmnl_net_buffer_chunked_prepare, fails_without_memory_with_overflowing_size)
 {
     VmnlNetError error = UINT32_MAX;
     VmnlNetBufferView views[8];

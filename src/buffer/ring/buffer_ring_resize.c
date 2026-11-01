@@ -3,7 +3,7 @@
 
 #include <string.h>
 
-bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error)
+bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error)
 {
     uint8_t *pointer = vmnl_net_allocator.allocate(capacity);
     VmnlNetBufferView views[2] = {0};

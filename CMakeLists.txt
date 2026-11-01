@@ -15,6 +15,7 @@ set(CMAKE_C_EXTENSIONS OFF)
 
 option(BUILD_SHARED_LIBS "Build a shared library instead of a static one" OFF)
 option(VMNL_NET_BUILD_DOCS "Generate the documentation with Doxygen" OFF)
+option(VMNL_NET_BUILD_DOCS_INTERNAL "Add the internal headers to the documentation, with VMNL_NET_BUILD_DOCS" OFF)
 option(VMNL_NET_BUILD_TESTS "Build the tests" ${PROJECT_IS_TOP_LEVEL})
 option(VMNL_NET_BUILD_BENCHMARKS "Build the benchmarks" OFF)
 option(VMNL_NET_BUILD_EXAMPLES "Build the examples" ${PROJECT_IS_TOP_LEVEL})
