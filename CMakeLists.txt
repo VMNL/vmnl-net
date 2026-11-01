@@ -51,16 +51,21 @@ target_sources(vmnl_net
         src/error/error_as_string.c
         src/allocator/allocator_set.c
         src/context/context_create.c
+        src/context/context_remaining.c
+        src/context/context_advance.c
         src/context/context_destroy.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:src/clock/posix/clock_now.c>
         $<$<PLATFORM_ID:Windows>:src/clock/win32/clock_now.c>
         src/clock/clock_elapsed.c
-        # src/timer/timer_create.c
-        # src/timer/timer_destroy.c
-        # src/timer/timer_remaining.c
-        # src/timer/timer_start.c
-        # src/timer/timer_stop.c
-        # src/timer/timer_update.c
+        src/timer/timer_create.c
+        src/timer/timer_is_active.c
+        src/timer/timer_interval.c
+        src/timer/timer_remaining.c
+        src/timer/timer_set_callback.c
+        src/timer/timer_set_interval.c
+        src/timer/timer_start.c
+        src/timer/timer_stop.c
+        src/timer/timer_destroy.c
         src/buffer/buffer_create.c
         src/buffer/buffer_size.c
         src/buffer/buffer_capacity.c
@@ -110,7 +115,7 @@ target_sources(vmnl_net
             include/vmnl/net/allocator.h
             include/vmnl/net/context.h
             include/vmnl/net/clock.h
-            # include/vmnl/net/timer.h
+            include/vmnl/net/timer.h
             include/vmnl/net/buffer.h
 )
 

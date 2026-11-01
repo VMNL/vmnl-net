@@ -179,8 +179,11 @@ block-beta
     BUFFER --> RING
     BUFFER --> CHUNKED
     POLL -.-> CONTEXT
-    TIMER -.-> CONTEXT
-    TIMER -.-> CLOCK
+    TIMER --> CONTEXT
+    TIMER --> ALLOCATOR
+    TIMER --> LIST
+    CONTEXT --> TIMER
+    CONTEXT --> CLOCK
     CONTEXT --> ALLOCATOR
     CONTEXT --> LIST
     FLAT --> ALLOCATOR
@@ -192,7 +195,7 @@ block-beta
     classDef title fill:none,stroke:none
     classDef planned fill:none,stroke-dasharray: 4 3
     class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
-    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,TIMER,SER,LOG planned
+    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER,LOG planned
 ```
 
 ## Installation
