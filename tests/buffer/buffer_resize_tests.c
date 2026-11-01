@@ -6,7 +6,7 @@ BUFFER_FIXTURE_I(vmnl_net_buffer_resize, resizable_types, 16)
 
 UTEST_I(vmnl_net_buffer_resize, grows_capacity, NRESIZABLE_TYPES)
 {
-    const size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
+    size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
     VmnlNetError error = UINT32_MAX;
 
     EXPECT_TRUE(vmnl_net_buffer_resize(utest_fixture->buffer, capacity + 1, &error));
@@ -24,7 +24,7 @@ UTEST_I(vmnl_net_buffer_resize, keeps_stored_bytes, NRESIZABLE_TYPES)
 
 UTEST_I(vmnl_net_buffer_resize, ignores_current_capacity, NRESIZABLE_TYPES)
 {
-    const size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
+    size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
     VmnlNetError error = UINT32_MAX;
 
     EXPECT_TRUE(vmnl_net_buffer_resize(utest_fixture->buffer, capacity, &error));
@@ -34,7 +34,7 @@ UTEST_I(vmnl_net_buffer_resize, ignores_current_capacity, NRESIZABLE_TYPES)
 
 UTEST_I(vmnl_net_buffer_resize, fails_without_memory, NRESIZABLE_TYPES)
 {
-    const size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
+    size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
     VmnlNetError error = UINT32_MAX;
 
     ASSERT_TRUE(append(utest_fixture->buffer, "hello"));

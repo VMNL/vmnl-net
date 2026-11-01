@@ -1,7 +1,7 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
-bool vmnl_net_buffer_chunked_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error)
+bool vmnl_net_buffer_chunked_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error)
 {
     struct VmnlNetBufferChunk *chunk;
     struct VmnlNetListLink chunks;
@@ -11,7 +11,7 @@ bool vmnl_net_buffer_chunked_resize(VmnlNetBuffer *buffer, const size_t capacity
     while (buffer->capacity + added_capacity < capacity) {
         chunk = vmnl_net_allocator.allocate(sizeof *chunk + VMNL_NET_BUFFER_CHUNK_SIZE);
         if (chunk == NULL) {
-            vmnl_net_buffer_chunked_destroy_internal_chunks(&chunks);
+            vmnl_net_buffer_chunked_destroy_chunks(&chunks);
             vmnl_net_error_set(error, VMNL_NET_ENOMEM);
             return false;
         }

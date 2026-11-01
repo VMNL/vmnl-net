@@ -2,9 +2,9 @@
 
 #include "utest.h"
 
-BUFFER_FIXTURE_F(vmnl_net_buffer_chunks_consume, VMNL_NET_BUFFER_CHUNKS, 0)
+BUFFER_FIXTURE_F(vmnl_net_buffer_chunked_consume, VMNL_NET_BUFFER_CHUNKED, 0)
 
-UTEST_F(vmnl_net_buffer_chunks_consume, drops_bytes_across_chunks)
+UTEST_F(vmnl_net_buffer_chunked_consume, drops_bytes_across_chunks)
 {
     ASSERT_TRUE(commit(utest_fixture->buffer, VMNL_NET_BUFFER_CHUNK_SIZE));
     ASSERT_TRUE(append(utest_fixture->buffer, "abcde"));
@@ -12,7 +12,7 @@ UTEST_F(vmnl_net_buffer_chunks_consume, drops_bytes_across_chunks)
     EXPECT_TRUE(data_equals(utest_fixture->buffer, "cde"));
 }
 
-UTEST_F(vmnl_net_buffer_chunks_consume, recycles_emptied_chunks)
+UTEST_F(vmnl_net_buffer_chunked_consume, recycles_emptied_chunks)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;
@@ -24,7 +24,7 @@ UTEST_F(vmnl_net_buffer_chunks_consume, recycles_emptied_chunks)
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), 2 * VMNL_NET_BUFFER_CHUNK_SIZE);
 }
 
-UTEST_F(vmnl_net_buffer_chunks_consume, keeps_chunk_with_one_byte_left)
+UTEST_F(vmnl_net_buffer_chunked_consume, keeps_chunk_with_one_byte_left)
 {
     VmnlNetBufferView views[8];
     size_t nviews = 8;

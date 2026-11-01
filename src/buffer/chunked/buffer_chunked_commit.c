@@ -1,22 +1,23 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
-bool vmnl_net_buffer_chunked_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error)
+bool vmnl_net_buffer_chunked_commit(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetError *error)
 {
     struct VmnlNetBufferChunked *chunked_buffer = (struct VmnlNetBufferChunked *) buffer;
-    struct VmnlNetBufferChunk *front_chunk = VMNL_NET_LIST_FRONT(&chunked_buffer->chunks, struct VmnlNetBufferChunk, link);
-    struct VmnlNetBufferChunk *chunk = (chunked_buffer->commit_tail == NULL) ? front_chunk : chunked_buffer->commit_tail;
-    size_t chunk_available_space;
+    struct VmnlNetBufferChunk *chunk = vmnl_net_buffer_chunked_writing_chunk(chunked_buffer);
     size_t chunk_committed_bytes;
 
-    if (nbytes > buffer->capacity - buffer->size - ((front_chunk == NULL) ? 0 : front_chunk->offset)) {
+    if (nbytes > vmnl_net_buffer_chunked_free_space(buffer)) {
         vmnl_net_error_set(error, VMNL_NET_EINVAL);
         return false;
     }
-    for (size_t nbytes_to_commit = nbytes; nbytes_to_commit > 0; chunk = VMNL_NET_LIST_ENTRY(chunk->link.next, struct VmnlNetBufferChunk, link)) {
-        chunk_available_space = VMNL_NET_BUFFER_CHUNK_SIZE - chunk->offset - chunk->size;
-        chunk_committed_bytes = (nbytes_to_commit < chunk_available_space) ? nbytes_to_commit : chunk_available_space;
-        nbytes_to_commit -= chunk_committed_bytes;
+    VMNL_NET_LIST_FOREACH_FROM(chunk, &chunked_buffer->chunks, link)
+    {
+        if (nbytes == 0) {
+            break;
+        }
+        chunk_committed_bytes = (nbytes < vmnl_net_buffer_chunk_free_space(chunk)) ? nbytes : vmnl_net_buffer_chunk_free_space(chunk);
+        nbytes -= chunk_committed_bytes;
         chunk->size += chunk_committed_bytes;
         buffer->size += chunk_committed_bytes;
         chunked_buffer->commit_tail = chunk;

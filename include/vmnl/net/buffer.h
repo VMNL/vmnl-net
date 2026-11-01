@@ -30,7 +30,7 @@
  * Buffers are allocated with the global allocator, see vmnl_net_allocator_set().
  *
  * \par Types
- * |                      | Flat                          | Ring                    | Dynamic                         | Chunks                       |
+ * |                      | Flat                          | Ring                    | Dynamic                         | Chunked                      |
  * | -------------------- | :---------------------------: | :---------------------: | :-----------------------------: | :--------------------------: |
  * | When full            | Fails, fixed memory           | Fails, fixed memory     | Grows, copies its bytes         | Adds a 16 KiB chunk, no copy |
  * | Views returned       | 1                             | 1, or 2 when wrapped    | 1                               | 1 per chunk                  |
@@ -89,11 +89,11 @@ typedef uint32_t VmnlNetBufferType;
 #define VMNL_NET_BUFFER_FLAT    UINT32_C(1) /*!< Fixed capacity, one view. */
 #define VMNL_NET_BUFFER_RING    UINT32_C(2) /*!< Fixed capacity, wraps around, up to two views. */
 #define VMNL_NET_BUFFER_DYNAMIC UINT32_C(3) /*!< Grows when full, one view. */
-#define VMNL_NET_BUFFER_CHUNKS  UINT32_C(4) /*!< Grows by chunks, one view per chunk. */
+#define VMNL_NET_BUFFER_CHUNKED UINT32_C(4) /*!< Grows by chunks, one view per chunk. */
 
 /**
  * \brief Creates a buffer.
- * \param type Type of the buffer, one of the VMNL_NET_BUFFER_* constants.
+ * \param type Type of the buffer, one of #VMNL_NET_BUFFER_FLAT, #VMNL_NET_BUFFER_RING, #VMNL_NET_BUFFER_DYNAMIC or #VMNL_NET_BUFFER_CHUNKED.
  * \param capacity Bytes allocated up front, 0 to allocate on the first write of a dynamic or chunked buffer.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p type is unknown, or \p capacity is 0 for a flat or ring buffer.
@@ -104,7 +104,7 @@ typedef uint32_t VmnlNetBufferType;
  * \remark A dynamic buffer grows to 1.5 times its capacity, or to the bytes needed if more, and to 256 bytes at least, when vmnl_net_buffer_prepare() lacks room.
  * \remark A chunked buffer rounds \p capacity up to whole chunks, each one allocation, so growing adds chunks without copying the stored bytes.
  */
-VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create(const VmnlNetBufferType type, const size_t capacity, VmnlNetError *error);
+VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create(VmnlNetBufferType type, size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Counts the stored bytes of a buffer.
@@ -145,7 +145,7 @@ VMNL_NET_API void vmnl_net_buffer_clear(VmnlNetBuffer *buffer);
  * \remark Does nothing, successfully, if \p buffer already has \p capacity bytes or more.
  * \remark A chunked buffer rounds \p capacity up to whole chunks.
  */
-VMNL_NET_API bool vmnl_net_buffer_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+VMNL_NET_API bool vmnl_net_buffer_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Reduces the capacity of a buffer.
@@ -160,7 +160,7 @@ VMNL_NET_API bool vmnl_net_buffer_resize(VmnlNetBuffer *buffer, const size_t cap
  * \remark Shrinking a dynamic or chunked buffer to 0 frees all its memory, allocated again on the next write.
  * \remark A chunked buffer frees only its free chunks, from the end: its capacity is rounded up to whole chunks, and stays above \p capacity when its stored bytes span more chunks.
  */
-VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error);
+VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Describes free space of a buffer to write into, without copy.
@@ -178,7 +178,7 @@ VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, const size_t cap
  * \remark Describes no view, successfully, when \p nbytes is 0.
  * \remark Nothing is stored until vmnl_net_buffer_commit().
  */
-VMNL_NET_API VMNL_NET_NODISCARD bool vmnl_net_buffer_prepare(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
+VMNL_NET_API VMNL_NET_NODISCARD bool vmnl_net_buffer_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 
 /**
  * \brief Appends the first prepared bytes to the stored bytes of a buffer.
@@ -188,8 +188,9 @@ VMNL_NET_API VMNL_NET_NODISCARD bool vmnl_net_buffer_prepare(VmnlNetBuffer *buff
  * - #VMNL_NET_EINVAL: \p nbytes is more than the free space after the stored bytes.
  * \return true on success, false otherwise.
  * \attention The bytes **MUST** be written in the views of the last vmnl_net_buffer_prepare(): nothing is copied, they are only counted as stored.
+ * \remark Stores nothing, successfully, when \p nbytes is 0.
  */
-VMNL_NET_API bool vmnl_net_buffer_commit(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
+VMNL_NET_API bool vmnl_net_buffer_commit(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetError *error);
 
 /**
  * \brief Drops the first stored bytes of a buffer.
@@ -200,7 +201,7 @@ VMNL_NET_API bool vmnl_net_buffer_commit(VmnlNetBuffer *buffer, const size_t nby
  * \return true on success, false otherwise.
  * \remark Only moves the start of the stored bytes: nothing is erased, and a chunked buffer keeps the chunks it empties for the next writes.
  */
-VMNL_NET_API bool vmnl_net_buffer_consume(VmnlNetBuffer *buffer, const size_t nbytes, VmnlNetError *error);
+VMNL_NET_API bool vmnl_net_buffer_consume(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetError *error);
 
 /**
  * \brief Describes the stored bytes of a buffer to read, without copy.
@@ -227,7 +228,7 @@ VMNL_NET_API bool vmnl_net_buffer_consume(VmnlNetBuffer *buffer, const size_t nb
  * }
  * \endcode
  */
-VMNL_NET_API size_t vmnl_net_buffer_data(const VmnlNetBuffer *buffer, const size_t offset, VmnlNetBufferView *views, size_t *nviews);
+VMNL_NET_API size_t vmnl_net_buffer_data(const VmnlNetBuffer *buffer, size_t offset, VmnlNetBufferView *views, size_t *nviews);
 
 /**
  * \brief Destroys a buffer.

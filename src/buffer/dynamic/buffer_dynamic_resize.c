@@ -1,7 +1,7 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
-bool vmnl_net_buffer_dynamic_resize(VmnlNetBuffer *buffer, const size_t capacity, VmnlNetError *error)
+bool vmnl_net_buffer_dynamic_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error)
 {
     uint8_t *pointer = vmnl_net_allocator.reallocate(((struct VmnlNetBufferContiguous *) buffer)->pointer, capacity);
 

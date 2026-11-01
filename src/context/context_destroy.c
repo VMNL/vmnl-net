@@ -1,5 +1,5 @@
-#include "allocator/allocator_internal.h"
 #include "context/context_internal.h"
+#include "allocator/allocator_internal.h"
 
 void vmnl_net_context_destroy(VmnlNetContext *context)
 {
