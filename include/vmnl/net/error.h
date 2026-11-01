@@ -16,7 +16,9 @@
  * - A code keeps its value on every platform and in every version, and the value of a removed code is never reused.
  *
  * \par Example
- * Example to be written.
+ * \snippet{trimleft} example_error_as_string.c as_string
+ *
+ * \see \ref example_error_as_string.c
  * @{
  */
 
@@ -84,3 +86,8 @@ VMNL_NET_API const char *vmnl_net_error_as_string(const VmnlNetError error);
 #endif /* !VMNL_NET_ERROR_H */
 
 /** @} */
+
+/**
+ * \example example_error_as_string.c
+ * Checks a failed call and prints the message of its error.
+ */
