@@ -4,7 +4,9 @@
 
 static void clock_now(benchmark::State &state)
 {
-    state.SkipWithMessage("not written");
+    for (auto _ : state) {
+        benchmark::DoNotOptimize(vmnl_net_clock_now());
+    }
 }
 
 BENCHMARK(clock_now);
