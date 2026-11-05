@@ -1,4 +1,9 @@
 /**
+ * \file timer_internal.h
+ * \brief Internal definition of the timers.
+ */
+
+/**
  * \addtogroup Timer
  * @{
  */
@@ -17,7 +22,8 @@ extern "C" {
 /**
  * \brief Timer, opaque outside the library.
  * \remark Active while #link is in a list, see vmnl_net_list_is_empty().
- * \remark While its periodic callback runs, vmnl_net_context_advance() holds the timer alone in a local list, the honeypot: vmnl_net_timer_stop(), vmnl_net_timer_start() and vmnl_net_timer_destroy() all take it out, so an empty honeypot after the callback tells that the callback took the timer over, and the timer, maybe freed, is not read again.
+ * \remark During a periodic callback, vmnl_net_context_advance() keeps the timer alone in a local list, the honeypot.
+ * Stopping, starting or destroying the timer takes it out, so an empty honeypot after the callback means the callback took the timer over, and advance does not read it again, since it may be freed.
  */
 struct VmnlNetTimer {
     struct VmnlNetListLink link; /*!< Link in the active timers of the context it was started in, sorted by deadline, to itself while inactive. */
@@ -42,8 +48,9 @@ static inline uint64_t vmnl_net_timer_compute_deadline(uint64_t time, uint64_t d
  * \brief Inserts a timer in a list of active timers, sorted by deadline.
  * \param active_timers Head of the list.
  * \param timer Timer to insert.
- * \attention \p timer **MUST** be inactive: inserting a link that is in a list would corrupt both lists.
- * \remark Searches from the back for the last timer whose deadline is not later: O(1) when the timeouts are equal, and timers with the same deadline keep the order of their start.
+ * \attention \p timer **MUST** be inactive, as inserting a link that is in a list would corrupt both lists.
+ * \remark Searches from the back of the list, so inserting is O(1) when every timeout is equal.
+ * \remark Goes after the timers of the same deadline, which keeps their start order.
  */
 static inline void vmnl_net_timer_insert(struct VmnlNetListLink *active_timers, VmnlNetTimer *timer)
 {

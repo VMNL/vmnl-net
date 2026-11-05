@@ -15,7 +15,7 @@
  * - O(n) traversal through scattered memory, slower than an array.
  * - vmnl_net_list_size() is O(n).
  * - No access by index.
- * - The list does not own its structures: remove them before freeing them.
+ * - The list does not own its structures, so remove them before freeing them.
  *
  * \par Example
  * \code
@@ -84,7 +84,7 @@ struct VmnlNetListLink {
  * \param type Type of the structure.
  * \param member Name of the link in the structure.
  * \return First structure.
- * \attention The list **MUST** not be empty: its head would be returned as a structure, so a caller that can meet an empty list checks it with vmnl_net_list_is_empty() first.
+ * \attention The list **MUST** not be empty, as its head would be returned as a structure. A caller that can meet an empty list checks it with vmnl_net_list_is_empty() first.
  * \remark Getting both ends of a list:
  * \code
  * struct Client *first = VMNL_NET_LIST_FRONT(&clients, struct Client, link); // &alice
@@ -99,7 +99,7 @@ struct VmnlNetListLink {
  * \param type Type of the structure.
  * \param member Name of the link in the structure.
  * \return Last structure.
- * \attention The list **MUST** not be empty: its head would be returned as a structure, so a caller that can meet an empty list checks it with vmnl_net_list_is_empty() first.
+ * \attention The list **MUST** not be empty, as its head would be returned as a structure. A caller that can meet an empty list checks it with vmnl_net_list_is_empty() first.
  * \remark See the example of #VMNL_NET_LIST_FRONT.
  */
 #define VMNL_NET_LIST_BACK(head, type, member) VMNL_NET_LIST_ENTRY((head)->prev, type, member)
@@ -109,8 +109,9 @@ struct VmnlNetListLink {
  * \param it Pointer to the current structure.
  * \param head Head of the list.
  * \param member Name of the link in the structure.
- * \attention The \p it parameter **MUST** be an identifier, pasted into the cursor name `cursor_<it>`.
- * \attention Only the current structure can be removed: the cursor already holds the next one, which would loop on itself once removed.
+ * \attention
+ * - The \p it parameter **MUST** be an identifier, as it is pasted into the cursor name `cursor_<it>`.
+ * - Only the current structure can be removed, as the cursor already holds the next one, which would loop on itself once removed.
  * \remark Removing the current structure:
  * \code
  * struct Client *client;
@@ -130,8 +131,9 @@ struct VmnlNetListLink {
  * \param it Pointer to the current structure.
  * \param head Head of the list.
  * \param member Name of the link in the structure.
- * \attention The \p it parameter **MUST** be an identifier, pasted into the cursor name `cursor_<it>`.
- * \attention Only the current structure can be removed: the cursor already holds the previous one, which would loop on itself once removed.
+ * \attention
+ * - The \p it parameter **MUST** be an identifier, as it is pasted into the cursor name `cursor_<it>`.
+ * - Only the current structure can be removed, as the cursor already holds the previous one, which would loop on itself once removed.
  * \remark See the example of #VMNL_NET_LIST_FOREACH.
  */
 #define VMNL_NET_LIST_FOREACH_REVERSE(it, head, member) \
@@ -142,9 +144,10 @@ struct VmnlNetListLink {
  * \param it Pointer to the current structure, set beforehand to the first structure to visit.
  * \param head Head of the list.
  * \param member Name of the link in the structure.
- * \attention The \p it parameter **MUST** be an identifier, pasted into the cursor name `cursor_<it>`.
- * \attention The \p it parameter **MUST** point to a structure of the list, not NULL: the iteration starts from its link.
- * \attention Only the current structure can be removed: the cursor already holds the next one, which would loop on itself once removed.
+ * \attention
+ * - The \p it parameter **MUST** be an identifier, as it is pasted into the cursor name `cursor_<it>`.
+ * - The \p it parameter **MUST** point to a structure of the list, not NULL, as the iteration starts from its link.
+ * - Only the current structure can be removed, as the cursor already holds the next one, which would loop on itself once removed.
  * \remark Iterating from bob, included, in [alice, bob]:
  * \code
  * struct Client *client = &bob;
@@ -162,9 +165,10 @@ struct VmnlNetListLink {
  * \param it Pointer to the current structure, set beforehand to the first structure to visit.
  * \param head Head of the list.
  * \param member Name of the link in the structure.
- * \attention The \p it parameter **MUST** be an identifier, pasted into the cursor name `cursor_<it>`.
- * \attention The \p it parameter **MUST** point to a structure of the list, not NULL: the iteration starts from its link.
- * \attention Only the current structure can be removed: the cursor already holds the previous one, which would loop on itself once removed.
+ * \attention
+ * - The \p it parameter **MUST** be an identifier, as it is pasted into the cursor name `cursor_<it>`.
+ * - The \p it parameter **MUST** point to a structure of the list, not NULL, as the iteration starts from its link.
+ * - Only the current structure can be removed, as the cursor already holds the previous one, which would loop on itself once removed.
  * \remark See the example of #VMNL_NET_LIST_FOREACH_FROM.
  */
 #define VMNL_NET_LIST_FOREACH_REVERSE_FROM(it, head, member) \
@@ -209,7 +213,7 @@ static inline size_t vmnl_net_list_size(const struct VmnlNetListLink *head)
  * \brief Inserts a link after another one.
  * \param position Link to insert after, the head to insert at the front.
  * \param link Link to insert.
- * \attention \p link **MUST** not be in a list: its neighbours would keep pointing to it, corrupting that list.
+ * \attention \p link **MUST** not be in a list, as its neighbours would keep pointing to it, corrupting that list.
  */
 static inline void vmnl_net_list_insert_after(struct VmnlNetListLink *position, struct VmnlNetListLink *link)
 {
@@ -223,7 +227,7 @@ static inline void vmnl_net_list_insert_after(struct VmnlNetListLink *position, 
  * \brief Inserts a link before another one.
  * \param position Link to insert before, the head to insert at the end.
  * \param link Link to insert.
- * \attention \p link **MUST** not be in a list: its neighbours would keep pointing to it, corrupting that list.
+ * \attention \p link **MUST** not be in a list, as its neighbours would keep pointing to it, corrupting that list.
  */
 static inline void vmnl_net_list_insert_before(struct VmnlNetListLink *position, struct VmnlNetListLink *link)
 {
@@ -237,7 +241,7 @@ static inline void vmnl_net_list_insert_before(struct VmnlNetListLink *position,
  * \brief Inserts a link at the front of a list.
  * \param head Head of the list.
  * \param link Link to insert.
- * \attention \p link **MUST** not be in a list: its neighbours would keep pointing to it, corrupting that list.
+ * \attention \p link **MUST** not be in a list, as its neighbours would keep pointing to it, corrupting that list.
  */
 static inline void vmnl_net_list_push_front(struct VmnlNetListLink *head, struct VmnlNetListLink *link)
 {
@@ -248,7 +252,7 @@ static inline void vmnl_net_list_push_front(struct VmnlNetListLink *head, struct
  * \brief Inserts a link at the end of a list.
  * \param head Head of the list.
  * \param link Link to insert.
- * \attention \p link **MUST** not be in a list: its neighbours would keep pointing to it, corrupting that list.
+ * \attention \p link **MUST** not be in a list, as its neighbours would keep pointing to it, corrupting that list.
  */
 static inline void vmnl_net_list_push_back(struct VmnlNetListLink *head, struct VmnlNetListLink *link)
 {
@@ -258,7 +262,7 @@ static inline void vmnl_net_list_push_back(struct VmnlNetListLink *head, struct 
 /**
  * \brief Removes a link from its list.
  * \param link Link to remove.
- * \attention \p link **MUST** be in a list or initialized with vmnl_net_list_init(): its pointers are dereferenced.
+ * \attention \p link **MUST** be in a list or initialized with vmnl_net_list_init(), as its pointers are dereferenced.
  * \remark \p link then links to itself, like an empty list, so removing it again does nothing.
  */
 static inline void vmnl_net_list_remove(struct VmnlNetListLink *link)
@@ -272,7 +276,7 @@ static inline void vmnl_net_list_remove(struct VmnlNetListLink *link)
  * \brief Moves every link of a list to the end of another one, in O(1).
  * \param head Head of the list that receives the links.
  * \param other Head of the list to move, empty afterwards.
- * \attention \p other **MUST** be another list than \p head: moving a list into itself would unlink its head.
+ * \attention \p other **MUST** be another list than \p head, as moving a list into itself would unlink its head.
  * \remark Moving the waiting clients after the connected ones:
  * \code
  * vmnl_net_list_splice(&connected, &waiting); // connected: alice, bob, carol; waiting: empty

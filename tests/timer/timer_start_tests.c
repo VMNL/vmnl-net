@@ -48,14 +48,13 @@ UTEST_F(vmnl_net_timer_start, postpones_active_timer)
 
 UTEST_F(vmnl_net_timer_start, moves_active_timer_to_other_context)
 {
-    uint64_t remaining;
     VmnlNetContext *context = vmnl_net_context_create(NULL);
 
     ASSERT_NE(context, NULL);
     vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, TIMEOUT);
     vmnl_net_timer_start(context, utest_fixture->timer, TIMEOUT);
-    EXPECT_FALSE(vmnl_net_context_remaining(utest_fixture->context, START_TIME, &remaining));
-    EXPECT_TRUE(vmnl_net_context_remaining(context, START_TIME, &remaining));
+    EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME), UINT64_MAX);
+    EXPECT_NE(vmnl_net_context_remaining(context, START_TIME), UINT64_MAX);
     vmnl_net_context_destroy(context);
 }
 

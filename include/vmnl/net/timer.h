@@ -3,12 +3,14 @@
  *
  * \defgroup Timer Timer
  * \addtogroup Timer
- * \brief Timers of the network loop.
+ * \brief One-shot and periodic timers, driven by the time the application gives.
  *
- * vmnl_net_context_advance(), vmnl_net_context_remaining() and vmnl_net_timer_remaining() take the current time as \p now, in nanoseconds of vmnl_net_clock_now(), so the loop reads the clock once per turn.
- * A timer starts from the \p now of the last vmnl_net_context_advance() of the context given to vmnl_net_timer_start(), or from the vmnl_net_clock_now() read by vmnl_net_context_create() before the first call.
- * It expires at the first vmnl_net_context_advance() whose \p now reaches its deadline: late, never early.
- * A periodic timer keeps its phase: a late call reports the deadlines it missed through the lateness given to the callback, without shifting the next ones.
+ * The application gives the current time to the context of the timers with vmnl_net_context_advance(), which calls the expired ones.
+ *
+ * \par Deadlines
+ * - A timeout counts from the last advance of the context, or from its creation before the first one.
+ * - A timer expires at the first advance whose time reaches its deadline, so late but never early.
+ * - A late periodic timer is called once, with its lateness, and its next deadlines do not shift.
  *
  * \par Example
  * Example to be written.
@@ -28,27 +30,26 @@ extern "C" {
 
 /**
  * \brief Opaque timer.
- * \attention A timer **MUST** be used by the thread of the context it is started in: they share no lock.
+ * \attention A timer **MUST** be used by the thread of the context it is started in, as they share no lock.
  */
 typedef struct VmnlNetTimer VmnlNetTimer;
 
 /**
  * \brief Function called when a timer expires.
  * \param timer Expired timer.
- * \param lateness Nanoseconds between the first deadline reached and the \p now of vmnl_net_context_advance(): a periodic timer also missed \p lateness / interval deadlines, see vmnl_net_timer_interval().
+ * \param lateness Nanoseconds since the deadline. A periodic timer also missed \p lateness / interval deadlines.
  * \param data Pointer given with the callback, nullable.
- * \remark It can start, stop or destroy any timer, its own included.
+ * \remark It can start, stop, change or destroy any timer, its own included.
  */
 typedef void (*VmnlNetTimerCallback)(VmnlNetTimer *timer, uint64_t lateness, void *data);
 
 /**
  * \brief Creates an inactive one-shot timer.
  * \param callback Function called at each expiration.
- * \param data Pointer given to \p callback, nullable.
+ * \param data Pointer given to \p callback, nullable, never freed by the library.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created timer on success, NULL otherwise.
- * \remark The timer is allocated with the global allocator, see vmnl_net_allocator_set().
  */
 VMNL_NET_API VMNL_NET_NODISCARD VmnlNetTimer *vmnl_net_timer_create(VmnlNetTimerCallback callback, void *data, VmnlNetError *error);
 
@@ -70,9 +71,9 @@ VMNL_NET_API uint64_t vmnl_net_timer_interval(const VmnlNetTimer *timer);
 /**
  * \brief Gets the time left before the next deadline of a timer.
  * \param timer Timer to read.
- * \param now Current time.
+ * \param now Current time, see vmnl_net_clock_now().
  * \return Nanoseconds before the next deadline of \p timer, 0 if it passed.
- * \attention \p timer **MUST** be active: an inactive timer has no deadline.
+ * \attention \p timer **MUST** be active, as an inactive timer has no deadline.
  */
 VMNL_NET_API uint64_t vmnl_net_timer_remaining(const VmnlNetTimer *timer, uint64_t now);
 
@@ -85,20 +86,17 @@ VMNL_NET_API uint64_t vmnl_net_timer_remaining(const VmnlNetTimer *timer, uint64
 VMNL_NET_API void vmnl_net_timer_set_callback(VmnlNetTimer *timer, VmnlNetTimerCallback callback, void *data);
 
 /**
- * \brief Sets the interval of a timer, 0 at its creation.
+ * \brief Sets the interval of a periodic timer.
  * \param timer Timer to change.
- * \param interval Nanoseconds between the deadlines that follow the first one, 0 for a one-shot timer.
- * \remark The deadline already set is kept: \p interval applies from the next one.
+ * \param interval Nanoseconds between the deadlines after the next one, 0 for a one-shot timer, the default.
  */
 VMNL_NET_API void vmnl_net_timer_set_interval(VmnlNetTimer *timer, uint64_t interval);
 
 /**
- * \brief Starts a timer, or starts it again if it is active.
- * \param context Context in which \p timer waits for its deadlines.
+ * \brief Starts a timer, or restarts it if it is active.
+ * \param context Context that calls the timer, see vmnl_net_context_advance().
  * \param timer Timer to start.
- * \param timeout Nanoseconds before the first deadline, 0 for the next vmnl_net_context_advance().
- * \remark The next deadlines follow at the interval of \p timer, see vmnl_net_timer_set_interval().
- * \remark The deadlines stop at UINT64_MAX instead of wrapping around.
+ * \param timeout Nanoseconds before the first deadline, 0 for the next advance, the deadline stopping at UINT64_MAX.
  * \remark A timer active in another context moves to \p context.
  */
 VMNL_NET_API void vmnl_net_timer_start(VmnlNetContext *context, VmnlNetTimer *timer, uint64_t timeout);

@@ -7,7 +7,7 @@ Several presets of `CMakePresets.json` build and check the library, each run fro
 - CMake 3.28 or later and one of the compilers listed in the README
 - a C++17 compiler for the benchmarks
 - clang-format 22 for the formatting
-- GCC and gcovr 8.6 for the coverage
+- gcovr 8.6, with GCC or Clang, for the coverage
 - Doxygen 1.18 for the documentation
 
 ## Presets
@@ -26,4 +26,11 @@ Several presets of `CMakePresets.json` build and check the library, each run fro
 
 `cmake --list-presets=all` lists them with the names shown in the IDEs.
 
-To add the internal headers to the documentation, configure the `docs` preset with `-DVMNL_NET_BUILD_DOCS_INTERNAL=ON`, then build it with `cmake --build --preset docs`.
+To add the internal headers to the documentation, configure the `docs` preset with the internal option, then build it:
+
+```sh
+cmake --preset docs -DVMNL_NET_BUILD_DOCS_INTERNAL=ON
+cmake --build --preset docs
+```
+
+`cmake --workflow --preset docs` generates the public documentation again.

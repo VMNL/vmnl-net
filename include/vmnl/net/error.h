@@ -3,20 +3,20 @@
  *
  * \defgroup Error Error
  * \addtogroup Error
- * \brief Error codes of the library.
+ * \brief Error codes, and how a function reports a failure.
  *
- * A function that can fail gives its failure value in its documented return, and writes its code to a nullable #VmnlNetError pointer, its last parameter.
+ * A function that can fail tells it with its return value, and writes the reason to a nullable #VmnlNetError pointer, its last parameter.
  *
- * \attention A pointer parameter **MUST** not be NULL unless documented as nullable: like the libc, the library uses it without checking, so a NULL one is a bug of the caller, not an error code.
+ * \attention A pointer parameter **MUST** not be NULL unless documented as nullable, as the library uses it without checking, like the libc. A NULL one is a bug of the caller, not an error code.
  * \remark A destroy function accepts NULL and does nothing, like free().
  *
  * \par Codes
- * - The code is written on every call, #VMNL_NET_SUCCESS included: it only describes the last call that received it.
+ * - The code is written on every call, #VMNL_NET_SUCCESS included, so it only describes the last call that received it.
  * - E codes are named after errno, F codes are specific to the library.
  * - A code keeps its value on every platform and in every version, and the value of a removed code is never reused.
  *
  * \par Example
- * \snippet{trimleft} example_error_as_string.c as_string
+ * \snippet example_error_as_string.c as_string
  *
  * \see \ref example_error_as_string.c
  * @{
@@ -74,8 +74,8 @@ typedef uint32_t VmnlNetError;
 /**
  * \brief Gets the message of an error code.
  * \param error Error code.
- * \return Static string, cannot be NULL, "Unknown error" for a code the library does not define.
- * \remark O(1), no allocation, thread-safe.
+ * \return Static string, never NULL, "Unknown error" for a code the library does not define.
+ * \remark Thread-safe, without allocation.
  */
 VMNL_NET_API const char *vmnl_net_error_as_string(VmnlNetError error);
 

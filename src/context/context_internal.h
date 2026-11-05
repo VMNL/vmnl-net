@@ -25,7 +25,7 @@ extern "C" {
 struct VmnlNetContext {
     struct {
         struct VmnlNetListLink active; /*!< Active timers, sorted by deadline. */
-        uint64_t now; /*!< Time the timers start from: the one given to the last vmnl_net_context_advance(), or read with vmnl_net_clock_now() by vmnl_net_context_create() before. */
+        uint64_t now; /*!< Time the timeouts count from, given by the last vmnl_net_context_advance() or read with vmnl_net_clock_now() at the creation of the context. */
     } timers; /*!< Timers of the context. */
 };
 

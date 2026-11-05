@@ -3,15 +3,15 @@
  *
  * \defgroup Clock Clock
  * \addtogroup Clock
- * \brief Monotonic clock of the library.
+ * \brief Monotonic clock in nanoseconds, for durations and timeouts.
  *
- * vmnl_net_clock_now() counts nanoseconds from an unspecified origin, vmnl_net_clock_elapsed() measures from one of its readings, and the constants convert them, all as uint64_t.
+ * Times are nanoseconds in a uint64_t, from an unspecified origin.
  *
  * \par Measuring a duration
- * \snippet{trimleft} example_clock_elapsed.c elapsed
+ * \snippet example_clock_elapsed.c elapsed
  *
  * \par Checking a timeout
- * \snippet{trimleft} example_clock_elapsed.c timeout
+ * \snippet example_clock_elapsed.c timeout
  *
  * \see \ref example_clock_elapsed.c
  * @{
@@ -35,7 +35,7 @@ extern "C" {
 /**
  * \brief Gets the current time of a monotonic clock.
  * \return Nanoseconds since an unspecified origin.
- * \remark Only the difference between two calls is meaningful: the clock never goes back, unlike the wall clock.
+ * \remark Only the difference between two readings is meaningful, and the clock never goes back, unlike the wall clock.
  * \remark Keeps counting while the machine is asleep, on Linux, macOS and Windows. Thread-safe.
  */
 VMNL_NET_API uint64_t vmnl_net_clock_now(void);
@@ -43,8 +43,7 @@ VMNL_NET_API uint64_t vmnl_net_clock_now(void);
 /**
  * \brief Gets the time elapsed since a reading of the clock.
  * \param start Earlier result of vmnl_net_clock_now().
- * \return Nanoseconds since \p start.
- * \remark Saturates to 0 when \p start is in the future, instead of wrapping around to a huge duration.
+ * \return Nanoseconds since \p start, 0 if \p start is in the future.
  */
 VMNL_NET_API uint64_t vmnl_net_clock_elapsed(uint64_t start);
 

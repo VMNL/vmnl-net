@@ -1,6 +1,6 @@
 /**
  * \file allocator_internal.h
- * \brief Global allocator of the library.
+ * \brief Internal definition of the allocator.
  */
 
 /**
@@ -18,17 +18,16 @@ extern "C" {
 #endif
 
 /**
- * \brief Memory allocation functions.
+ * \brief Memory allocator object.
  */
 typedef struct {
-    void *(*allocate)(size_t size); /*!< Equivalent of malloc(). */
-    void *(*reallocate)(void *pointer, size_t size); /*!< Equivalent of realloc(). */
-    void (*deallocate)(void *pointer); /*!< Equivalent of free(). */
+    VmnlNetAllocatorAllocate allocate; /*!< Equivalent of malloc(). */
+    VmnlNetAllocatorReallocate reallocate; /*!< Equivalent of realloc(). */
+    VmnlNetAllocatorDeallocate deallocate; /*!< Equivalent of free(). */
 } VmnlNetAllocator;
 
 /**
- * \brief Allocator used by every allocation of the library.
- * \remark malloc(), realloc() and free() until vmnl_net_allocator_set() replaces them, read without lock.
+ * \brief Global allocator of every allocation of the library.
  */
 extern VmnlNetAllocator vmnl_net_allocator;
 

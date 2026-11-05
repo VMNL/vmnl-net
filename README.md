@@ -47,7 +47,7 @@ It is developed as the networking module of the [VMNL](https://github.com/VMNL/v
 
 ### Is it for you?
 
-A multiplayer game needs several network layers: UDP for the gameplay, reliable UDP for the events that must arrive, TCP and HTTP for the services around it, chat and voice between the players.
+A multiplayer game needs several network layers, with UDP for the gameplay, reliable UDP for the events that must arrive, TCP and HTTP for the services around it, and chat and voice between the players.
 Most libraries cover one of them, so a game combines several, each with its own threads, allocator and error codes.
 `vmnl_net` aims to cover them all in one C library.
 
@@ -67,7 +67,8 @@ Not made for:
 - The browser, mobile or consoles: Windows, macOS and Linux only
 
 > [!NOTE]
-> The network only progresses inside the calls of the application: if your game loop blocks or computes for long, run the network in a thread of its own.
+> The network only progresses inside the calls of the application.
+> If your game loop blocks or computes for long, run the network in a thread of its own.
 
 ## Architecture
 
@@ -75,7 +76,8 @@ The library is built in layers, each module pointing to the ones it uses.
 In the diagram, solid lines show what exists and dotted ones what is planned.
 
 Every module reports its failures with errors, so those arrows are left out.
-RUDP is a connection over UDP with reliable and unreliable channels: text chat uses the reliable ones, voice chat the unreliable ones, without retransmission.
+RUDP is a connection over UDP with reliable and unreliable channels.
+Text chat uses the reliable ones, voice chat the unreliable ones, without retransmission.
 
 ```mermaid
 block-beta
@@ -192,8 +194,10 @@ block-beta
     CHUNKED --> ALLOCATOR
     CHUNKED --> LIST
 
+    classDef default fill:none,stroke:#6f7e8e
     classDef title fill:none,stroke:none
-    classDef planned fill:none,stroke-dasharray: 4 3
+    classDef planned fill:none,stroke:#6f7e8e,stroke-dasharray: 4 3
+
     class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
     class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER,LOG planned
 ```
@@ -212,7 +216,8 @@ tar -xzf vmnl_net-v0.2.0-linux-x86_64-static.tar.gz
 ```
 
 It creates a folder named after the archive, with `include/` and `lib/`, plus `bin/` for the Windows DLL.
-Move it wherever you keep your dependencies, for example a `third_party` folder in your project: it is the prefix used in [Using the library](#using-the-library).
+Move it wherever you keep your dependencies, for example a `third_party` folder in your project.
+It is the prefix used in [Using the library](#using-the-library).
 
 ### From sources
 
@@ -224,7 +229,7 @@ You need CMake 3.28 or later (`cmake --version`) and one of these compilers:
 - MSVC from Visual Studio 2022 version 17.9 or later, with the Windows SDK 10.0.22621.0 or later
 
 > [!NOTE]
-> Their support is theoretical: the CI only builds and tests with the compilers of the latest GitHub runners.
+> Their support is theoretical, as the CI only builds and tests with the compilers of the latest GitHub runners.
 
 Then clone, build and install it:
 
@@ -264,7 +269,8 @@ export PKG_CONFIG_PATH=<prefix>/lib/pkgconfig
 cc main.c $(pkg-config --cflags --libs vmnl-net) -o main
 ```
 
-With the shared library, the program must find it at run time: copy `bin/vmnl_net.dll` next to the executable on Windows, or add `-Wl,-rpath,<prefix>/lib` on macOS and Linux.
+With the shared library, the program must find it at run time.
+Copy `bin/vmnl_net.dll` next to the executable on Windows, or add `-Wl,-rpath,<prefix>/lib` on macOS and Linux.
 
 Include the header of each module you use, such as `<vmnl/net/buffer.h>`, all described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
 

@@ -8,7 +8,7 @@ VmnlNetAllocator vmnl_net_allocator = {
     .deallocate = free,
 };
 
-void vmnl_net_allocator_set(void *(*allocate)(size_t size), void *(*reallocate)(void *pointer, size_t size), void (*deallocate)(void *pointer))
+void vmnl_net_allocator_set(VmnlNetAllocatorAllocate allocate, VmnlNetAllocatorReallocate reallocate, VmnlNetAllocatorDeallocate deallocate)
 {
     vmnl_net_allocator = (VmnlNetAllocator) {.allocate = allocate, .reallocate = reallocate, .deallocate = deallocate};
 }

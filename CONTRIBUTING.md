@@ -1,6 +1,6 @@
 # Contributing
 
-Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+Everyone taking part in the project follows the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ## Guides
 
@@ -12,6 +12,12 @@ Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUC
 
 The code must be clean and efficient, with the data structures and the algorithms that fit each problem.
 A change to the public API comes with its Doxygen comments and tests, a new module with an example in `examples/example_<module>_<feature>.c`, a bug fix with a regression test, and a new feature with its benchmarks and an update of the roadmap in the README.
+
+## AI
+
+AI tools are welcome, as long as the author reviews every line before pushing it and the code shows none of the usual patterns of generated code.
+Using AI to make commits without taking the time to actively understand the project is pointless.
+One push has one contributor, its author, with no AI co-author nor trailer such as `Co-Authored-By`.
 
 ## Commits and Pull Requests
 
