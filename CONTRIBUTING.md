@@ -1,6 +1,6 @@
 # Contributing
 
-Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
+Everyone taking part in the project follows the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
 
 ## Guides
 
