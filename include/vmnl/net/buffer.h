@@ -3,34 +3,18 @@
  *
  * \defgroup Buffer Buffer
  * \addtogroup Buffer
- * \brief Byte buffers of the library.
+ * \brief Byte queues written and read in place.
  *
- * A buffer is a queue of bytes: the first bytes written are the first read.
- * Its memory holds the stored bytes, written and not dropped yet, then the free space for the next ones:
- * \code
- * |               stored bytes               |                 free space                 |
- *   read with vmnl_net_buffer_data(),         written after vmnl_net_buffer_prepare(),
- *   dropped with vmnl_net_buffer_consume()    stored with vmnl_net_buffer_commit()
- * \endcode
- * vmnl_net_buffer_size() counts the stored bytes, and vmnl_net_buffer_capacity() the stored bytes and the free space.
+ * A buffer is a queue of bytes, read in the order they were written.
+ * Its memory holds the stored bytes, written and not consumed yet, then the free space for the next ones.
  *
- * Nothing is copied in or out of a buffer: its functions return views, a pointer and a size in its own memory, where the bytes are written or read directly, see VmnlNetBufferView.
- *
- * \par Writing
- * 1. vmnl_net_buffer_prepare() returns views on at least the free bytes asked for.
- * 2. The bytes are written into these views, with memcpy() or recv() for example.
- * 3. vmnl_net_buffer_commit() turns the bytes written into stored bytes.
- *
- * \par Reading
- * 1. vmnl_net_buffer_data() returns views on the stored bytes, and keeps them stored.
- * 2. The bytes are read from these views, with memcpy() or send() for example, as many times as needed.
- * 3. vmnl_net_buffer_consume() drops the bytes that were handled, which frees their space.
- *
- * Buffers are allocated with the global allocator, see vmnl_net_allocator_set().
+ * The buffer functions never copy bytes themselves. They return views, a pointer and a size in the memory of the buffer, where the application writes and reads directly, so recv() and send() need no intermediate copy, see VmnlNetBufferView.
  *
  * \par Types
+ * The four types answer different memory needs behind the same functions, as the views describe their memory whatever its layout.
+ *
  * |                      | Flat                          | Ring                    | Dynamic                         | Chunked                      |
- * | -------------------- | :---------------------------: | :---------------------: | :-----------------------------: | :--------------------------: |
+ * |----------------------|-------------------------------|-------------------------|---------------------------------|------------------------------|
  * | When full            | Fails, fixed memory           | Fails, fixed memory     | Grows, copies its bytes         | Adds a chunk, no copy        |
  * | Views returned       | 1                             | 1, or 2 when wrapped    | 1                               | 1 per chunk                  |
  * | Reading at an offset | Constant                      | Constant                | Constant                        | Walks the chunks before it   |
@@ -38,15 +22,36 @@
  * | Resizable            | No                            | Yes                     | Yes                             | Yes                          |
  * | Best use case        | Packets of known maximum size | Streams in fixed memory | Messages of unknown size        | Large transfers, like files  |
  *
- * Dynamic suits most uses: flat and ring keep a fixed memory, chunks grow without copying.
+ * Dynamic suits most uses, while flat and ring keep a fixed memory and chunked grows without copying.
+ *
+ * \par Creating a buffer
+ * Buffers are allocated with the global allocator, see vmnl_net_allocator_set(), and their type is picked from the table of the types above.
+ *
+ * \snippet example_buffer_basics.c create_buffer
+ *
+ * \par Writing to a view
+ * 1. vmnl_net_buffer_prepare() returns views on at least the free bytes asked for.
+ * 2. The bytes are written into these views, with memcpy() or recv() for example.
+ * 3. vmnl_net_buffer_commit() turns the bytes written into stored bytes.
+ *
+ * \snippet example_buffer_basics.c write_buffer
+ *
+ * \par Reading from a view
+ * 1. vmnl_net_buffer_data() returns views on the stored bytes, and keeps them stored.
+ * 2. The bytes are read from these views, with memcpy() or send() for example, as many times as needed.
+ * 3. vmnl_net_buffer_consume() drops the bytes that were handled, which frees their space.
+ *
+ * \snippet example_buffer_basics.c read_buffer
+ *
+ * \par Destroying a buffer
+ * Destroying a buffer frees its memory, and invalidates its views.
+ *
+ * \snippet example_buffer_basics.c destroy_buffer
  *
  * \par Holding a secret
- * No function erases bytes: consuming, clearing and destroying only move offsets or free memory.
+ * No function erases bytes, as consuming, clearing and destroying only move offsets or free memory.
  * Erase the bytes of a secret through the views of vmnl_net_buffer_data() before dropping them, with a call the compiler cannot remove, like explicit_bzero(), memset_s() or SecureZeroMemory().
- * Keep it in a chunked buffer, or in a ring buffer never resized: flat and dynamic buffers move their stored bytes, and resizing leaves a copy of them in the memory it frees, out of reach of the views.
- *
- * \par Example
- * \snippet{trimleft} example_buffer_read_write.c read_write
+ * Keep it in a chunked buffer, or in a ring buffer never resized. Flat and dynamic buffers move their stored bytes, and resizing leaves a copy of them in the memory it frees, out of reach of the views.
  * @{
  */
 
@@ -58,7 +63,6 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,14 +70,15 @@ extern "C" {
 
 /**
  * \brief Opaque buffer.
- * \attention A buffer **MUST** be used by one thread at a time: it has no lock.
+ * \attention A buffer **MUST** be used by one thread at a time, as it has no lock.
  */
 typedef struct VmnlNetBuffer VmnlNetBuffer;
 
 /**
  * \brief Contiguous bytes in the memory of a buffer.
- * \attention A view does not own its bytes: they **MUST** not be freed, the buffer frees them with vmnl_net_buffer_destroy().
- * \attention A view **MUST** not be used after a call that modifies its buffer: the bytes may have moved, or been dropped.
+ * \attention
+ * - The bytes of a view **MUST** not be freed, as the buffer owns them and frees them with vmnl_net_buffer_destroy().
+ * - A view **MUST** not be used after a call that modifies its buffer, as the bytes may have moved, or been dropped.
  * \remark The views returned by the buffer functions are never empty.
  */
 typedef struct VmnlNetBufferView {
@@ -94,13 +99,11 @@ typedef uint32_t VmnlNetBufferType;
 /**
  * \brief Creates a buffer.
  * \param type Type of the buffer, one of #VMNL_NET_BUFFER_FLAT, #VMNL_NET_BUFFER_RING, #VMNL_NET_BUFFER_DYNAMIC or #VMNL_NET_BUFFER_CHUNKED.
- * \param capacity Bytes allocated up front, 0 to allocate on the first write of a dynamic or chunked buffer.
+ * \param capacity Bytes allocated up front, rounded up to whole chunks for a chunked buffer, 0 to allocate on the first write of a dynamic or chunked buffer.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p type is unknown, or \p capacity is 0 for a flat or ring buffer.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return Created buffer on success, NULL otherwise.
- * \remark A dynamic or chunked buffer grows by itself when vmnl_net_buffer_prepare() lacks room, see vmnl_net_buffer_resize() to grow it up front.
- * \remark A chunked buffer rounds \p capacity up to whole chunks.
  */
 VMNL_NET_API VMNL_NET_NODISCARD VmnlNetBuffer *vmnl_net_buffer_create(VmnlNetBufferType type, size_t capacity, VmnlNetError *error);
 
@@ -126,71 +129,63 @@ VMNL_NET_API size_t vmnl_net_buffer_capacity(const VmnlNetBuffer *buffer);
 VMNL_NET_API bool vmnl_net_buffer_is_empty(const VmnlNetBuffer *buffer);
 
 /**
- * \brief Drops every stored byte of a buffer.
+ * \brief Drops every stored byte of a buffer, and keeps its capacity.
  * \param buffer Buffer to clear.
- * \remark Keeps the capacity.
  */
 VMNL_NET_API void vmnl_net_buffer_clear(VmnlNetBuffer *buffer);
 
 /**
  * \brief Grows the capacity of a buffer.
  * \param buffer Buffer to grow.
- * \param capacity Capacity to grow to.
+ * \param capacity Capacity to grow to, rounded up to whole chunks for a chunked buffer.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOTSUP: \p buffer is flat.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return true on success, false otherwise.
- * \remark Does nothing, successfully, if \p buffer already has \p capacity bytes or more.
- * \remark A chunked buffer rounds \p capacity up to whole chunks.
+ * \return true on success, including when \p buffer already has \p capacity bytes or more, false otherwise.
  */
 VMNL_NET_API bool vmnl_net_buffer_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error);
 
 /**
  * \brief Reduces the capacity of a buffer.
  * \param buffer Buffer to shrink.
- * \param capacity Capacity to reduce to.
+ * \param capacity Capacity to reduce to, 0 to free all the memory of a dynamic or chunked buffer until its next write.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p capacity is less than vmnl_net_buffer_size(), or 0 for a ring buffer.
  * - #VMNL_NET_ENOTSUP: \p buffer is flat.
  * - #VMNL_NET_ENOMEM: memory allocation failure.
- * \return true on success, false otherwise.
- * \remark Does nothing, successfully, if \p buffer already has \p capacity bytes or less.
- * \remark Shrinking a dynamic or chunked buffer to 0 frees all its memory, allocated again on the next write.
- * \remark A chunked buffer frees only its free chunks, from the end: its capacity is rounded up to whole chunks, and stays above \p capacity when its stored bytes span more chunks.
+ * \return true on success, including when \p buffer already has \p capacity bytes or less, false otherwise.
+ * \remark A chunked buffer frees only its free chunks, from the end, so its capacity stays a whole number of chunks, above \p capacity when its stored bytes span more chunks.
  */
 VMNL_NET_API bool vmnl_net_buffer_shrink(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error);
 
 /**
- * \brief Describes free space of a buffer to write into, without copy.
+ * \brief Describes free space of a buffer to write into.
  * \param buffer Buffer to write to.
- * \param nbytes Free bytes needed, at least.
- * \param views Free space, in order.
+ * \param nbytes Free bytes needed, at least, 0 for no view.
+ * \param views Free space in order, at least \p nbytes and as much as the buffer has.
  * \param nviews Number of elements of \p views on input, number of views filled on output.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
  * - #VMNL_NET_ENOBUFS: \p buffer is flat or ring, and lacks \p nbytes of free space.
  * - #VMNL_NET_ENOMEM: memory allocation failure, or \p nbytes too large to ever fit.
  * \return true on success, false otherwise.
- * \attention The return value **MUST** be checked: \p views describes nothing after a failure.
- * \remark The views describe at least \p nbytes, and as much free space as they can, so one recv() can receive more.
- * \remark Describes no view, successfully, when \p nbytes is 0.
+ * \attention The return value **MUST** be checked, as \p views describes nothing after a failure.
  */
 VMNL_NET_API VMNL_NET_NODISCARD bool vmnl_net_buffer_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 
 /**
  * \brief Appends the first prepared bytes to the stored bytes of a buffer.
  * \param buffer Buffer written to.
- * \param nbytes Bytes written at the start of the views of the last vmnl_net_buffer_prepare(), in order.
+ * \param nbytes Bytes written at the start of the views of the last vmnl_net_buffer_prepare(), in order, 0 for none.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EINVAL: \p nbytes is more than the free space after the stored bytes.
  * \return true on success, false otherwise.
- * \attention The bytes **MUST** be written in the views of the last vmnl_net_buffer_prepare(): nothing is copied, they are only counted as stored.
- * \remark Stores nothing, successfully, when \p nbytes is 0.
+ * \attention The bytes **MUST** be written in the views of the last vmnl_net_buffer_prepare(), as nothing is copied and they are only counted as stored.
  */
 VMNL_NET_API bool vmnl_net_buffer_commit(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetError *error);
 
 /**
- * \brief Describes the stored bytes of a buffer to read, without copy.
+ * \brief Describes the stored bytes of a buffer to read.
  * \param buffer Buffer to read.
  * \param offset Stored bytes to skip from the first one.
  * \param views Stored bytes from \p offset, in order.
@@ -238,8 +233,3 @@ VMNL_NET_API void vmnl_net_buffer_destroy(VmnlNetBuffer *buffer);
 #endif /* !VMNL_NET_BUFFER_H */
 
 /** @} */
-
-/**
- * \example example_buffer_read_write.c
- * Writes bytes into a buffer, then reads and drops them.
- */
