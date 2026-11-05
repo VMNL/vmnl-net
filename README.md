@@ -192,8 +192,10 @@ block-beta
     CHUNKED --> ALLOCATOR
     CHUNKED --> LIST
 
+    classDef default fill:none,stroke:#6f7e8e
     classDef title fill:none,stroke:none
-    classDef planned fill:none,stroke-dasharray: 4 3
+    classDef planned fill:none,stroke:#6f7e8e,stroke-dasharray: 4 3
+
     class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
     class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER,LOG planned
 ```

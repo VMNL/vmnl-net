@@ -1,19 +1,18 @@
 PROJECT_NAME            = "VMNL / Network@VMNL_NET_DOCS_TITLE_SUFFIX@"
 PROJECT_NUMBER          = @PROJECT_VERSION@
 PROJECT_BRIEF           = "@PROJECT_DESCRIPTION@"
-PROJECT_LOGO            = docs/logo.png
-PROJECT_ICON            = docs/logo.png
 OUTPUT_DIRECTORY        = @PROJECT_BINARY_DIR@/docs
 INPUT                   = README.md CONTRIBUTING.md .github/CODE_OF_CONDUCT.md include/vmnl docs @VMNL_NET_DOCS_EXTRA_INPUT@
 FILE_PATTERNS           = *.h *.md *.dox
 RECURSIVE               = YES
 EXAMPLE_PATH            = examples
-LAYOUT_FILE             = docs/DoxygenLayout.xml
 USE_MDFILE_AS_MAINPAGE  = README.md
 MARKDOWN_ID_STYLE       = GITHUB
 STRIP_FROM_PATH         = . include
 STRIP_FROM_INC_PATH     = include
 OPTIMIZE_OUTPUT_FOR_C   = YES
+ALIASES                 = "iso{2}=<a href=\"https://en.cppreference.com/w/c/\2/\1\">\1()</a>"
+ALIASES                 += "posix{2}=<a href=\"https://man7.org/linux/man-pages/man\2/\1.\2.html\">\1()</a>"
 ENABLE_PREPROCESSING    = YES
 MACRO_EXPANSION         = YES
 EXPAND_ONLY_PREDEF      = YES
@@ -32,7 +31,7 @@ GENERATE_TREEVIEW       = YES
 DISABLE_INDEX           = NO
 FULL_SIDEBAR            = NO
 HTML_COLORSTYLE         = LIGHT
-HTML_EXTRA_STYLESHEET   = $(DOXYGEN_THEME) docs/vmnl.css
+HTML_EXTRA_STYLESHEET   = $(DOXYGEN_THEME)
 SEARCHENGINE            = YES
 HAVE_DOT                = @VMNL_NET_DOCS_GRAPHS@
 DOT_IMAGE_FORMAT        = svg
