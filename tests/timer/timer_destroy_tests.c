@@ -29,12 +29,10 @@ UTEST_F(vmnl_net_timer_destroy, frees_timer)
 
 UTEST_F(vmnl_net_timer_destroy, removes_active_timer)
 {
-    uint64_t remaining;
-
     vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, TIMEOUT);
     vmnl_net_timer_destroy(utest_fixture->timer);
     utest_fixture->timer = NULL;
-    EXPECT_FALSE(vmnl_net_context_remaining(utest_fixture->context, START_TIME, &remaining));
+    EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME), UINT64_MAX);
 }
 
 UTEST_F(vmnl_net_timer_destroy, frees_timer_in_one_shot_callback)
