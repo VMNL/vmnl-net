@@ -3,9 +3,9 @@
  *
  * \defgroup Allocator Allocator
  * \addtogroup Allocator
- * \brief Memory allocator of the library.
+ * \brief Replaceable global allocator.
  *
- * Every allocation of the library goes through one global allocator: malloc(), realloc() and free() until vmnl_net_allocator_set() replaces them.
+ * Every allocation of the library goes through one global allocator, which uses \iso{malloc,memory}, \iso{realloc,memory} and \iso{free,memory} until vmnl_net_allocator_set() replaces them.
  *
  * \par Example
  * Example to be written.
@@ -24,17 +24,38 @@ extern "C" {
 #endif
 
 /**
- * \brief Sets the allocator of the whole library.
- * \param allocate Replacement of malloc().
- * \param reallocate Replacement of realloc().
- * \param deallocate Replacement of free().
- * \attention The 3 functions **MUST** not be NULL: NULL does not restore the default allocator, see the remark.
- * \attention It **MUST** be called before any other function, or once no object is alive: an object allocated by the previous allocator would be freed by the new one.
- * \attention It **MUST** be called while no other thread uses the library: the allocator is a global variable, written without lock.
- * \attention The functions **MUST** be thread-safe and keep the contract of their standard counterpart, alignment included: the library stores any type in the memory they return.
+ * \brief Function that allocates memory, following malloc()'s contract.
+ * \param size Number of bytes to allocate.
+ * \return Allocated memory on success, NULL otherwise.
+ */
+typedef void *(*VmnlNetAllocatorAllocate)(size_t size);
+
+/**
+ * \brief Function that reallocates memory, following realloc()'s contract.
+ * \param pointer Memory to reallocate, nullable.
+ * \param size Number of bytes to reallocate to.
+ * \return Reallocated memory on success, NULL otherwise.
+ */
+typedef void *(*VmnlNetAllocatorReallocate)(void *pointer, size_t size);
+
+/**
+ * \brief Function that releases memory, following free()'s contract.
+ * \param pointer Memory to release, nullable.
+ */
+typedef void (*VmnlNetAllocatorDeallocate)(void *pointer);
+
+/**
+ * \brief Replaces the global allocator's functions.
+ * \param allocate Function allocating memory.
+ * \param reallocate Function reallocating memory.
+ * \param deallocate Function releasing memory.
+ * \attention
+ * - This function **MUST** be called before any other function of the library, or while no object of the library is alive, as an object allocated by the previous allocator would be freed by the new one.
+ * - This function **MUST** be called while no other thread uses the library, as the allocator has no locks.
+ * - The 3 functions **MUST** be thread-safe when several threads use the library, as every thread allocates through this global allocator.
  * \remark Passing malloc, realloc and free restores the default allocator.
  */
-VMNL_NET_API void vmnl_net_allocator_set(void *(*allocate)(size_t size), void *(*reallocate)(void *pointer, size_t size), void (*deallocate)(void *pointer));
+VMNL_NET_API void vmnl_net_allocator_set(VmnlNetAllocatorAllocate allocate, VmnlNetAllocatorReallocate reallocate, VmnlNetAllocatorDeallocate deallocate);
 
 #ifdef __cplusplus
 }
