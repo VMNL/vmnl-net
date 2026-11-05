@@ -1,6 +1,6 @@
 /**
  * \file error_internal.h
- * \brief Internal helpers of the error codes.
+ * \brief Internal definition of the error codes.
  */
 
 /**

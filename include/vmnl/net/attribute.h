@@ -3,13 +3,19 @@
  *
  * \defgroup Attribute Attribute
  * \addtogroup Attribute
- * \brief Compiler attributes of the library.
+ * \brief Additional compiler checks on the use of the API.
  *
  * \par Example
  * \code
- * VMNL_NET_NODISCARD VmnlNetContext *vmnl_net_context_create(VmnlNetError *error);
+ * VMNL_NET_API VMNL_NET_NODISCARD bool vmnl_net_buffer_prepare(VmnlNetBuffer *, size_t, VmnlNetBufferView *, size_t *, VmnlNetError *);
  *
- * vmnl_net_context_create(NULL); // warning: ignoring return value
+ * VmnlNetBufferView prepare_buffer(VmnlNetBuffer *buffer)
+ * {
+ *     VmnlNetBufferView view;
+ *
+ *     vmnl_net_buffer_prepare(buffer, 42, &view, &(size_t) {1}, NULL); // warning: ignoring return value, does it succeed?
+ *     return view;
+ * }
  * \endcode
  * @{
  */
@@ -20,7 +26,7 @@
 /**
  * \def VMNL_NET_NODISCARD
  * \brief Warns when the result of a function is ignored.
- * \remark `warn_unused_result` on GCC and clang, `_Check_return_` on MSVC, which checks it with /analyze only, nothing elsewhere.
+ * \remark `warn_unused_result` attribute on GCC and clang, `_Check_return_` on MSVC, which checks it with /analyze only, nothing elsewhere.
  */
 #if defined(_MSC_VER) && !defined(__clang__)
 #include <sal.h>

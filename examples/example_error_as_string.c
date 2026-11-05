@@ -1,7 +1,5 @@
 #include <vmnl/net/buffer.h>
-#include <vmnl/net/error.h>
 
-#include <stdbool.h>
 #include <stdio.h>
 
 //! [as_string]
@@ -9,11 +7,11 @@ static void drop_header(VmnlNetBuffer *buffer)
 {
     VmnlNetError error = VMNL_NET_SUCCESS;
 
-    // Fails while the buffer holds less than 64 bytes
+    // Fails while the buffer holds fewer than 64 bytes.
     if (vmnl_net_buffer_consume(buffer, 64, &error) == false) {
         printf("%s\n", vmnl_net_error_as_string(error)); // Invalid argument
     }
-    // Fails too, without writing a code
+    // Fails too, without writing a code.
     vmnl_net_buffer_consume(buffer, 64, NULL);
 }
 //! [as_string]

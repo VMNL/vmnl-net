@@ -3,9 +3,9 @@
  *
  * \defgroup Version Version
  * \addtogroup Version
- * \brief Version of the library.
+ * \brief Version of the library linked at run time.
  *
- * vmnl_net_version() packs the version in one integer, (MAJOR << 16) | (MINOR << 8) | PATCH, so two versions compare with a single comparison.
+ * vmnl_net_version() packs the version in one integer, (MAJOR << 16) | (MINOR << 8) | PATCH, so two versions compare as integers.
  * Before 1.0.0, a new minor version may break the API.
  *
  * \par Example
@@ -51,7 +51,7 @@ VMNL_NET_API uint32_t vmnl_net_version(void);
 
 /**
  * \brief Gets the version of the library as text.
- * \return Static string "MAJOR.MINOR.PATCH", cannot be NULL.
+ * \return Static string "MAJOR.MINOR.PATCH", never NULL.
  */
 VMNL_NET_API const char *vmnl_net_version_string(void);
 
