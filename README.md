@@ -32,10 +32,9 @@ TCP, UDP, reliable UDP (RUDP) and socket polling for games and real-time applica
 
 - [Overview](#overview)
 - [Architecture](#architecture)
-- [Installation](#installation)
 - [Technical Documentation](#technical-documentation)
+- [Installation](#installation)
 - [Roadmap](#roadmap)
-- [References](#references)
 - [Author](#author)
 - [License](#license)
 
@@ -53,7 +52,7 @@ Most libraries cover one of them, so a game combines several, each with its own 
 
 Made for:
 
-- One library for TCP, UDP, reliable UDP, HTTP and voice, with one allocator, logging hooks and one way to report errors
+- One library for TCP, UDP, reliable UDP, HTTP and voice, with one allocator and one way to report errors
 - No background threads: the library only runs inside the calls of the application, so it takes no lock, has no data race, and a bug reproduces under a debugger
 - No buffer lent to a pending operation: each call returns at once and the library owns its buffers, so none can outlive the request that uses it, unlike completion-based APIs
 - Native polling with epoll, kqueue or WSAPoll, IPv4 and IPv6
@@ -154,7 +153,7 @@ block-beta
         CONTEXT["<sup>0.1</sup> context"]
         ERROR["<sup>0.1</sup> errors"]
         VERSION["<sup>0.1</sup> version"]
-        LOG["<sup>0.3</sup> logging"]
+        space
     end
 
     block:INTERNAL
@@ -199,8 +198,16 @@ block-beta
     classDef planned fill:none,stroke:#6f7e8e,stroke-dasharray: 4 3
 
     class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
-    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER,LOG planned
+    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER planned
 ```
+
+## Technical Documentation
+
+The CI generates the API reference with Doxygen from the public headers and publishes it on [GitHub Pages](https://vmnl.github.io/vmnl-net/).
+The papers and articles the library is built on are listed in [docs/references.md](docs/references.md).
+The technical watch behind its design choices is logged, with dates, in [docs/watch.md](docs/watch.md).
+The architecture of the library is described in [docs/architecture.md](docs/architecture.md).
+Its structuring decisions are recorded in [docs/decisions](docs/decisions/README.md).
 
 ## Installation
 
@@ -231,25 +238,46 @@ You need CMake 3.28 or later (`cmake --version`) and one of these compilers:
 > [!NOTE]
 > Their support is theoretical, as the CI only builds and tests with the compilers of the latest GitHub runners.
 
-Then clone, build and install it:
+Then clone and build the static library:
 
 ```sh
 git clone https://github.com/VMNL/vmnl-net.git
 cd vmnl-net
 cmake --workflow --preset release
-cmake --install build/release --config Release --prefix <prefix>
 ```
 
-The `release` preset builds the static library in Release.
-For the shared library, configure it with `cmake --preset release -DBUILD_SHARED_LIBS=ON`, then build it with `cmake --build --preset release`.
-Added to another CMake project with `add_subdirectory` or `FetchContent`, the library generates no install rules unless `VMNL_NET_INSTALL` is `ON`.
+Or the shared library:
+
+```sh
+cmake --preset release -DBUILD_SHARED_LIBS=ON
+cmake --build --preset release
+```
+
+`cmake --install build/release --config Release` installs it, with administrator rights, into `/usr/local` on macOS and Linux and `C:/Program Files/vmnl_net` on Windows.
+
 The other presets, for the tests, the sanitizers, the coverage, the benchmarks and the documentation, are listed in [docs/build.md](docs/build.md).
 
 ### Using the library
 
-The prefix is the extracted archive folder, or the `--prefix` given to `cmake --install`.
+With `FetchContent`, CMake downloads and builds the library with your project, with nothing to install:
 
-With CMake, pass it to `CMAKE_PREFIX_PATH` when configuring your project:
+```cmake
+include(FetchContent)
+
+FetchContent_Declare(vmnl_net
+  GIT_REPOSITORY https://github.com/VMNL/vmnl-net.git
+  GIT_TAG v0.2.0
+)
+FetchContent_MakeAvailable(vmnl_net)
+
+target_link_libraries(my_app PRIVATE vmnl::net)
+```
+
+Built this way, or with `add_subdirectory`, the library leaves out its tests and examples, and generates no install rules unless `VMNL_NET_INSTALL` is `ON`.
+
+Installed, the library is found from its prefix, which is the extracted archive folder or the folder `cmake --install` copied it to.
+
+With CMake, pass the prefix to `CMAKE_PREFIX_PATH` when configuring your project:
 
 ```sh
 cmake -B build -DCMAKE_PREFIX_PATH=<prefix>
@@ -269,14 +297,12 @@ export PKG_CONFIG_PATH=<prefix>/lib/pkgconfig
 cc main.c $(pkg-config --cflags --libs vmnl-net) -o main
 ```
 
+With the static library, use `pkg-config --static --libs`, which adds the system libraries it needs, like `ws2_32` on Windows.
+
 With the shared library, the program must find it at run time.
 Copy `bin/vmnl_net.dll` next to the executable on Windows, or add `-Wl,-rpath,<prefix>/lib` on macOS and Linux.
 
 Include the header of each module you use, such as `<vmnl/net/buffer.h>`, all described in the [API reference](https://vmnl.github.io/vmnl-net/topics.html).
-
-## Technical Documentation
-
-The CI generates the API reference with Doxygen from the public headers and publishes it on [GitHub Pages](https://vmnl.github.io/vmnl-net/).
 
 ## Roadmap
 
@@ -286,7 +312,7 @@ Each version keeps its target month, and gets its release date once it is implem
 | --- | --- | --- | --- |
 | `0.1.0` | Build system, CI and packaging; core: library context, error codes and custom allocator | October 2026 | October 4, 2026 |
 | `0.2.0` | Dynamic and ring byte buffers; monotonic clock and application-driven timers | November 2026 | October 11, 2026 |
-| `0.3.0` | Flat and chunked buffers, reworked buffer API and timers; non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets; logging hooks | December 2026 |  |
+| `0.3.0` | Flat and chunked buffers, reworked buffer API and timers; non-blocking socket wrapper over Winsock2 and BSD sockets, TCP and UDP sockets | December 2026 |  |
 | `0.4.0` | Serialization: bit packing, fixed-size and variable-length integers, with bounds checking | January 2027 |  |
 | `0.5.0` | Reliable UDP: connections, sequenced unreliable channels, ordered reliable channels with acknowledgments and retransmission, round-trip time and packet loss statistics | March 2027 |  |
 | `0.6.0` | Polling for many sockets with WSAPoll, kqueue or epoll and DNS resolution to IPv4 and IPv6; the last `0.6.x` is the beta | April 2027 |  |
@@ -295,51 +321,6 @@ Each version keeps its target month, and gets its release date once it is implem
 | `0.9.0` | Text chat over reliable channels and voice chat over unreliable channels | November 2027 |  |
 | `0.10.0` | Encrypted traffic between clients and servers | December 2027 |  |
 | `1.0.0` | First stable release, with a stable C ABI | February 2028 |  |
-
-## References
-
-The papers and articles the library is built on, in roadmap order.
-
-### Buffers (0.2.0, 0.3.0)
-
-- [Dynamic buffer requirements](https://www.boost.org/doc/libs/latest/doc/html/boost_asio/reference/DynamicBuffer_v2.html) of Boost.Asio and [Networking TS changes to enable better DynamicBuffer composition](https://open-std.org/jtc1/sc22/WG21/docs/papers/2020/p1790r1.html) by Christopher Kohlhoff (WG21, 2020): the prepare, commit, data and consume model, the offset reads of its version 2, and the copy problem behind it, which a C handle does not have.
-- [ByteBuf](https://netty.io/4.1/api/io/netty/buffer/ByteBuf.html) of Netty: the same model in Java, with reader and writer indices, and an explicit compaction that the library does in prepare().
-- [basic_multi_buffer](https://www.boost.org/doc/libs/latest/libs/beast/doc/html/beast/ref/boost__beast__basic_multi_buffer.html) of Boost.Beast: the same model over a list of blocks, which grows without copying its bytes, like the chunked buffer.
-- [The Growth Factor Debate: 1.5x, 2x, or Something Else?](https://pablogs.dev/posts/growth-factor-dynamic-array-1.5-vs-2/) by pablo (2026): why the dynamic buffer grows by 1.5 rather than 2.
-
-### Timers (0.2.0, 0.3.0)
-
-- [Hashed and Hierarchical Timing Wheels](http://www.cs.columbia.edu/~nahum/w6998/papers/sosp87-timing-wheels.pdf) by George Varghese and Tony Lauck (SOSP, 1987): the timer wheels I compare with the sorted list and the heap.
-- [Reinventing the timer wheel](https://lwn.net/Articles/646950/) by Jonathan Corbet (LWN, 2015): how Linux removed the cascading from its timer wheel, trading accuracy for timeouts that are almost always canceled before they expire.
-- [The high-resolution timer API](https://lwn.net/Articles/167897/) by Jonathan Corbet (LWN, 2006): the timers of Linux that must not run late, kept in a red-black tree, whose periodic ones count the periods they missed, and which a cancel cannot stop while their callback runs.
-
-### Sockets (0.3.0)
-
-- [Beej's Guide to Network Programming](https://beej.us/guide/bgnet/) by Brian Hall: my starting point for sockets, DNS resolution and polling.
-- [RFC 768](https://www.rfc-editor.org/rfc/rfc768) and [RFC 9293](https://www.rfc-editor.org/rfc/rfc9293): the UDP and TCP specifications the sockets follow.
-
-### Serialization (0.4.0)
-
-- [Reading and Writing Packets](https://gafferongames.com/post/reading_and_writing_packets/) and [Serialization Strategies](https://gafferongames.com/post/serialization_strategies/) by Glenn Fiedler (Gaffer On Games): bit packing, and the bounds checks that reject malicious packets.
-
-### Reliable UDP (0.5.0)
-
-- [Game networking articles](https://gafferongames.com/categories/game-networking/) by Glenn Fiedler (Gaffer On Games): my main source on UDP, for connections, acknowledgments, round-trip time and packet loss.
-- [Quake 3 Source Code Review: Network Model](https://fabiensanglard.net/quake3/network.php) by Fabien Sanglard: how a shipped game sends its snapshots over UDP, with delta compression.
-- [RFC 9002](https://www.rfc-editor.org/rfc/rfc9002): loss detection and congestion control in QUIC, the reference for retransmissions.
-
-### Polling and DNS (0.6.0)
-
-- [WSAPoll](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll), [kqueue(2)](https://man.freebsd.org/cgi/man.cgi?query=kqueue) and [epoll(7)](https://man7.org/linux/man-pages/man7/epoll.7.html): the exact behavior of each polling API.
-- [Ringing in a new asynchronous I/O API](https://lwn.net/Articles/776703/) by Jonathan Corbet (LWN, 2019) and [On the way to io_uring networking](https://www.youtube.com/watch?v=O0NMUvThafI) by Pavel Begunkov (Kernel Recipes, 2023): io_uring, the completion model of Linux, which questions the readiness model of the library.
-
-### Fragmentation (0.7.0)
-
-- [Packet Fragmentation and Reassembly](https://gafferongames.com/post/packet_fragmentation_and_reassembly/) by Glenn Fiedler (Gaffer On Games): fragment headers, a conservative MTU of 1200 bytes, and the checks against malicious fragments.
-
-### HTTP (0.8.0)
-
-- [RFC 9112](https://www.rfc-editor.org/rfc/rfc9112): the HTTP/1.1 specification the HTTP client follows.
 
 ## Author
 
