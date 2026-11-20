@@ -22,6 +22,51 @@ The comparison and its sources are in the [research log](../watch.md).
 Option 3: a Handle base for the destruction, the poll and the native handle, with the families Stream, Listener, Message, Datagram and Notifier.
 Each kind of socket implements the operations of its family through a table, like the buffers, and takes its options through setters.
 
+The families and the kinds planned for them, with a solid line from a family to its kinds, and a dotted one from a kind to what it runs over or wraps:
+
+```mermaid
+flowchart TB
+    Handle["Handle"]
+    Stream["Stream"]
+    Listener["Listener"]
+    Message["Message"]
+    Datagram["Datagram"]
+    Notifier["Notifier"]
+    TCP["TCP"]
+    LocalStream["Local"]
+    Pair["Pair"]
+    TLS["TLS"]
+    TCPListener["TCP"]
+    LocalListener["Local"]
+    RUDPListener["RUDP"]
+    RUDP["RUDP"]
+    UDP["UDP"]
+    Simulated["Simulated"]
+    Crypt["Crypt"]
+
+    Handle --- Stream
+    Handle --- Listener
+    Handle --- Message
+    Handle --- Datagram
+    Handle --- Notifier
+    Stream --- TCP
+    Stream --- LocalStream
+    Stream --- Pair
+    Stream --- TLS
+    Listener --- TCPListener
+    Listener --- LocalListener
+    Listener --- RUDPListener
+    Message --- RUDP
+    Datagram --- UDP
+    Datagram --- Simulated
+    Datagram --- Crypt
+    RUDP -. "runs over" .-> UDP
+    RUDPListener -. "runs over" .-> UDP
+    TLS -. "wraps" .-> Stream
+    Simulated -. "wraps" .-> Datagram
+    Crypt -. "wraps" .-> Datagram
+```
+
 **Reason**
 
 Invalid combinations do not compile, a new family or a new kind reuses the base, and the operation tables already work for the buffers.
