@@ -16,21 +16,16 @@ Several presets of `CMakePresets.json` build and check the library, each run fro
 | --- | --- | --- |
 | `release` | Builds the library in Release | All |
 | `debug` | Builds the library in Debug | All |
-| `test` | Builds and runs the tests in Debug | All |
-| `sanitize` | Runs the tests under AddressSanitizer and UndefinedBehaviorSanitizer | Linux, macOS |
-| `coverage` | Measures the coverage of the tests, which must stay at 100% of lines and branches | Linux, macOS |
+| `test` | Builds and runs the tests in Release, like the CI | All |
+| `sanitize-address` | Runs the tests under AddressSanitizer and UndefinedBehaviorSanitizer, in RelWithDebInfo | Linux, macOS |
+| `sanitize-memory` | Runs the tests under MemorySanitizer, built with Clang, in RelWithDebInfo | Linux |
+| `coverage` | Measures the coverage of the tests in Debug, which must stay at 100% of lines and branches, with its report in `build/coverage/report/html` | Linux, macOS |
 | `bench` | Builds the benchmarks in Release, run with `./build/bench/bin/vmnl_net_benchmarks` | All |
 | `docs` | Generates the documentation in `build/docs/docs/html`, and fails on any warning | All |
+| `docs-internal` | Generates the documentation with the internal headers, in `build/docs-internal/docs/html` | All |
 | `format` | Formats the sources with clang-format | All |
 | `format-check` | Checks the formatting, like the CI | All |
 
 `cmake --list-presets=all` lists them with the names shown in the IDEs.
 
-To add the internal headers to the documentation, configure the `docs` preset with the internal option, then build it:
-
-```sh
-cmake --preset docs -DVMNL_NET_BUILD_DOCS_INTERNAL=ON
-cmake --build --preset docs
-```
-
-`cmake --workflow --preset docs` generates the public documentation again.
+The presets read the environment variable `VMNL_NET_WARNINGS_AS_ERRORS` into the option of the same name, which turns the warnings of the library, the tests, the benchmarks and the examples into errors. The CI sets it to `ON`, so a warning fails its build. Set it to reproduce a CI failure locally, as in `VMNL_NET_WARNINGS_AS_ERRORS=ON cmake --workflow --preset test`.
