@@ -65,6 +65,14 @@ flowchart TB
     TLS -. "wraps" .-> Stream
     Simulated -. "wraps" .-> Datagram
     Crypt -. "wraps" .-> Datagram
+
+    subgraph Excluded["Excluded: not the same behavior on Windows, macOS and Linux"]
+        direction LR
+        LocalDatagram["Local datagram"]
+        LocalSeqpacket["Local SOCK_SEQPACKET"]
+        Pipe["Pipe, FIFO"]
+    end
+    LocalListener ~~~ Excluded
 ```
 
 **Reason**
@@ -76,3 +84,4 @@ Invalid combinations do not compile, a new family or a new kind reuses the base,
 - The options are setters, so creating a socket and binding or connecting it stay separate calls, and the setters that only work before a bind carry that contract in their documentation.
 - The kinds without a socket of the system, like RUDP, an in-memory pair or a decorator, cannot use the setters of the system sockets.
 - Each socket costs an allocation, behind its opaque handle.
+- The kinds that do not behave the same on Windows, macOS and Linux stay out of the public API: local datagrams, which Windows refuses with `WSAEAFNOSUPPORT`, local `SOCK_SEQPACKET`, which only Linux has, and pipes, which `WSAPoll` cannot wait on.
