@@ -207,7 +207,7 @@ The CI generates the API reference with Doxygen from the public headers and publ
 The papers and articles the library is built on are listed in [docs/references.md](docs/references.md).
 The technical watch behind its design choices is logged, with dates, in [docs/watch.md](docs/watch.md).
 The architecture of the library is described in [docs/architecture.md](docs/architecture.md).
-Its structuring decisions are recorded in [docs/decisions](docs/decisions/README.md).
+Its structuring decisions are recorded in [docs/decisions](https://github.com/VMNL/vmnl-net/tree/main/docs/decisions).
 
 ## Installation
 

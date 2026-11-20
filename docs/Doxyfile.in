@@ -5,6 +5,7 @@ OUTPUT_DIRECTORY        = @PROJECT_BINARY_DIR@/docs
 INPUT                   = README.md CONTRIBUTING.md .github/CODE_OF_CONDUCT.md include/vmnl docs @VMNL_NET_DOCS_EXTRA_INPUT@
 FILE_PATTERNS           = *.h *.md *.dox
 RECURSIVE               = YES
+EXCLUDE                 = docs/decisions
 EXAMPLE_PATH            = examples
 USE_MDFILE_AS_MAINPAGE  = README.md
 MARKDOWN_ID_STYLE       = GITHUB
