@@ -27,6 +27,10 @@ cmake_path(RELATIVE_PATH CMAKE_INSTALL_PREFIX
   OUTPUT_VARIABLE VMNL_NET_PC_PREFIX
 )
 
+if(WIN32)
+    set(VMNL_NET_PC_LIBS_PRIVATE -lws2_32)
+endif()
+
 configure_file(cmake/vmnl-net.pc.in vmnl-net.pc @ONLY)
 
 install(FILES ${PROJECT_BINARY_DIR}/vmnl-net.pc
