@@ -1,5 +1,12 @@
 #include <vmnl/net/clock.h>
 
+// before utest.h, which reuses the declarations of windows.h when it is included first
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
+
 #include "utest.h"
 
 UTEST(vmnl_net_clock_now, ticks_forward)

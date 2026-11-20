@@ -4,49 +4,56 @@
     {
       "name": "base",
       "hidden": true,
-      "binaryDir": "${sourceDir}/build/${presetName}"
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "VMNL_NET_BUILD_TESTS": "OFF",
+        "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
+        "VMNL_NET_BUILD_DOCS": "OFF",
+        "VMNL_NET_BUILD_DOCS_INTERNAL": "OFF",
+        "VMNL_NET_WARNINGS_AS_ERRORS": "$env{VMNL_NET_WARNINGS_AS_ERRORS}"
+      }
+    },
+    {
+      "name": "unix",
+      "hidden": true,
+      "condition": {
+        "type": "inList",
+        "string": "${hostSystemName}",
+        "list": ["Linux", "Darwin"]
+      }
     },
     {
       "name": "release",
       "displayName": "Build (Release)",
       "inherits": "base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "VMNL_NET_BUILD_TESTS": "OFF",
-        "VMNL_NET_BUILD_EXAMPLES": "OFF",
-        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
-        "VMNL_NET_BUILD_DOCS": "OFF"
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {
       "name": "debug",
       "displayName": "Build (Debug)",
-      "inherits": "release",
+      "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
       "name": "test",
-      "displayName": "Test (Debug)",
-      "inherits": "base",
+      "displayName": "Test (Release)",
+      "inherits": "release",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
         "VMNL_NET_BUILD_TESTS": "ON",
-        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
-        "VMNL_NET_BUILD_DOCS": "OFF"
+        "VMNL_NET_BUILD_EXAMPLES": "ON"
       }
     },
     {
       "name": "coverage",
       "displayName": "Coverage (Debug)",
-      "inherits": "test",
-      "condition": {
-        "type": "notEquals",
-        "lhs": "${hostSystemName}",
-        "rhs": "Windows"
-      },
+      "inherits": ["test", "unix"],
       "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
         "VMNL_NET_BUILD_EXAMPLES": "OFF",
         "CMAKE_C_FLAGS": "--coverage",
         "CMAKE_EXE_LINKER_FLAGS": "--coverage",
@@ -54,18 +61,31 @@
       }
     },
     {
-      "name": "sanitize",
-      "displayName": "Sanitize (Debug)",
-      "inherits": "test",
-      "condition": {
-        "type": "inList",
-        "string": "${hostSystemName}",
-        "list": ["Linux", "Darwin"]
-      },
+      "name": "sanitize-address",
+      "displayName": "Sanitize address (RelWithDebInfo)",
+      "inherits": ["test", "unix"],
       "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
         "CMAKE_C_FLAGS": "-fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer",
         "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=address,undefined",
         "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=address,undefined"
+      }
+    },
+    {
+      "name": "sanitize-memory",
+      "displayName": "Sanitize memory (RelWithDebInfo)",
+      "inherits": "test",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_C_FLAGS": "-fsanitize=memory -fsanitize-memory-track-origins -fno-sanitize-recover=all -fno-omit-frame-pointer",
+        "CMAKE_EXE_LINKER_FLAGS": "-fsanitize=memory",
+        "CMAKE_SHARED_LINKER_FLAGS": "-fsanitize=memory"
       }
     },
     {
@@ -81,8 +101,15 @@
       "displayName": "Documentation",
       "inherits": "release",
       "cacheVariables": {
-        "VMNL_NET_BUILD_DOCS": "ON",
-        "VMNL_NET_BUILD_DOCS_INTERNAL": "OFF"
+        "VMNL_NET_BUILD_DOCS": "ON"
+      }
+    },
+    {
+      "name": "docs-internal",
+      "displayName": "Documentation (internal)",
+      "inherits": "docs",
+      "cacheVariables": {
+        "VMNL_NET_BUILD_DOCS_INTERNAL": "ON"
       }
     }
   ],
@@ -101,9 +128,9 @@
     },
     {
       "name": "test",
-      "displayName": "Test (Debug)",
+      "displayName": "Test (Release)",
       "configurePreset": "test",
-      "configuration": "Debug"
+      "configuration": "Release"
     },
     {
       "name": "coverage",
@@ -119,10 +146,16 @@
       "targets": ["coverage"]
     },
     {
-      "name": "sanitize",
-      "displayName": "Sanitize (Debug)",
-      "configurePreset": "sanitize",
-      "configuration": "Debug"
+      "name": "sanitize-address",
+      "displayName": "Sanitize address (RelWithDebInfo)",
+      "configurePreset": "sanitize-address",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "sanitize-memory",
+      "displayName": "Sanitize memory (RelWithDebInfo)",
+      "configurePreset": "sanitize-memory",
+      "configuration": "RelWithDebInfo"
     },
     {
       "name": "bench",
@@ -134,6 +167,12 @@
       "name": "docs",
       "displayName": "Documentation",
       "configurePreset": "docs",
+      "targets": ["docs"]
+    },
+    {
+      "name": "docs-internal",
+      "displayName": "Documentation (internal)",
+      "configurePreset": "docs-internal",
       "targets": ["docs"]
     },
     {
@@ -152,24 +191,36 @@
   "testPresets": [
     {
       "name": "test",
-      "displayName": "Test (Debug)",
+      "displayName": "Test (Release)",
       "configurePreset": "test",
-      "configuration": "Debug",
+      "configuration": "Release",
       "output": {
         "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
       }
     },
     {
       "name": "coverage",
       "displayName": "Coverage (Debug)",
       "inherits": "test",
-      "configurePreset": "coverage"
+      "configurePreset": "coverage",
+      "configuration": "Debug"
     },
     {
-      "name": "sanitize",
-      "displayName": "Sanitize (Debug)",
+      "name": "sanitize-address",
+      "displayName": "Sanitize address (RelWithDebInfo)",
       "inherits": "test",
-      "configurePreset": "sanitize"
+      "configurePreset": "sanitize-address",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "sanitize-memory",
+      "displayName": "Sanitize memory (RelWithDebInfo)",
+      "inherits": "test",
+      "configurePreset": "sanitize-memory",
+      "configuration": "RelWithDebInfo"
     }
   ],
   "workflowPresets": [
@@ -191,7 +242,7 @@
     },
     {
       "name": "test",
-      "displayName": "Test (Debug)",
+      "displayName": "Test (Release)",
       "steps": [
         { "type": "configure", "name": "test" },
         { "type": "build", "name": "test" },
@@ -209,12 +260,21 @@
       ]
     },
     {
-      "name": "sanitize",
-      "displayName": "Sanitize (Debug)",
+      "name": "sanitize-address",
+      "displayName": "Sanitize address (RelWithDebInfo)",
       "steps": [
-        { "type": "configure", "name": "sanitize" },
-        { "type": "build", "name": "sanitize" },
-        { "type": "test", "name": "sanitize" }
+        { "type": "configure", "name": "sanitize-address" },
+        { "type": "build", "name": "sanitize-address" },
+        { "type": "test", "name": "sanitize-address" }
+      ]
+    },
+    {
+      "name": "sanitize-memory",
+      "displayName": "Sanitize memory (RelWithDebInfo)",
+      "steps": [
+        { "type": "configure", "name": "sanitize-memory" },
+        { "type": "build", "name": "sanitize-memory" },
+        { "type": "test", "name": "sanitize-memory" }
       ]
     },
     {
@@ -231,6 +291,14 @@
       "steps": [
         { "type": "configure", "name": "docs" },
         { "type": "build", "name": "docs" }
+      ]
+    },
+    {
+      "name": "docs-internal",
+      "displayName": "Documentation (internal)",
+      "steps": [
+        { "type": "configure", "name": "docs-internal" },
+        { "type": "build", "name": "docs-internal" }
       ]
     },
     {

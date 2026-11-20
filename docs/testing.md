@@ -36,7 +36,7 @@ Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake.
 - each limit tested at its value and one past it
 - from the nominal case to the limits, the errors and the nullable parameters, the NULL error last
 - a `VmnlNetError` set to `UINT32_MAX` first, to prove the function writes it
-- each test frees what it creates, and the `sanitize` preset checks it
+- each test frees what it creates, and the `sanitize-address` preset checks it
 - a test that replaces the allocator restores it before its first `ASSERT`, or leaves it to its fixture, whose teardown runs even after a failure
 - a behavior shared by the types of a module is written once with `UTEST_I`, which runs it once per type, like the buffer types of `tests/buffer/buffer_tests.h`
 

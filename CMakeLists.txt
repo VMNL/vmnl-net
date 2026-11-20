@@ -20,6 +20,7 @@ option(VMNL_NET_BUILD_TESTS "Build the tests" ${PROJECT_IS_TOP_LEVEL})
 option(VMNL_NET_BUILD_BENCHMARKS "Build the benchmarks" OFF)
 option(VMNL_NET_BUILD_EXAMPLES "Build the examples" ${PROJECT_IS_TOP_LEVEL})
 option(VMNL_NET_INSTALL "Generate the install rules" ${PROJECT_IS_TOP_LEVEL})
+option(VMNL_NET_WARNINGS_AS_ERRORS "Treat the warnings of the library, the tests, the benchmarks and the examples as errors" OFF)
 
 if(PROJECT_IS_TOP_LEVEL)
     set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -33,11 +34,11 @@ if(PROJECT_IS_TOP_LEVEL)
     endif()
 endif()
 
-add_library(vmnl_net_options INTERFACE)
-add_library(vmnl_net_warnings INTERFACE)
-
 add_library(vmnl_net)
 add_library(vmnl::net ALIAS vmnl_net)
+
+add_library(vmnl_net_options INTERFACE)
+add_library(vmnl_net_warnings INTERFACE)
 
 generate_export_header(vmnl_net
     EXPORT_MACRO_NAME VMNL_NET_API
@@ -121,14 +122,19 @@ target_sources(vmnl_net
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
 
-if(NOT MSVC)
+if(MSVC)
+    target_compile_options(vmnl_net_warnings
+      INTERFACE
+        /W4
+        $<$<BOOL:${VMNL_NET_WARNINGS_AS_ERRORS}>:/WX>
+    )
+else()
     target_compile_options(vmnl_net_warnings
       INTERFACE
         -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wcast-align -Wpointer-arith -Wvla -Wformat=2
         $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes -Wmissing-prototypes>
+        $<$<BOOL:${VMNL_NET_WARNINGS_AS_ERRORS}>:-Werror>
     )
-else()
-    target_compile_options(vmnl_net_warnings INTERFACE /W4)
 endif()
 
 target_include_directories(vmnl_net PRIVATE src)
@@ -141,14 +147,16 @@ target_compile_definitions(vmnl_net
     VMNL_NET_PROJECT_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
     VMNL_NET_PROJECT_VERSION_MINOR=${PROJECT_VERSION_MINOR}
     VMNL_NET_PROJECT_VERSION_PATCH=${PROJECT_VERSION_PATCH}
-    $<$<NOT:$<PLATFORM_ID:Windows>>:_POSIX_C_SOURCE=200809L>
+    $<$<NOT:$<PLATFORM_ID:Windows>>:_POSIX_C_SOURCE=200809L> # POSIX.1-2008
     $<$<PLATFORM_ID:Windows>:WIN32_LEAN_AND_MEAN>
+    $<$<PLATFORM_ID:Windows>:_WIN32_WINNT=0x0A00> # Windows 10
 )
 
 target_link_libraries(vmnl_net
   PRIVATE
     $<BUILD_INTERFACE:vmnl_net_options>
     $<BUILD_INTERFACE:vmnl_net_warnings>
+    $<$<PLATFORM_ID:Windows>:ws2_32>
 )
 
 set_target_properties(vmnl_net

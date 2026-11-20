@@ -69,7 +69,7 @@
 /**
  * \brief Every type, in the order of the UTEST_I indexes.
  */
-static VmnlNetBufferType types[NTYPES] = {
+static const VmnlNetBufferType types[NTYPES] = {
     VMNL_NET_BUFFER_FLAT,
     VMNL_NET_BUFFER_RING,
     VMNL_NET_BUFFER_DYNAMIC,
@@ -79,7 +79,7 @@ static VmnlNetBufferType types[NTYPES] = {
 /**
  * \brief Types that vmnl_net_buffer_resize() and vmnl_net_buffer_shrink() support.
  */
-static VmnlNetBufferType resizable_types[NRESIZABLE_TYPES] = {
+static const VmnlNetBufferType resizable_types[NRESIZABLE_TYPES] = {
     VMNL_NET_BUFFER_RING,
     VMNL_NET_BUFFER_DYNAMIC,
     VMNL_NET_BUFFER_CHUNKED,

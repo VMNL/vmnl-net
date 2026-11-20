@@ -11,7 +11,12 @@ elseif(CMAKE_C_COMPILER_ID STREQUAL "Clang")
 endif()
 
 add_custom_target(coverage
-  COMMAND ${GCOVR} --root . --filter src/ ${gcov_executable} --fail-under-line 100 --fail-under-branch 100 ${PROJECT_BINARY_DIR}
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/report/html
+  COMMAND ${GCOVR} --root . --filter src/ ${gcov_executable}
+    --html-details ${PROJECT_BINARY_DIR}/report/html/index.html
+    --markdown-summary ${PROJECT_BINARY_DIR}/report/summary.md
+    --fail-under-line 100 --fail-under-branch 100
+    ${PROJECT_BINARY_DIR}
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   VERBATIM
 )
