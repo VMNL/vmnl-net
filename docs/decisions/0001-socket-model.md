@@ -65,14 +65,6 @@ flowchart TB
     TLS -. "wraps" .-> Stream
     Simulated -. "wraps" .-> Datagram
     Crypt -. "wraps" .-> Datagram
-
-    subgraph Excluded["Excluded: not the same behavior on Windows, macOS and Linux"]
-        direction LR
-        LocalDatagram["Local datagram"]
-        LocalSeqpacket["Local SOCK_SEQPACKET"]
-        Pipe["Pipe, FIFO"]
-    end
-    LocalListener ~~~ Excluded
 ```
 
 **Reason**
