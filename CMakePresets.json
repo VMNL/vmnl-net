@@ -199,7 +199,8 @@
     {
       "name": "tidy",
       "displayName": "clang-tidy",
-      "configurePreset": "tidy"
+      "configurePreset": "tidy",
+      "nativeToolOptions": ["-k", "0"]
     }
   ],
   "testPresets": [
