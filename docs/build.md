@@ -6,7 +6,8 @@ Several presets of `CMakePresets.json` build and check the library, each run fro
 
 - CMake 3.28 or later and one of the compilers listed in the README
 - a C++17 compiler for the benchmarks
-- clang-format 22 for the formatting
+- clang-format 23.1.4 for the formatting
+- clang-tidy 23.1.4 and Ninja for the static analysis
 - gcovr 8.6, with GCC or Clang, for the coverage
 - Doxygen 1.18 for the documentation
 
@@ -25,6 +26,7 @@ Several presets of `CMakePresets.json` build and check the library, each run fro
 | `docs-internal` | Generates the documentation with the internal headers, in `build/docs-internal/docs/html` | All |
 | `format` | Formats the sources with clang-format | All |
 | `format-check` | Checks the formatting, like the CI | All |
+| `tidy` | Builds the library with Ninja and checks it with clang-tidy, like the CI | All |
 
 `cmake --list-presets=all` lists them with the names shown in the IDEs.
 

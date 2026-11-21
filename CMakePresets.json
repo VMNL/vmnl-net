@@ -111,6 +111,15 @@
       "cacheVariables": {
         "VMNL_NET_BUILD_DOCS_INTERNAL": "ON"
       }
+    },
+    {
+      "name": "tidy",
+      "displayName": "clang-tidy",
+      "inherits": "release",
+      "generator": "Ninja",
+      "cacheVariables": {
+        "VMNL_NET_CLANG_TIDY": "ON"
+      }
     }
   ],
   "buildPresets": [
@@ -186,6 +195,11 @@
       "displayName": "Format (check)",
       "configurePreset": "release",
       "targets": ["format-check"]
+    },
+    {
+      "name": "tidy",
+      "displayName": "clang-tidy",
+      "configurePreset": "tidy"
     }
   ],
   "testPresets": [
@@ -315,6 +329,14 @@
       "steps": [
         { "type": "configure", "name": "release" },
         { "type": "build", "name": "format-check" }
+      ]
+    },
+    {
+      "name": "tidy",
+      "displayName": "clang-tidy",
+      "steps": [
+        { "type": "configure", "name": "tidy" },
+        { "type": "build", "name": "tidy" }
       ]
     }
   ]
