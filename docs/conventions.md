@@ -20,7 +20,6 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 - private code in `src/<module>/<module>_internal.h`
 - an internal module used by several others in its own folder, like `src/list/`
 - platform code in `posix/` or `win32/`
-- includes in four blocks: public headers of the library, private ones, dependencies, C library
 
 ## Errors and NULL
 

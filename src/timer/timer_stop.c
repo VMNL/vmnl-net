@@ -1,5 +1,5 @@
-#include "timer/timer_internal.h"
 #include "list/list_internal.h"
+#include "timer/timer_internal.h"
 
 bool vmnl_net_timer_stop(VmnlNetTimer *timer)
 {
