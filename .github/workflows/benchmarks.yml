@@ -1,0 +1,99 @@
+name: Benchmarks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: benchmarks-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BASE: ${{ github.event.pull_request.base.sha }}
+  BASE_BENCHMARKS: ../base/build/bench/bin/vmnl_net_benchmarks
+  HEAD_BENCHMARKS: build/bench/bin/vmnl_net_benchmarks
+
+jobs:
+  times:
+    name: Compare the times
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+        timeout-minutes: 5
+
+      - name: Build the benchmarks of the pull request and of its base
+        run: |
+          cmake --workflow --preset bench
+          git worktree add ../base "$BASE"
+          cd ../base && cmake --workflow --preset bench
+        timeout-minutes: 30
+
+      - name: Install the requirements of compare.py
+        run: |
+          python3 -m venv ../venv
+          ../venv/bin/pip install -r build/bench/_deps/benchmark-src/tools/requirements.txt
+        timeout-minutes: 10
+
+      - name: Compare the times
+        run: |
+          mkdir -p report
+          "$BASE_BENCHMARKS" --benchmark_repetitions=9 --benchmark_out=report/base.json --benchmark_out_format=json > /dev/null
+          "$HEAD_BENCHMARKS" --benchmark_repetitions=9 --benchmark_out=report/head.json --benchmark_out_format=json > /dev/null
+          ../venv/bin/python build/bench/_deps/benchmark-src/tools/compare.py --no-color -a benchmarks report/base.json report/head.json > report/times.txt
+          { echo '```'; cat report/times.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          google-chrome --headless=new --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf=report/times.pdf "file://$PWD/report/times.txt"
+        timeout-minutes: 90
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: benchmark-times
+          path: report
+        timeout-minutes: 5
+
+  instructions:
+    name: Compare the instructions
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+        timeout-minutes: 5
+
+      - name: Build the benchmarks of the pull request and of its base
+        run: |
+          cmake --workflow --preset bench
+          git worktree add ../base "$BASE"
+          cd ../base && cmake --workflow --preset bench
+        timeout-minutes: 30
+
+      - name: Install Valgrind
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y valgrind
+        timeout-minutes: 10
+
+      - name: Compare the instructions
+        run: |
+          mkdir -p report
+          valgrind --tool=cachegrind --cachegrind-out-file=report/base.cachegrind "$BASE_BENCHMARKS" --benchmark_min_time=1x > /dev/null
+          valgrind --tool=cachegrind --cachegrind-out-file=report/head.cachegrind "$HEAD_BENCHMARKS" --benchmark_min_time=1x > /dev/null
+          cg_annotate --diff --mod-filename='s/^.*\/(src|include|bench)\//\1\//' --no-annotate report/base.cachegrind report/head.cachegrind > report/instructions.txt
+          { echo '```'; cat report/instructions.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          google-chrome --headless=new --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf=report/instructions.pdf "file://$PWD/report/instructions.txt"
+        timeout-minutes: 30
+
+      - name: Upload the report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: benchmark-instructions
+          path: report
+        timeout-minutes: 5
