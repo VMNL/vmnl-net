@@ -107,12 +107,38 @@ jobs:
           merge-multiple: true
         timeout-minutes: 5
 
+      - name: Install gnuplot
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gnuplot-nox
+        timeout-minutes: 10
+
       - name: Write the report
         run: |
           cat report/times-*.txt > report/times.txt
           { echo '```'; cat report/times.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-          google-chrome --headless=new --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf=report/times.pdf "file://$PWD/report/times.txt" 2> /dev/null
-        timeout-minutes: 5
+          awk '$1 ~ /_median$/ { median[substr($1, 1, length($1) - 7)] = $2 * 100 } $1 ~ /_pvalue$/ { pvalue[substr($1, 1, length($1) - 7)] = $2 } END { for (name in median) { color = pvalue[name] >= 0.05 ? 3 : (median[name] > 0 ? 1 : 2); printf "%s\t%.2f\t%d\n", name, median[name], color } }' report/times.txt | sort -t "$(printf '\t')" -k2,2n > report/times.tsv
+          gnuplot -e "rows = $(wc -l < report/times.tsv)" - <<'EOF'
+          set terminal svg size 960, rows * 13 + 140 font "Helvetica,10" background rgb "white" noenhanced
+          set output "report/times.svg"
+          set datafile separator "\t"
+          set title "Median time change per benchmark, head against base"
+          set xlabel "faster <- median time change -> slower (grey band: 3%, red or green: p < 0.05)"
+          set xrange [-30:30]
+          set yrange [-1:rows]
+          set xtics 10 format "%+g%%"
+          set grid xtics
+          set key off
+          set object 1 rectangle from -3, graph 0 to 3, graph 1 fillcolor rgb "#e8e8e8" fillstyle solid noborder behind
+          set linetype 1 linecolor rgb "#c0392b"
+          set linetype 2 linecolor rgb "#1e8449"
+          set linetype 3 linecolor rgb "#999999"
+          clamp(x) = x < -30 ? -30 : (x > 30 ? 30 : x)
+          plot "report/times.tsv" using (0):0:(clamp($2)):(0):3 with vectors nohead linecolor variable, "" using (clamp($2)):0:3:ytic(1) with points pointtype 7 pointsize 0.6 linecolor variable
+          EOF
+          { echo '<!doctype html><meta charset="utf-8"><img src="times.svg" style="width: 100%"><pre>'; sed 's/&/\&amp;/g; s/</\&lt;/g' report/times.txt; echo '</pre>'; } > report/times.html
+          google-chrome --headless=new --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf=report/times.pdf "file://$PWD/report/times.html" 2> /dev/null
+        timeout-minutes: 10
 
       - name: Upload the report
         if: ${{ !cancelled() }}
