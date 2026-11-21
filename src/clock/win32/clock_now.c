@@ -1,5 +1,6 @@
 #include <vmnl/net/clock.h>
 
+#include <stddef.h>
 #include <stdint.h>
 #include <windows.h>
 

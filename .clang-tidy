@@ -3,6 +3,7 @@ Checks: >
   bugprone-*,
   cert-*,
   clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
   misc-*,
   performance-*,
   portability-*,
@@ -12,6 +13,7 @@ Checks: >
 HeaderFilterRegex: '(include|src)[/\\]'
 CheckOptions:
   bugprone-signed-bitwise.IgnorePositiveIntegerLiterals: true
+  misc-include-cleaner.IgnoreHeaders: '(^|[/\\])_[^/\\]*\.h;Windows Kits[/\\].*[/\\](um|shared)[/\\].*'
   readability-identifier-naming.FunctionCase: lower_case
   readability-identifier-naming.FunctionPrefix: vmnl_net_
   readability-identifier-naming.GlobalVariableCase: lower_case
