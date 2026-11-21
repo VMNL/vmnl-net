@@ -33,7 +33,7 @@ static void vmnl_net_timer_call_and_rearm(struct VmnlNetListLink *active_timers,
     if (timer->interval == 0) {
         return;
     }
-    timer->deadline = vmnl_net_timer_compute_deadline(now - lateness % timer->interval, timer->interval);
+    timer->deadline = vmnl_net_timer_compute_deadline(now - (lateness % timer->interval), timer->interval);
     vmnl_net_timer_insert(active_timers, timer);
 }
 
