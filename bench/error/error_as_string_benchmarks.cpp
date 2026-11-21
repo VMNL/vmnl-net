@@ -11,6 +11,4 @@ static void error_as_string(benchmark::State &state)
     }
 }
 
-BENCHMARK(error_as_string)
-    ->Args({VMNL_NET_EINVAL})
-    ->Args({UINT32_MAX});
+BENCHMARK(error_as_string)->Args({VMNL_NET_EINVAL})->Args({UINT32_MAX});
