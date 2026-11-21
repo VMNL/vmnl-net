@@ -8,6 +8,18 @@ Everyone taking part in the project follows the [Code of Conduct](.github/CODE_O
 - [Conventions](docs/conventions.md): the names, the files, the errors, the Doxygen comments and the rules clang-format does not check
 - [Testing](docs/testing.md): the tests and the benchmarks
 
+## Layout
+
+- `include/vmnl/net/`: the public headers, one per module
+- `src/<module>/`: one source file per public function and the private header of the module
+- `tests/<module>/`: the tests of each module
+- `bench/`: the benchmarks of each module
+- `examples/`: the examples of the modules
+- `docs/`: the guides, the references, the research log, the architecture and the decision records
+- `cmake/`: the CMake modules and the pkg-config template
+- `.github/`: the workflows, the Dependabot configuration and the code of conduct
+- `.githooks/`: the hook that checks the commit messages
+
 ## Changes
 
 The code must be clean and efficient, with the data structures and the algorithms that fit each problem.
