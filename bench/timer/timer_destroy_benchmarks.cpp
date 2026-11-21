@@ -1,0 +1,20 @@
+#include "timer_benchmarks.hpp"
+
+static void timer_destroy(benchmark::State &state)
+{
+    std::vector<VmnlNetTimer *> timers(TIMER_BATCH);
+
+    for (auto _ : state) {
+        state.PauseTiming();
+        for (size_t it = 0; it < timers.size(); it++) {
+            timers[it] = vmnl_net_timer_create(Timers::ignore_call, NULL, NULL);
+        }
+        state.ResumeTiming();
+        for (const auto &timer : timers) {
+            vmnl_net_timer_destroy(timer);
+        }
+    }
+    state.counters["destroy"] = benchmark::Counter(TIMER_BATCH, benchmark::Counter::kIsIterationInvariantRate | benchmark::Counter::kInvert);
+}
+
+BENCHMARK(timer_destroy);

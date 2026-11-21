@@ -34,9 +34,33 @@ target_sources(vmnl_net_benchmarks
     error/error_as_string_benchmarks.cpp
     allocator/allocator_set_benchmarks.cpp
     context/context_create_benchmarks.cpp
+    context/context_remaining_benchmarks.cpp
+    context/context_advance_benchmarks.cpp
     context/context_destroy_benchmarks.cpp
     clock/clock_now_benchmarks.cpp
     clock/clock_elapsed_benchmarks.cpp
+    timer/timer_create_benchmarks.cpp
+    timer/timer_is_active_benchmarks.cpp
+    timer/timer_interval_benchmarks.cpp
+    timer/timer_remaining_benchmarks.cpp
+    timer/timer_set_callback_benchmarks.cpp
+    timer/timer_set_interval_benchmarks.cpp
+    timer/timer_start_benchmarks.cpp
+    timer/timer_stop_benchmarks.cpp
+    timer/timer_destroy_benchmarks.cpp
+    buffer/buffer_create_benchmarks.cpp
+    buffer/buffer_size_benchmarks.cpp
+    buffer/buffer_capacity_benchmarks.cpp
+    buffer/buffer_is_empty_benchmarks.cpp
+    buffer/buffer_clear_benchmarks.cpp
+    buffer/buffer_resize_benchmarks.cpp
+    buffer/buffer_shrink_benchmarks.cpp
+    buffer/buffer_prepare_benchmarks.cpp
+    buffer/buffer_commit_benchmarks.cpp
+    buffer/buffer_data_benchmarks.cpp
+    buffer/buffer_consume_benchmarks.cpp
+    buffer/buffer_destroy_benchmarks.cpp
+    buffer/buffer_cycle_benchmarks.cpp
 )
 
 target_link_libraries(vmnl_net_benchmarks
