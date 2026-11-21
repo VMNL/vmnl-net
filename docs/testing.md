@@ -58,5 +58,5 @@ UTEST_I(vmnl_net_buffer_consume, drops_first_bytes, NTYPES)
 
 Benchmarks use [Google Benchmark](https://github.com/google/benchmark), fetched by CMake when `VMNL_NET_BUILD_BENCHMARKS` is `ON`.
 Each public function has its file, `bench/<module>/<name>_benchmarks.cpp`, listed in `bench/CMakeLists.txt`.
-A benchmark is named after its function without `vmnl_net_`, plus its case when there are several, like `buffer_prepare_ring`, and covers its sizes with `Range` or `Args`.
+A benchmark is named `<function>/<case>`, like the suite and the condition of a test: its function without `vmnl_net_`, then its case when there are several, like `buffer_prepare/ring`, and covers its sizes with `Range` or `Args`.
 Compare the runs before and after a change with the `compare.py` tool of Google Benchmark.
