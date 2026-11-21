@@ -83,8 +83,8 @@ jobs:
       - name: Compare the instructions
         run: |
           mkdir -p report
-          valgrind --tool=cachegrind --cachegrind-out-file=report/base.cachegrind "$BASE_BENCHMARKS" --benchmark_min_time=1x > /dev/null
-          valgrind --tool=cachegrind --cachegrind-out-file=report/head.cachegrind "$HEAD_BENCHMARKS" --benchmark_min_time=1x > /dev/null
+          setarch "$(uname -m)" -R valgrind --tool=cachegrind --cachegrind-out-file=report/base.cachegrind "$BASE_BENCHMARKS" --benchmark_min_time=1x > /dev/null
+          setarch "$(uname -m)" -R valgrind --tool=cachegrind --cachegrind-out-file=report/head.cachegrind "$HEAD_BENCHMARKS" --benchmark_min_time=1x > /dev/null
           cg_annotate --diff --mod-filename='s/^.*\/(src|include|bench)\//\1\//' --no-annotate report/base.cachegrind report/head.cachegrind > report/instructions.txt
           { echo '```'; cat report/instructions.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
           google-chrome --headless=new --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf=report/instructions.pdf "file://$PWD/report/instructions.txt"
