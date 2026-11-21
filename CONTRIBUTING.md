@@ -1,6 +1,6 @@
 # Contributing
 
-Everyone taking part in the project follows the [Code of Conduct](.github/CODE_OF_CONDUCT.md).
+Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Guides
 
@@ -17,7 +17,7 @@ Everyone taking part in the project follows the [Code of Conduct](.github/CODE_O
 - `examples/`: the examples of the modules
 - `docs/`: the guides, the references, the research log, the architecture and the decision records
 - `cmake/`: the CMake modules and the pkg-config template
-- `.github/`: the workflows, the Dependabot configuration and the code of conduct
+- `.github/`: the workflows and the Dependabot configuration
 - `.githooks/`: the hook that checks the commit messages
 
 ## Changes
