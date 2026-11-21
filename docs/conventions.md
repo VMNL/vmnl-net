@@ -1,6 +1,6 @@
 # Conventions
 
-clang-format takes care of the layout of the sources, the tests and the benchmarks, the rules below cover the rest.
+clang-format takes care of the layout of the sources, the tests and the benchmarks, clang-tidy checks the library with the rules of `.clang-tidy`, and the rules below cover the rest.
 
 ## Names
 
@@ -8,10 +8,8 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 
 | Element | Form | Example |
 | --- | --- | --- |
-| Type | `VmnlNet<Name>` | `VmnlNetBuffer` |
 | Function | `vmnl_net_<module>_<action>` | `vmnl_net_buffer_create` |
 | Static function | `vmnl_net_<module>_<type>_<action>`, like the others, so that two files never share a name | `vmnl_net_buffer_ring_prepare_after_wrap` |
-| Macro | `VMNL_NET_<NAME>` | `VMNL_NET_EINVAL` |
 | Predicate | `vmnl_net_<module>_is_<state>` | `vmnl_net_buffer_is_empty` |
 | Conversion | `vmnl_net_<module>_as_<type>` | `vmnl_net_error_as_string` |
 
@@ -23,7 +21,6 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 - an internal module used by several others in its own folder, like `src/list/`
 - platform code in `posix/` or `win32/`
 - includes in four blocks: public headers of the library, private ones, dependencies, C library
-- a file includes only what it needs, and not a header that another of its includes already brings
 
 ## Errors and NULL
 
@@ -31,16 +28,10 @@ They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INST
 - NULL is accepted only where it means something: an `error` the caller does not read, a `data` it does not need, or nothing to destroy
 - any other pointer is used without check, like `strlen(NULL)` in the libc, so a NULL one is a bug of the caller
 
-## Not checked by clang-format
+## Not checked by the tools
 
-- `sizeof` without parentheses on an expression: `sizeof *context`
-- counters with `it++` and `it--`, not `++it` and `--it`, unless the expression needs the updated value
-- comparisons written out for readability: booleans with `== true` or `== false`, pointers with `== NULL` or `!= NULL`, not `!value` nor `value` alone
-- the condition of a ternary in parentheses: `(now > start) ? now - start : 0`
-- `const` only on what a pointer points to and on static tables, not on values, so a parameter can count down instead of a copy: `size_t nbytes`, `const VmnlNetBuffer *buffer`
 - no commented-out code, since Git keeps the old versions
 - a comment above the line it explains, and at its right only for the short state or result the line produces, like `// [alice, bob]`
-- a named constant rather than a magic number: `VMNL_NET_BUFFER_CHUNK_SIZE`, not `16384`
 - predicates stated in the positive: `vmnl_net_buffer_is_empty`, not `vmnl_net_buffer_is_not_empty`
 - a value of an argument that makes a function behave differently gets a named constant, unless the plain value reads naturally, like an `interval` of `0` for a one-shot timer
 

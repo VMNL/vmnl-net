@@ -5,7 +5,7 @@ Everyone taking part in the project follows the [Code of Conduct](.github/CODE_O
 ## Guides
 
 - [Build](docs/build.md): the requirements and the presets that build, test, measure and document the library
-- [Conventions](docs/conventions.md): the names, the files, the errors, the Doxygen comments and the rules clang-format does not check
+- [Conventions](docs/conventions.md): the names, the files, the errors, the Doxygen comments and the rules clang-format and clang-tidy do not check
 - [Testing](docs/testing.md): the tests and the benchmarks
 
 ## Layout
