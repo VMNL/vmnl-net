@@ -22,7 +22,7 @@ env:
   BASE: ${{ github.event.pull_request.base.sha }}
   BASE_BENCHMARKS: ../base/build/bench/bin/vmnl_net_benchmarks
   HEAD_BENCHMARKS: build/bench/bin/vmnl_net_benchmarks
-  PARTS: 5
+  PARTS: 10
 
 jobs:
   plan:
