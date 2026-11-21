@@ -1,5 +1,8 @@
 #include "context/context_internal.h"
 #include "timer/timer_internal.h"
+#include "list/list_internal.h"
+
+#include <stdint.h>
 
 static void vmnl_net_timer_gather_expired(struct VmnlNetListLink *active_timers, uint64_t now, struct VmnlNetListLink *expired_timers)
 {

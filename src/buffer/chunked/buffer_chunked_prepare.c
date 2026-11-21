@@ -1,5 +1,9 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
+#include "list/list_internal.h"
+
+#include <stddef.h>
+#include <stdint.h>
 
 static size_t vmnl_net_buffer_chunked_count_views_to_prepare(const struct VmnlNetBufferChunk *chunk, size_t nbytes)
 {

@@ -1,6 +1,7 @@
 #include "context/context_internal.h"
 #include "allocator/allocator_internal.h"
 #include "timer/timer_internal.h"
+#include "list/list_internal.h"
 
 void vmnl_net_context_destroy(VmnlNetContext *context)
 {

@@ -1,6 +1,8 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
+#include <stddef.h>
+
 static const struct VmnlNetBufferOps vmnl_net_buffer_flat_ops = {
     .create = vmnl_net_buffer_flat_create,
     .clear = vmnl_net_buffer_contiguous_clear,

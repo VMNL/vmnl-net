@@ -1,6 +1,7 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
+#include <stdint.h>
 #include <string.h>
 
 static size_t vmnl_net_buffer_dynamic_compute_grown_capacity(const VmnlNetBuffer *buffer, size_t nbytes)

@@ -1,6 +1,8 @@
 #include "buffer/buffer_internal.h"
+#include "allocator/allocator_internal.h"
 #include "error/error_internal.h"
 
+#include <stdint.h>
 #include <string.h>
 
 bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error)

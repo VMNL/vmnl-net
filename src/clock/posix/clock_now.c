@@ -1,5 +1,6 @@
 #include <vmnl/net/clock.h>
 
+#include <stdint.h>
 #include <time.h>
 
 uint64_t vmnl_net_clock_now(void)

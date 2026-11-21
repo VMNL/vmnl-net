@@ -1,5 +1,9 @@
 #include "buffer/buffer_internal.h"
+#include "allocator/allocator_internal.h"
 #include "error/error_internal.h"
+#include "list/list_internal.h"
+
+#include <stddef.h>
 
 bool vmnl_net_buffer_chunked_shrink(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error)
 {
