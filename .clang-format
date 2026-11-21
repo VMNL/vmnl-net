@@ -13,4 +13,16 @@ AlignTrailingComments:
   Kind: Never
 AllowShortFunctionsOnASingleLine: None
 AllowShortEnumsOnASingleLine: false
-SortIncludes: Never
+SortIncludes:
+  Enabled: true
+  IgnoreCase: false
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^<vmnl/'
+    Priority: 1
+  - Regex: '^"utest\.h"$|^<benchmark/'
+    Priority: 3
+  - Regex: '^"'
+    Priority: 2
+  - Regex: '^<'
+    Priority: 4

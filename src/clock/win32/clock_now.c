@@ -1,5 +1,7 @@
 #include <vmnl/net/clock.h>
 
+#include <stddef.h>
+#include <stdint.h>
 #include <windows.h>
 
 static LARGE_INTEGER vmnl_net_clock_now_frequency;
@@ -26,5 +28,5 @@ uint64_t vmnl_net_clock_now(void)
     frequency = vmnl_net_clock_now_frequency;
     whole_seconds = (uint64_t) ticks.QuadPart / frequency.QuadPart;
     remaining_ticks = (uint64_t) ticks.QuadPart % frequency.QuadPart;
-    return whole_seconds * VMNL_NET_NANOSECONDS_PER_SECOND + remaining_ticks * VMNL_NET_NANOSECONDS_PER_SECOND / frequency.QuadPart;
+    return (whole_seconds * VMNL_NET_NANOSECONDS_PER_SECOND) + (remaining_ticks * VMNL_NET_NANOSECONDS_PER_SECOND / frequency.QuadPart);
 }

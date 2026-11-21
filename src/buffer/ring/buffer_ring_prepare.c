@@ -1,6 +1,8 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
+#include <stddef.h>
+
 static size_t vmnl_net_buffer_ring_count_views_to_prepare(const VmnlNetBuffer *buffer, size_t offset, size_t nbytes)
 {
     return (offset < buffer->capacity && nbytes > buffer->capacity - offset) ? 2 : 1;

@@ -1,5 +1,8 @@
 #include "context/context_internal.h"
+#include "list/list_internal.h"
 #include "timer/timer_internal.h"
+
+#include <stdint.h>
 
 uint64_t vmnl_net_context_remaining(const VmnlNetContext *context, uint64_t now)
 {

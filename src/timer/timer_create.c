@@ -1,6 +1,7 @@
-#include "timer/timer_internal.h"
 #include "allocator/allocator_internal.h"
 #include "error/error_internal.h"
+#include "list/list_internal.h"
+#include "timer/timer_internal.h"
 
 VmnlNetTimer *vmnl_net_timer_create(VmnlNetTimerCallback callback, void *data, VmnlNetError *error)
 {

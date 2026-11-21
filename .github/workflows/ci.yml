@@ -14,7 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CLANG_FORMAT_VERSION: 22.1.8
+  CLANG_FORMAT_VERSION: 23.1.4
+  CLANG_TIDY_VERSION: 23.1.4
   GCOVR_VERSION: 8.6
   VMNL_NET_WARNINGS_AS_ERRORS: ON
 
@@ -34,6 +35,40 @@ jobs:
       - name: Check the formatting
         run: cmake --workflow --preset format-check
         timeout-minutes: 10
+
+  tidy:
+    name: Tidy (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        timeout-minutes: 5
+
+      - name: Install clang-tidy ${{ env.CLANG_TIDY_VERSION }}
+        shell: bash
+        run: |
+          pipx install "clang-tidy==$CLANG_TIDY_VERSION"
+          pipx environment --value PIPX_BIN_DIR >> "$GITHUB_PATH"
+        timeout-minutes: 5
+
+      - name: Set up the MSVC environment
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          cmd /c "`"$vs\VC\Auxiliary\Build\vcvars64.bat`" > nul && set" |
+            Select-String -Pattern '^(PATH|INCLUDE|LIB|LIBPATH)=' |
+            ForEach-Object { $_.Line } |
+            Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        timeout-minutes: 5
+
+      - name: Check the library
+        run: cmake --workflow --preset tidy
+        timeout-minutes: 20
 
   coverage:
     name: Coverage

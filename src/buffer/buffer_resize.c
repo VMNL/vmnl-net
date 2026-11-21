@@ -1,6 +1,8 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
+#include <stddef.h>
+
 bool vmnl_net_buffer_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error)
 {
     if (buffer->ops->resize == NULL) {

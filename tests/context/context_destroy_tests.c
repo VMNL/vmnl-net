@@ -1,5 +1,5 @@
-#include <vmnl/net/context.h>
 #include <vmnl/net/allocator.h>
+#include <vmnl/net/context.h>
 
 #include "timer/timer_tests.h"
 

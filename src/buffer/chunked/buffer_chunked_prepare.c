@@ -1,12 +1,16 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
+#include "list/list_internal.h"
+
+#include <stddef.h>
+#include <stdint.h>
 
 static size_t vmnl_net_buffer_chunked_count_views_to_prepare(const struct VmnlNetBufferChunk *chunk, size_t nbytes)
 {
     size_t chunk_free_space = (chunk == NULL) ? 0 : vmnl_net_buffer_chunk_free_space(chunk);
     size_t nbytes_after_chunk = (nbytes < chunk_free_space) ? 0 : nbytes - chunk_free_space;
 
-    return (chunk_free_space > 0) + nbytes_after_chunk / VMNL_NET_BUFFER_CHUNK_SIZE + (nbytes_after_chunk % VMNL_NET_BUFFER_CHUNK_SIZE > 0);
+    return (chunk_free_space > 0) + (nbytes_after_chunk / VMNL_NET_BUFFER_CHUNK_SIZE) + (nbytes_after_chunk % VMNL_NET_BUFFER_CHUNK_SIZE > 0);
 }
 
 bool vmnl_net_buffer_chunked_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error)

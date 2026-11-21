@@ -1,5 +1,6 @@
 #include <vmnl/net/clock.h>
 
+#include <stdint.h>
 #include <time.h>
 
 uint64_t vmnl_net_clock_now(void)
@@ -11,5 +12,5 @@ uint64_t vmnl_net_clock_now(void)
 #else
     clock_gettime(CLOCK_MONOTONIC, &now);
 #endif
-    return (uint64_t) now.tv_sec * VMNL_NET_NANOSECONDS_PER_SECOND + (uint64_t) now.tv_nsec;
+    return ((uint64_t) now.tv_sec * VMNL_NET_NANOSECONDS_PER_SECOND) + (uint64_t) now.tv_nsec;
 }

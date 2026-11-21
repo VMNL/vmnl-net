@@ -1,5 +1,6 @@
-#include "timer/timer_internal.h"
 #include "allocator/allocator_internal.h"
+#include "list/list_internal.h"
+#include "timer/timer_internal.h"
 
 void vmnl_net_timer_destroy(VmnlNetTimer *timer)
 {

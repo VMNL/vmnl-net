@@ -1,0 +1,80 @@
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  misc-*,
+  performance-*,
+  portability-*,
+  readability-*,
+  -readability-implicit-bool-conversion,
+  custom-*
+HeaderFilterRegex: '(include|src)[/\\]'
+CheckOptions:
+  bugprone-signed-bitwise.IgnorePositiveIntegerLiterals: true
+  misc-include-cleaner.IgnoreHeaders: '(^|[/\\])_[^/\\]*\.h;Windows Kits[/\\].*[/\\](um|shared)[/\\].*'
+  readability-identifier-naming.FunctionCase: lower_case
+  readability-identifier-naming.FunctionPrefix: vmnl_net_
+  readability-identifier-naming.GlobalVariableCase: lower_case
+  readability-identifier-naming.GlobalVariablePrefix: vmnl_net_
+  readability-identifier-naming.VariableCase: lower_case
+  readability-identifier-naming.ParameterCase: lower_case
+  readability-identifier-naming.MemberCase: lower_case
+  readability-identifier-naming.StructCase: CamelCase
+  readability-identifier-naming.StructPrefix: VmnlNet
+  readability-identifier-naming.TypedefCase: CamelCase
+  readability-identifier-naming.TypedefPrefix: VmnlNet
+  readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
+  readability-identifier-naming.MacroDefinitionPrefix: VMNL_NET_
+CustomChecks:
+  - Name: explicit-comparison
+    Query: |
+        match stmt(anyOf(
+          ifStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
+          whileStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
+          doStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
+          forStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
+          conditionalOperator(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
+          binaryOperator(hasAnyOperatorName("&&", "||"), hasEitherOperand(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
+          unaryOperator(hasOperatorName("!"), hasUnaryOperand(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value")))
+        ))
+    Diagnostic:
+      - BindName: value
+        Message: compare it with == true, == false, == NULL or != NULL
+        Level: Warning
+  - Name: sizeof-expression
+    Query: |
+        match sizeOfExpr(has(parenExpr())).bind("sizeof")
+    Diagnostic:
+      - BindName: sizeof
+        Message: write sizeof without parentheses on an expression
+        Level: Warning
+  - Name: ternary-condition
+    Query: |
+        match conditionalOperator(hasCondition(expr(unless(ignoringImpCasts(parenExpr()))).bind("condition")))
+    Diagnostic:
+      - BindName: condition
+        Message: put the condition of the ternary in parentheses
+        Level: Warning
+  - Name: const-value
+    Query: |
+        match varDecl(hasType(isConstQualified()), unless(hasStaticStorageDuration())).bind("variable")
+    Diagnostic:
+      - BindName: variable
+        Message: keep const for what a pointer points to and for static tables
+        Level: Warning
+  - Name: conversion-to-bool
+    Query: |
+        match implicitCastExpr(
+          anyOf(hasCastKind("CK_PointerToBoolean"), hasCastKind("CK_IntegralToBoolean"), hasCastKind("CK_FloatingToBoolean")),
+          unless(hasSourceExpression(ignoringParens(anyOf(
+            integerLiteral(),
+            binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||"))),
+            unaryOperator(hasOperatorName("!"))
+          ))))
+        ).bind("value")
+    Diagnostic:
+      - BindName: value
+        Message: compare it to get a bool instead of converting it
+        Level: Warning

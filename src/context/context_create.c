@@ -1,8 +1,9 @@
 #include <vmnl/net/clock.h>
 
-#include "context/context_internal.h"
 #include "allocator/allocator_internal.h"
+#include "context/context_internal.h"
 #include "error/error_internal.h"
+#include "list/list_internal.h"
 
 VmnlNetContext *vmnl_net_context_create(VmnlNetError *error)
 {

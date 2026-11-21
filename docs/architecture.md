@@ -60,7 +60,7 @@ The time only flows from the application to the context, so the timers never rea
 | Winsock2 (`ws2_32`) and BSD sockets | the sockets, from 0.3 | run time |
 | CMake 3.28 | the build, the presets and the packages | build |
 | utest.h, Google Benchmark | the tests and the benchmarks, fetched by CMake | development only |
-| Doxygen, clang-format, gcovr | the documentation, the formatting and the coverage | development only |
+| Doxygen, clang-format, clang-tidy, gcovr | the documentation, the formatting, the static analysis and the coverage | development only |
 
 The DNS resolution and the TLS library of the later versions are still to choose, as logged in the [research log](watch.md).
 

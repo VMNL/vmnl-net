@@ -1,5 +1,7 @@
 #include "buffer/buffer_internal.h"
 
+#include <stddef.h>
+
 static size_t vmnl_net_buffer_ring_data_after_wrap(const VmnlNetBuffer *buffer, size_t offset, VmnlNetBufferView *views, size_t *nviews)
 {
     const struct VmnlNetBufferContiguous *contiguous_buffer = (const struct VmnlNetBufferContiguous *) buffer;
