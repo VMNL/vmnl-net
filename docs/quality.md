@@ -16,14 +16,14 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 
 > November 21, 2026
 
-clang-tidy entered the CI with #86.
+clang-tidy entered the CI with [#86](https://github.com/VMNL/vmnl-net/pull/86).
 The current `.clang-tidy`, run on `main` just before it (b96de83) on macOS, reports 39 warnings in the library.
 
 - 35 `misc-include-cleaner`, for headers used without being included directly
 - 2 `readability-magic-numbers` and 1 `bugprone-signed-bitwise`, in `src/version/version.c`
 - 1 `readability-math-missing-parentheses`, in `src/context/context_advance.c`
 
-#86 fixed all of them, and each source now includes the headers it uses.
+[#86](https://github.com/VMNL/vmnl-net/pull/86) fixed all of them, and each source now includes the headers it uses.
 Since then the count stays at 0, as the CI runs clang-tidy with `--warnings-as-errors`.
 
 ## Final measurement
@@ -60,7 +60,7 @@ The utest.h macros inflate the cognitive complexity and the magic numbers of the
 
 > Since October 12, 2026
 
-- Why it stays: the naive list came first, as [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md) explains, and #100 compares a wheel and a heap in 0.4.0
+- Why it stays: the naive list came first, as [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md) explains, and [#100](https://github.com/VMNL/vmnl-net/issues/100) compares a wheel and a heap in 0.4.0
 - What it costs: a start walks the list with deadlines out of order, 25.6 µs with 32,000 active timers
 - What fixing it would cost: to estimate
 
