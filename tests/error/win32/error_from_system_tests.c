@@ -135,3 +135,8 @@ UTEST(vmnl_net_error_from_system, returns_fsystem_without_matching_code)
 {
     EXPECT_EQ(vmnl_net_error_from_system(WSAEINPROGRESS), VMNL_NET_FSYSTEM);
 }
+
+UTEST(vmnl_net_error_from_system, returns_fsystem_with_int_max)
+{
+    EXPECT_EQ(vmnl_net_error_from_system(INT_MAX), VMNL_NET_FSYSTEM);
+}

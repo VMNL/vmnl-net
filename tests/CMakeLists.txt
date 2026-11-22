@@ -16,8 +16,6 @@ target_sources(vmnl_net_tests
     version/version_tests.c
     version/version_string_tests.c
     error/error_as_string_tests.c
-    $<$<NOT:$<PLATFORM_ID:Windows>>:error/posix/error_from_system_tests.c>
-    $<$<PLATFORM_ID:Windows>:error/win32/error_from_system_tests.c>
     allocator/allocator_set_tests.c
     context/context_create_tests.c
     context/context_remaining_tests.c
@@ -87,6 +85,14 @@ target_sources(vmnl_net_tests
     buffer/chunked/buffer_chunked_data_tests.c
     buffer/chunked/buffer_chunked_consume_tests.c
 )
+
+if(NOT BUILD_SHARED_LIBS)
+    target_sources(vmnl_net_tests
+      PRIVATE
+        $<$<NOT:$<PLATFORM_ID:Windows>>:error/posix/error_from_system_tests.c>
+        $<$<PLATFORM_ID:Windows>:error/win32/error_from_system_tests.c>
+    )
+endif()
 
 target_include_directories(vmnl_net_tests SYSTEM PRIVATE ${utest_SOURCE_DIR})
 target_include_directories(vmnl_net_tests PRIVATE ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/tests)
