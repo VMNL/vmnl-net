@@ -12,6 +12,7 @@ file(GLOB_RECURSE format_files CONFIGURE_DEPENDS
     ${PROJECT_SOURCE_DIR}/bench/*.hpp
     ${PROJECT_SOURCE_DIR}/tests/*.c
     ${PROJECT_SOURCE_DIR}/tests/*.h
+    ${PROJECT_SOURCE_DIR}/examples/*.c
 )
 
 add_custom_target(format
