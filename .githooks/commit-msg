@@ -3,13 +3,15 @@
 
 set -eu
 
-checker=$(mktemp)
+CHECKER=$(mktemp)
 
-trap 'rm -f "$checker"' EXIT
+readonly CHECKER
 
-if ! curl -fsSL --max-time 5 -o "$checker" https://raw.githubusercontent.com/VMNL/vmnl-graphics/main/tools/commit_message.py; then
+trap 'rm -f "$CHECKER"' EXIT
+
+if ! curl -fsSL --max-time 5 -o "$CHECKER" https://raw.githubusercontent.com/VMNL/vmnl-graphics/main/tools/commit_message.py; then
     echo "commit-msg: cannot fetch the convention checker" >&2
     exit 1
 fi
 
-python3 "$checker" file "$1"
+python3 "$CHECKER" file "$1"
