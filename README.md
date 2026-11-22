@@ -41,7 +41,7 @@ TCP, UDP, reliable UDP (RUDP) and socket polling for games and real-time applica
 
 `vmnl_net` is a cross-platform networking library written in C11.
 It exposes a single non-blocking API over the native socket interfaces of Windows, macOS and Linux, and builds higher-level protocols and services on top of it.
-It is developed as the networking module of the [VMNL](https://github.com/VMNL/vmnl) project and can be used on its own from any C or C++ application.
+It is developed as the networking module of the [VMNL](https://github.com/VMNL) project and can be used on its own from any C or C++ application.
 
 ### Is it for you?
 
