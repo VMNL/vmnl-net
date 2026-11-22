@@ -46,3 +46,12 @@ git config core.hooksPath .githooks
 
 A pull request has a title in the format of a commit and a description of a few plain sentences, since it becomes the body of the merge commit.
 It closes the issue of its feature with `Closes #N`, and the issue carries the milestone of the version and the labels.
+
+## Issues
+
+An issue has a title in the format of a commit, the labels of its type, its areas and its impacts, and the milestone of its version once it is planned.
+Its description depends on who takes it:
+
+- a feature or a change planned in a version describes its result in one sentence that starts with what it adds, like `Error codes for the failures of the network layer, named after errno: would block, interrupted, …`
+- a task left to contributors, like a good first issue, explains its context in a paragraph, then lists the steps under `What to do:`, ends with the command that checks the result, and links the guides it relies on
+
