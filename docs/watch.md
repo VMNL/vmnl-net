@@ -140,7 +140,7 @@ In the high-resolution timers of Linux, a late periodic timer counts the periods
 Linux dropped the cascading of its timer wheel and gave up accuracy, since timeouts are almost always canceled before they expire.
 
 - What it changes: A network library's timeouts, like retransmissions, are mostly canceled too, so the model is worth a look
-- What I did: The timer benchmarks rule out the sorted list for deadlines out of order, so a wheel is to prototype against a heap
+- What I did: The timer benchmarks rule out the sorted list for deadlines out of order, so a wheel is to prototype against a heap, in [decision 0012](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md)
 
 ## Hashed and Hierarchical Timing Wheels
 
@@ -154,7 +154,7 @@ Linux dropped the cascading of its timer wheel and gave up accuracy, since timeo
 A timer wheel starts and stops a timer in constant time, where a sorted list has to find the place of each new deadline.
 
 - What it changes: The library's sorted list searches from its back, so it can walk all its timers on each start unless their timeouts are equal
-- What I did: The benchmarks confirmed it on the reference machine. A start costs 3.3 ns with deadlines in order, but 19 to 21 µs out of order with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process, so the 1,000 starts of a frame take longer than a 60 Hz frame. A wheel and a heap come next, measured with the same benchmarks
+- What I did: The benchmarks confirmed it on the reference machine. A start costs 3.3 ns with deadlines in order, but 19 to 21 µs out of order with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process, so the 1,000 starts of a frame take longer than a 60 Hz frame. A wheel and a heap come next, measured with the same benchmarks in [decision 0012](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md)
 
 ## DNS RFCs and the DNS configuration of macOS
 

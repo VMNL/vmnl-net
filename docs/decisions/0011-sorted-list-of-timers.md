@@ -1,7 +1,7 @@
 # 0011 Sorted list of timers
 
 - Date: October 12, 2026
-- Status: accepted, to replace once a wheel or a heap is measured
+- Status: accepted, to be superseded by [0012](0012-timer-structure.md) once a wheel or a heap is measured
 
 **Context and problem**
 
