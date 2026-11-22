@@ -7,7 +7,7 @@ data = "< awk '" . \
 stats data using 2 nooutput
 rows = STATS_records
 
-set terminal svg size 960, rows * 13 + 140 font "Helvetica,10" background rgb "white" noenhanced
+set terminal pdfcairo size 8in, (rows * 13 + 140) / 96.0 font "Helvetica,7" noenhanced
 set output ARG2
 set title "Median time change per benchmark, head against base"
 set xlabel "faster <- median time change -> slower (grey band: 3%, red or green: p < 0.05)"
