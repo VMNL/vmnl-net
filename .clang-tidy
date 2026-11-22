@@ -13,7 +13,7 @@ Checks: >
 HeaderFilterRegex: '(include|src)[/\\]'
 CheckOptions:
   bugprone-signed-bitwise.IgnorePositiveIntegerLiterals: true
-  misc-include-cleaner.IgnoreHeaders: '(^|[/\\])_[^/\\]*\.h;Windows Kits[/\\].*[/\\](um|shared)[/\\].*'
+  misc-include-cleaner.IgnoreHeaders: '(^|[/\\])_[^/\\]*\.h;Windows Kits[/\\].*[/\\](um|shared)[/\\].*;(asm-generic|bits|sys)[/\\]errno(-base)?\.h'
   readability-identifier-naming.FunctionCase: lower_case
   readability-identifier-naming.FunctionPrefix: vmnl_net_
   readability-identifier-naming.GlobalVariableCase: lower_case
