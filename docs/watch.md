@@ -16,6 +16,20 @@ A generic doubly linked list whose links live inside the structures they chain.
 - What it changes: One list serves every module that chains structures, without allocating per link
 - What I did: Ported it as the library's intrusive list, first for a context's active timers sorted by deadline, now also for the chunked buffer's chunks
 
+## Process alternation and random interleaving
+
+> November 22, 2026
+
+- Status: Tested
+- Source: [random interleaving](https://github.com/google/benchmark/blob/v1.9.5/docs/random_interleaving.md) and [paused timing](https://github.com/google/benchmark/blob/v1.9.5/docs/user_guide.md) in the docs of Google Benchmark 1.9.5, and "Rigorous Benchmarking in Reasonable Time" by Tomas Kalibera and Richard Jones (ISMM 2013)
+
+#### Subject
+
+Google Benchmark can interleave the repetitions of different benchmarks at random, and warns that pausing the timer has a high overhead. Kalibera and Jones repeat the runs at every level where the results vary, the executions included.
+
+- What it changes: On 25 benchmarks run against themselves, 9 repetitions in one process gave 12 false changes, random interleaving 6, 3 processes of 3 repetitions 5, and 9 processes of 1 repetition none. On all 179 benchmarks, 9 processes gave 4 false changes instead of 122. Timing by hand instead of pausing the timer made the run 43 % longer without lowering the noise
+- What I did: tools/compare_benchmarks.sh runs each build 9 times in turn, each run in a new process, as [decision 0004](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0004-benchmark-comparison-on-a-reference-machine.md) explains
+
 ## Apple App Review Guidelines, rule 2.5.5
 
 > November 19, 2026
@@ -140,7 +154,7 @@ Linux dropped the cascading of its timer wheel and gave up accuracy, since timeo
 A timer wheel starts and stops a timer in constant time, where a sorted list has to find the place of each new deadline.
 
 - What it changes: The library's sorted list searches from its back, so it can walk all its timers on each start unless their timeouts are equal
-- What I did: The benchmarks confirmed it on the reference machine. A start costs 3.3 ns with deadlines in order, but 25.6 µs out of order with 32,000 active timers, so the 1,000 starts of a frame take longer than a 60 Hz frame. A wheel and a heap come next, measured with the same benchmarks
+- What I did: The benchmarks confirmed it on the reference machine. A start costs 3.3 ns with deadlines in order, but 19 to 21 µs out of order with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process, so the 1,000 starts of a frame take longer than a 60 Hz frame. A wheel and a heap come next, measured with the same benchmarks
 
 ## DNS RFCs and the DNS configuration of macOS
 
