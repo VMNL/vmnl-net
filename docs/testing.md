@@ -59,5 +59,5 @@ UTEST_I(vmnl_net_buffer_consume, drops_first_bytes, NTYPES)
 Benchmarks use [Google Benchmark](https://github.com/google/benchmark), fetched by CMake when `VMNL_NET_BUILD_BENCHMARKS` is `ON`.
 Each public function has its file, `bench/<module>/<name>_benchmarks.cpp`, listed in `bench/CMakeLists.txt`.
 A benchmark is named `<function>/<case>`, like the suite and the condition of a test: its function without `vmnl_net_`, then its case when there are several, like `buffer_prepare/ring`, and covers its sizes with `Range` or `Args`.
-Compare a change with `tools/compare_benchmarks.sh <base>` on a quiet machine, after comparing a commit with itself to measure the noise of the day, as [decision 0004](decisions/0004-benchmark-comparison-on-a-reference-machine.md) explains.
+Compare a change with `tools/compare_benchmarks.sh <base>` on a quiet machine, after comparing a commit with itself to measure the noise of the day, as [decision 0004](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0004-benchmark-comparison-on-a-reference-machine.md) explains.
 The CI only runs each benchmark once.
