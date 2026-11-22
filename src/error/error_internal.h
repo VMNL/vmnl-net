@@ -33,6 +33,15 @@ static inline void vmnl_net_error_set(VmnlNetError *error, VmnlNetError value)
     *error = value;
 }
 
+/**
+ * \brief Translates an error code of the system into a code of the library.
+ *
+ * A code whose meaning depends on the call is translated by the caller instead, like the WSAEWOULDBLOCK of a connect in progress on Windows, which means #VMNL_NET_EINPROGRESS there.
+ * \param error_code Code of the failed call, errno on POSIX and WSAGetLastError() on Windows.
+ * \return Code of the library with the same meaning, #VMNL_NET_FSYSTEM if none matches.
+ */
+VmnlNetError vmnl_net_error_from_system(int error_code);
+
 #ifdef __cplusplus
 }
 #endif
