@@ -61,7 +61,7 @@ The utest.h macros inflate the cognitive complexity and the magic numbers of the
 > Since October 12, 2026
 
 - Why it stays: the naive list came first, as [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md) explains, and [#100](https://github.com/VMNL/vmnl-net/issues/100) compares a wheel and a heap in 0.4.0
-- What it costs: a start walks the list with deadlines out of order, 25.6 µs with 32,000 active timers
+- What it costs: a start walks the list with deadlines out of order, which takes 19 to 21 µs with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process
 - What fixing it would cost: to estimate
 
 ### One allocation per object
