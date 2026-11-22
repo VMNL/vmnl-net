@@ -17,6 +17,7 @@ Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUC
 - `examples/`: the examples of the modules
 - `docs/`: the guides, the references, the research log, the architecture and the decision records
 - `cmake/`: the CMake modules and the pkg-config template
+- `tools/`: the scripts that compare the benchmarks and print the docs to PDF
 - `.github/`: the workflows and the Dependabot configuration
 - `.githooks/`: the hook that checks the commit messages
 
