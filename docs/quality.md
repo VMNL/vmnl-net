@@ -12,6 +12,20 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 - Doxygen fails on any documentation warning (like undocumented function).
 - The benchmarks build and run once.
 
+## Changes stopped by the CI
+
+### Warnings on other compilers
+
+> November 20, 2026
+
+[#79](https://github.com/VMNL/vmnl-net/pull/79) turned the warnings into errors in the CI. It built and passed the tests on macOS with AppleClang, but the other compilers found three warnings.
+
+- GCC reported `resizable_types` as unused, a static table of `tests/buffer/buffer_tests.h` that `buffer_create_tests.c` does not use. [d3afd77](https://github.com/VMNL/vmnl-net/commit/d3afd77) made the type tables `const`.
+- MSVC reported C4232 on the addresses of `malloc()`, `realloc()` and `free()`, imported from the DLL of the C runtime, in the default allocator of `src/allocator/allocator_set.c`. [f723f19](https://github.com/VMNL/vmnl-net/commit/f723f19) points it to static wrappers.
+- MSVC reported C4013 on `Sleep()`, called without a declaration in `tests/clock/clock_now_tests.c`. [7e46881](https://github.com/VMNL/vmnl-net/commit/7e46881) includes `windows.h`, or `unistd.h` elsewhere, before `utest.h`.
+
+The ruleset of `main` requires every test job and the coverage job, so the pull request stayed blocked until the last run passed.
+
 ## Baseline
 
 > November 21, 2026
