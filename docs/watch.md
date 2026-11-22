@@ -16,6 +16,20 @@ A generic doubly linked list whose links live inside the structures they chain.
 - What it changes: One list serves every module that chains structures, without allocating per link
 - What I did: Ported it as the library's intrusive list, first for a context's active timers sorted by deadline, now also for the chunked buffer's chunks
 
+## Process alternation and random interleaving
+
+> November 22, 2026
+
+- Status: Tested
+- Source: [random interleaving](https://github.com/google/benchmark/blob/v1.9.5/docs/random_interleaving.md) and [paused timing](https://github.com/google/benchmark/blob/v1.9.5/docs/user_guide.md) in the docs of Google Benchmark 1.9.5, and "Rigorous Benchmarking in Reasonable Time" by Tomas Kalibera and Richard Jones (ISMM 2013)
+
+#### Subject
+
+Google Benchmark can interleave the repetitions of different benchmarks at random, and warns that pausing the timer has a high overhead. Kalibera and Jones repeat the runs at every level where the results vary, the executions included.
+
+- What it changes: On 25 benchmarks run against themselves, 9 repetitions in one process gave 12 false changes, random interleaving 6, 3 processes of 3 repetitions 5, and 9 processes of 1 repetition none. On all 179 benchmarks, 9 processes gave 4 false changes instead of 122. Timing by hand instead of pausing the timer made the run 43 % longer without lowering the noise
+- What I did: tools/compare_benchmarks.sh runs each build 9 times in turn, each run in a new process, as [decision 0004](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0004-benchmark-comparison-on-a-reference-machine.md) explains
+
 ## Apple App Review Guidelines, rule 2.5.5
 
 > November 19, 2026
