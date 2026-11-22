@@ -17,6 +17,7 @@ Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUC
 - `examples/`: the examples of the modules
 - `docs/`: the guides, the references, the research log, the architecture and the decision records
 - `cmake/`: the CMake modules and the pkg-config template
+- `tools/`: the scripts that compare the benchmarks and print the docs to PDF
 - `.github/`: the workflows and the Dependabot configuration
 - `.githooks/`: the hook that checks the commit messages
 
@@ -35,7 +36,7 @@ One push has one contributor, its author, with no AI co-author nor trailer such 
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/): `<type>[optional scope]: <description>`, in the imperative, starting with a lowercase letter and without a final period.
 The subject stays under 72 characters and the lines of the body under 80.
-The types are `build`, `cicd`, `chore`, `docs`, `feat`, `fix`, `perf`, `refactor`, `style` and `test`, described in the [instructions of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INSTRUCTIONS.md#commit-type-usage-guidelines).
+The types are `build`, `cicd`, `chore`, `docs`, `feat`, `fix`, `perf`, `refactor`, `style` and `test`, described in the [instructions of VMNL](https://github.com/VMNL/vmnl-graphics/blob/main/docs/INSTRUCTIONS.md#commit-type-usage-guidelines).
 Before `1.0.0`, any version may break the API, so breaking changes are not marked with `!`.
 
 Install the hook that checks every message before the commit:
@@ -46,3 +47,12 @@ git config core.hooksPath .githooks
 
 A pull request has a title in the format of a commit and a description of a few plain sentences, since it becomes the body of the merge commit.
 It closes the issue of its feature with `Closes #N`, and the issue carries the milestone of the version and the labels.
+
+## Issues
+
+An issue has a title in the format of a commit, the labels of its type, its areas and its impacts, and the milestone of its version once it is planned.
+Its description depends on who takes it:
+
+- a feature or a change planned in a version describes its result in one sentence that starts with what it adds, like `Error codes for the failures of the network layer, named after errno: would block, interrupted, …`
+- a task left to contributors, like a good first issue, explains its context in a paragraph, then lists the steps under `What to do:`, ends with the command that checks the result, and links the guides it relies on
+

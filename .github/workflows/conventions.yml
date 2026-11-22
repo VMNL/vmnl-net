@@ -20,7 +20,7 @@ jobs:
         timeout-minutes: 5
 
       - name: Fetch the commit convention checker of VMNL
-        run: curl -fsSL -o "$RUNNER_TEMP/commit_message.py" https://raw.githubusercontent.com/VMNL/vmnl/main/tools/commit_message.py
+        run: curl -fsSL -o "$RUNNER_TEMP/commit_message.py" https://raw.githubusercontent.com/VMNL/vmnl-graphics/main/tools/commit_message.py
         timeout-minutes: 5
 
       - name: Check the pull request title
