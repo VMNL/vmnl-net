@@ -2,6 +2,9 @@
 
 This file keeps track of every watch this library's decisions are built on, see [references](references.md) for papers and articles.
 
+The watch follows the RFCs, LWN.net for the networking and the timers of Linux, Gaffer On Games for the netcode of games, and the docs of Microsoft, man7.org and Apple for the system calls.
+It also follows the releases of the candidate dependencies, like c-ares, OpenSSL and BearSSL, and of libraries with the same goals, like libuv, ENet and SDL_net.
+
 ## The intrusive list of Linux
 
 > October 12, 2026
