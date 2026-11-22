@@ -14,7 +14,7 @@ add_custom_target(coverage
   COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/report/html
   COMMAND ${GCOVR} --root . --filter src/ ${gcov_executable}
     --html-details ${PROJECT_BINARY_DIR}/report/html/index.html
-    --markdown-summary ${PROJECT_BINARY_DIR}/report/summary.md
+    --markdown ${PROJECT_BINARY_DIR}/report/summary.md
     --fail-under-line 100 --fail-under-branch 100
     ${PROJECT_BINARY_DIR}
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
