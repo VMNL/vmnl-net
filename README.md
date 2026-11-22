@@ -31,7 +31,6 @@ TCP, UDP, reliable UDP (RUDP) and socket polling for games and real-time applica
 ## Table of Contents
 
 - [Overview](#overview)
-- [Architecture](#architecture)
 - [Technical Documentation](#technical-documentation)
 - [Installation](#installation)
 - [Roadmap](#roadmap)
@@ -42,7 +41,7 @@ TCP, UDP, reliable UDP (RUDP) and socket polling for games and real-time applica
 
 `vmnl_net` is a cross-platform networking library written in C11.
 It exposes a single non-blocking API over the native socket interfaces of Windows, macOS and Linux, and builds higher-level protocols and services on top of it.
-It is developed as the networking module of the [VMNL](https://github.com/VMNL/vmnl) project and can be used on its own from any C or C++ application.
+It is developed as the networking module of the [VMNL](https://github.com/VMNL) project and can be used on its own from any C or C++ application.
 
 ### Is it for you?
 
@@ -68,138 +67,6 @@ Not made for:
 > [!NOTE]
 > The network only progresses inside the calls of the application.
 > If your game loop blocks or computes for long, run the network in a thread of its own.
-
-## Architecture
-
-The library is built in layers, each module pointing to the ones it uses.
-In the diagram, solid lines show what exists and dotted ones what is planned.
-
-Every module reports its failures with errors, so those arrows are left out.
-RUDP is a connection over UDP with reliable and unreliable channels.
-Text chat uses the reliable ones, voice chat the unreliable ones, without retransmission.
-
-```mermaid
-block-beta
-    columns 1
-
-    block:SERVICES
-        columns 10
-        SERVICES_TITLE["Services"]
-        HTTP["<sup>0.8</sup> HTTP(S) client"]
-        space:5
-        CHAT["<sup>0.9</sup> text chat"]
-        VOICE["<sup>0.9</sup> voice chat"]
-        space
-    end
-
-    block:PROTOCOLS
-        columns 10
-        PROTOCOLS_TITLE["Protocols"]
-        TCP["<sup>0.3</sup> TCP"]
-        space:2
-        CRYPT["<sup>0.10</sup> encryption"]
-        space
-        UDP["<sup>0.3</sup> UDP"]
-        RUDP["<sup>0.5</sup> RUDP"]
-        FRAG["<sup>0.7</sup> fragmentation"]
-        space
-    end
-
-    block:IO
-        columns 10
-        IO_TITLE["I/O"]
-        SOCKET["<sup>0.3</sup> sockets"]
-        space:4
-        POLL["<sup>0.6</sup> polling"]
-        space
-        DNS["<sup>0.6</sup> DNS resolution"]
-        space
-    end
-
-    block:DATA
-        columns 10
-        DATA_TITLE["Data"]
-        BUFFER["<sup>0.2</sup> buffer API"]
-        space:3
-        SER["<sup>0.4</sup> serialization"]
-        space:4
-    end
-
-    block:BUFFERS
-        columns 10
-        BUFFERS_TITLE["Buffers"]
-        FLAT["<sup>0.3</sup> flat"]
-        RING["<sup>0.2</sup> ring"]
-        DYNAMIC["<sup>0.2</sup> dynamic"]
-        CHUNKED["<sup>0.3</sup> chunked"]
-        space:5
-    end
-
-    block:TIME
-        columns 10
-        TIME_TITLE["Time"]
-        space:6
-        TIMER["<sup>0.2</sup> timers"]
-        CLOCK["<sup>0.2</sup> clock"]
-        space
-    end
-
-    block:CORE
-        columns 10
-        CORE_TITLE["Core"]
-        space
-        ALLOCATOR["<sup>0.1</sup> allocator"]
-        space:3
-        CONTEXT["<sup>0.1</sup> context"]
-        ERROR["<sup>0.1</sup> errors"]
-        VERSION["<sup>0.1</sup> version"]
-        space
-    end
-
-    block:INTERNAL
-        columns 10
-        INTERNAL_TITLE["Internal"]
-        space:4
-        LIST["<sup>0.2</sup> intrusive list"]
-        space:4
-    end
-
-    HTTP -.-> TCP
-    CHAT -.-> RUDP
-    VOICE -.-> RUDP
-    RUDP -.-> UDP
-    RUDP -.-> FRAG
-    RUDP -.-> TIMER
-    TCP -.-> SOCKET
-    UDP -.-> SOCKET
-    SOCKET -.-> POLL
-    SOCKET -.-> BUFFER
-    SER -.-> BUFFER
-    BUFFER --> FLAT
-    BUFFER --> DYNAMIC
-    BUFFER --> RING
-    BUFFER --> CHUNKED
-    POLL -.-> CONTEXT
-    TIMER --> CONTEXT
-    TIMER --> ALLOCATOR
-    TIMER --> LIST
-    CONTEXT --> TIMER
-    CONTEXT --> CLOCK
-    CONTEXT --> ALLOCATOR
-    CONTEXT --> LIST
-    FLAT --> ALLOCATOR
-    DYNAMIC --> ALLOCATOR
-    RING --> ALLOCATOR
-    CHUNKED --> ALLOCATOR
-    CHUNKED --> LIST
-
-    classDef default fill:none,stroke:#6f7e8e
-    classDef title fill:none,stroke:none
-    classDef planned fill:none,stroke:#6f7e8e,stroke-dasharray: 4 3
-
-    class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
-    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER planned
-```
 
 ## Technical Documentation
 

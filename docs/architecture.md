@@ -1,95 +1,257 @@
 # Architecture
 
 vmnl-net is a C11 library linked into the application, statically or as a shared library.
-It runs no service and no thread of its own: every function runs inside a call of the application, on the thread that owns the context.
+It runs no service and no thread of its own. Every function runs inside an application call, on the thread that owns the context.
 
-## Components
+## Layers
 
-| Module | Responsibility | Since | Uses |
-| --- | --- | --- | --- |
-| allocator | One global allocator, replaceable by the application, `malloc`, `realloc` and `free` by default | 0.1 | C runtime |
-| errors | The error codes every function reports, and their messages | 0.1 | |
-| version | The version of the library linked at run time | 0.1 | |
-| context | The state of one thread: its active timers, and the time given to its last advance | 0.1 | allocator, clock, timers, list |
-| clock | A monotonic clock in nanoseconds | 0.2 | `clock_gettime()` on POSIX, `QueryPerformanceCounter()` on Windows |
-| timers | One-shot and periodic timers, fired by the time the application gives to its context | 0.2, reworked in 0.3 | context, allocator, list |
-| buffers | Byte queues written and read in place, as flat, ring, dynamic or chunked buffers behind one API | 0.2 and 0.3 | allocator, list |
-| list | A generic intrusive doubly linked list, internal to the library | 0.2 | |
+The library is built in layers, each module pointing to the ones it uses.
+In the diagram, solid lines show what exists and dotted ones what is planned.
 
-The planned modules follow the [roadmap](../README.md#roadmap): the sockets, TCP and UDP in 0.3, the serialization in 0.4, RUDP in 0.5, the polling and the DNS resolution in 0.6, the fragmentation in 0.7, the HTTP client in 0.8, the chat in 0.9 and the encryption in 0.10.
-
-## Dependencies and data flows
+Every module reports its failures with errors, so those arrows are left out.
+RUDP is a connection over UDP with reliable and unreliable channels.
+Text chat uses the reliable ones, voice chat the unreliable ones, without retransmission.
 
 ```mermaid
-flowchart TB
-    APP["Application"]
-    CONTEXT["context"]
-    TIMERS["timers"]
-    BUFFERS["buffers"]
-    CLOCK["clock"]
-    LIST["list"]
-    ALLOCATOR["allocator"]
-    OS["Operating system"]
-    CRT["C runtime, or the allocator of the application"]
+block-beta
+    columns 1
 
-    APP -- "current time, through vmnl_net_context_advance()" --> CONTEXT
-    CONTEXT -- "expired timers" --> TIMERS
-    TIMERS -- "callbacks" --> APP
-    APP -- "bytes written in the views of vmnl_net_buffer_prepare()" --> BUFFERS
-    BUFFERS -- "bytes read from the views of vmnl_net_buffer_data()" --> APP
-    APP -- "vmnl_net_clock_now()" --> CLOCK
-    CLOCK --> OS
-    CONTEXT --> LIST
-    TIMERS --> LIST
-    BUFFERS --> LIST
+    block:SERVICES
+        columns 10
+        SERVICES_TITLE["Services"]
+        HTTP["<sup>0.8</sup> HTTP(S) client"]
+        space:5
+        CHAT["<sup>0.9</sup> text chat"]
+        VOICE["<sup>0.9</sup> voice chat"]
+        space
+    end
+
+    block:PROTOCOLS
+        columns 10
+        PROTOCOLS_TITLE["Protocols"]
+        TCP["<sup>0.3</sup> TCP"]
+        space:2
+        CRYPT["<sup>0.10</sup> encryption"]
+        space
+        UDP["<sup>0.3</sup> UDP"]
+        RUDP["<sup>0.5</sup> RUDP"]
+        FRAG["<sup>0.7</sup> fragmentation"]
+        space
+    end
+
+    block:IO
+        columns 10
+        IO_TITLE["I/O"]
+        SOCKET["<sup>0.3</sup> sockets"]
+        space:4
+        POLL["<sup>0.6</sup> polling"]
+        space
+        DNS["<sup>0.6</sup> DNS resolution"]
+        space
+    end
+
+    block:DATA
+        columns 10
+        DATA_TITLE["Data"]
+        BUFFER["<sup>0.2</sup> buffer API"]
+        space:3
+        SER["<sup>0.4</sup> serialization"]
+        space:4
+    end
+
+    block:BUFFERS
+        columns 10
+        BUFFERS_TITLE["Buffers"]
+        FLAT["<sup>0.3</sup> flat"]
+        RING["<sup>0.2</sup> ring"]
+        DYNAMIC["<sup>0.2</sup> dynamic"]
+        CHUNKED["<sup>0.3</sup> chunked"]
+        space:5
+    end
+
+    block:TIME
+        columns 10
+        TIME_TITLE["Time"]
+        space:6
+        TIMER["<sup>0.2</sup> timers"]
+        CLOCK["<sup>0.2</sup> clock"]
+        space
+    end
+
+    block:CORE
+        columns 10
+        CORE_TITLE["Core"]
+        space
+        ALLOCATOR["<sup>0.1</sup> allocator"]
+        space:3
+        CONTEXT["<sup>0.1</sup> context"]
+        ERROR["<sup>0.1</sup> errors"]
+        VERSION["<sup>0.1</sup> version"]
+        space
+    end
+
+    block:INTERNAL
+        columns 10
+        INTERNAL_TITLE["Internal"]
+        space:4
+        LIST["<sup>0.2</sup> intrusive list"]
+        space:4
+    end
+
+    HTTP -.-> TCP
+    CHAT -.-> RUDP
+    VOICE -.-> RUDP
+    RUDP -.-> UDP
+    RUDP -.-> FRAG
+    RUDP -.-> TIMER
+    TCP -.-> SOCKET
+    UDP -.-> SOCKET
+    SOCKET -.-> POLL
+    SOCKET -.-> BUFFER
+    SER -.-> BUFFER
+    BUFFER --> FLAT
+    BUFFER --> DYNAMIC
+    BUFFER --> RING
+    BUFFER --> CHUNKED
+    POLL -.-> CONTEXT
+    TIMER --> CONTEXT
+    TIMER --> ALLOCATOR
+    TIMER --> LIST
+    CONTEXT --> TIMER
+    CONTEXT --> CLOCK
     CONTEXT --> ALLOCATOR
-    TIMERS --> ALLOCATOR
-    BUFFERS --> ALLOCATOR
-    ALLOCATOR --> CRT
+    CONTEXT --> LIST
+    FLAT --> ALLOCATOR
+    DYNAMIC --> ALLOCATOR
+    RING --> ALLOCATOR
+    CHUNKED --> ALLOCATOR
+    CHUNKED --> LIST
+
+    classDef default fill:none,stroke:#6f7e8e
+    classDef title fill:none,stroke:none
+    classDef planned fill:none,stroke:#6f7e8e,stroke-dasharray: 4 3
+
+    class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
+    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER planned
 ```
 
-The bytes never go through a copy of the library: the application writes into the free space a buffer exposes and reads its stored bytes in place.
-The time only flows from the application to the context, so the timers never read the clock on their own.
+The application gives the time to its context, so the timers never read the clock themselves.
+The bytes never go through a library copy. The application writes into the free space a buffer exposes and reads the stored bytes in place.
 
-## External dependencies
+## Modules
 
-| Dependency | Used for | When |
-| --- | --- | --- |
-| C runtime | memory, through the default allocator | run time |
-| `clock_gettime()`, `QueryPerformanceCounter()` | the clock | run time |
-| Winsock2 (`ws2_32`) and BSD sockets | the sockets, from 0.3 | run time |
-| CMake 3.28 | the build, the presets and the packages | build |
-| utest.h, Google Benchmark | the tests and the benchmarks, fetched by CMake | development only |
-| Doxygen, clang-format, clang-tidy, gcovr | the documentation, the formatting, the static analysis and the coverage | development only |
+### allocator
 
-The DNS resolution and the TLS library of the later versions are still to choose, as logged in the [research log](watch.md).
+> 0.1
+
+- Uses: the C runtime
+
+One global allocator, replaceable by the application, with `malloc`, `realloc` and `free` by default.
+
+### errors
+
+> 0.1
+
+The error codes every function reports, and their messages.
+
+### version
+
+> 0.1
+
+The version of the library linked at run time.
+
+### context
+
+> 0.1
+
+- Uses: allocator, clock, timers, list
+
+The state of one thread, with its active timers and the time given to its last advance.
+
+### clock
+
+> 0.2
+
+- Uses: `clock_gettime()` on POSIX, `QueryPerformanceCounter()` on Windows
+
+A monotonic clock in nanoseconds.
+
+### list
+
+> 0.2
+
+An internal generic intrusive doubly linked list.
+
+### timers
+
+> 0.2, reworked in 0.3
+
+- Uses: context, allocator, list
+
+One-shot and periodic timers, fired by the time the application gives to its context.
+
+### buffers
+
+> 0.2 and 0.3
+
+- Uses: allocator, list
+
+Byte queues written and read in place, as flat, ring, dynamic or chunked buffers behind one API.
+
+The planned modules follow the [roadmap](../README.md#roadmap) and appear dotted in the diagram.
+
+## Dependencies
+
+The library has no third-party dependency. It only needs the C runtime and the system sockets, Winsock2 on Windows and BSD sockets elsewhere.
+The first ones may come with the DNS resolution of 0.6 and the TLS library of 0.8, like c-ares or OpenSSL, still to choose in decisions [0005](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0005-dns-resolution.md) and [0006](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0006-tls-library.md).
+The build and development tools are listed in [docs/build.md](build.md).
 
 ## Deployment
 
-The library ships as static and shared archives for Windows, macOS and Linux on x86_64 and arm64, with a CMake package and a pkg-config file, or is built from its sources, by `FetchContent` for instance.
-It lives in the process of the application, which owns the loop: a context belongs to one thread at a time, and the allocator is global to the process.
+The library ships as static and shared archives for Windows, macOS and Linux on x86_64 and arm64, with a CMake package and a pkg-config file.
+It can also be built from its sources, with `FetchContent` for instance.
+It lives in the application's process, and the application owns the loop. A context belongs to one thread at a time, and the allocator is global to the process.
 
 ## Points of failure
 
-| Situation | What the library does |
-| --- | --- |
-| An allocation fails | The function reports `VMNL_NET_ENOMEM` |
-| A flat or ring buffer lacks free space | `vmnl_net_buffer_prepare()` reports `VMNL_NET_ENOBUFS`, while a dynamic buffer grows by 1.5 times and a chunked buffer adds a chunk of 16 KiB without moving its bytes |
-| The application stops calling `vmnl_net_context_advance()` | The timers fire late, each callback learns how late it is called, and a periodic timer that missed several deadlines fires once |
-| The number of active timers doubles | Starting a timer can walk the whole sorted list, so its worst cost doubles, while equal timeouts still insert at once from the back |
-| Two threads use one context | A data race, as the context has no lock, which its documentation forbids |
-| The allocator is replaced while objects are alive or other threads run | Memory freed by the wrong allocator or a data race, which its documentation forbids |
+### An allocation fails
+
+The function reports `VMNL_NET_ENOMEM`.
+
+### A buffer lacks free space
+
+A flat or ring buffer makes `vmnl_net_buffer_prepare()` report `VMNL_NET_ENOBUFS`.
+A dynamic buffer grows by 1.5 times, and a chunked buffer adds a 16 KiB chunk without moving its bytes.
+
+### The application falls behind
+
+The timers fire late, and each callback learns how late it runs.
+A periodic timer that missed several deadlines fires once.
+
+### The number of active timers grows
+
+Starting a timer can walk the whole sorted list, so its worst cost grows with the number of active timers, while equal timeouts still insert at once from the back.
+On the reference machine, a start costs 3.3 ns with deadlines in order, and 25.6 µs out of order with 32,000 active timers.
+
+### Two threads use one context
+
+A data race, since the context has no lock. Its documentation forbids it.
+
+### The allocator is replaced while objects are alive or other threads run
+
+Memory freed by the wrong allocator, or a data race. Its documentation forbids it.
 
 ## Structuring choices
 
-| Choice | Alternative set aside | Reason |
-| --- | --- | --- |
-| No background thread | Threads inside the library | It takes no lock, has no data race, and a bug reproduces under a debugger, at the cost of a loop run by the application and of one context per thread |
-| Opaque handles and fixed-size integers in the C ABI | Public structures the application embeds | The ABI stays stable, the library is easy to bind from Rust, C# or Python, and the library owns every byte it exposes, at the cost of an allocation per object |
-| One global replaceable allocator | An allocator given to each call or each context | No signature carries an allocator, at the cost of a contract on when and from which thread it is replaced |
-| One buffer API over operation tables | One API per kind of buffer | The application changes the kind of a buffer without changing its code |
-| Timers in a sorted intrusive list | A heap or a timer wheel | The naive list stays until the benchmarks show the need for another structure |
-| Typed socket families sharing a base, planned for 0.3 | A generic socket, or a flat list of typed sockets | Invalid combinations do not compile, and a new family reuses the base, as compared in the [research log](watch.md) |
+- [0001 Socket model](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0001-socket-model.md)
+- [0002 Cryptography](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0002-cryptography.md)
+- [0005 DNS resolution](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0005-dns-resolution.md), proposed
+- [0006 TLS library](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0006-tls-library.md), proposed
+- [0007 No background thread](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0007-no-background-thread.md)
+- [0008 Opaque handles](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0008-opaque-handles.md)
+- [0009 Global allocator](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0009-global-allocator.md)
+- [0010 Buffer operation tables](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0010-buffer-operation-tables.md)
+- [0011 Sorted list of timers](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md)
 
 ## Data model
 
@@ -103,13 +265,11 @@ erDiagram
     BUFFER ||--o{ VIEW : "exposes for a write or a read"
 ```
 
-| Entity | Lifetime | Size |
-| --- | --- | --- |
-| allocator | the process | 3 function pointers |
-| context | created and destroyed by the application, one per thread | its active timers and the time of its last advance |
-| timer | created by the application, started in a context | one link, a callback and its data, a deadline and an interval |
-| buffer | created and destroyed by the application | its capacity, fixed for flat and ring buffers |
-| chunk | owned by a chunked buffer | 16 KiB of bytes |
-| view | given by the buffer for a write or a read, invalid once the buffer is destroyed | a pointer and a size |
+- allocator, alive for the whole process, made of 3 function pointers
+- context, created and destroyed by the application, one per thread, holding its active timers and the time of its last advance
+- timer, created by the application and started in a context, holding one link, a callback and its data, a deadline and an interval
+- buffer, created and destroyed by the application, with a capacity fixed for flat and ring buffers
+- chunk, owned by a chunked buffer, holding 16 KiB of bytes
+- view, given by a buffer for a write or a read and invalid once the buffer is destroyed, made of a pointer and a size
 
 The expected numbers of timers and buffers per context will be measured once the sockets exist.
