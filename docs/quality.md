@@ -5,7 +5,7 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 ## Tools
 
 - clang-format checks the formatting, with the `format-check` preset.
-- clang-tidy checks the library on Linux and Windows, with the `tidy` preset (Linux and Windows for `posix` and `win32` dedicated code base). 
+- clang-tidy checks the library with the `tidy` preset, on Linux for its `posix` code and on Windows for its `win32` code.
 - The compilers treat warnings as errors in the CI, through `VMNL_NET_WARNINGS_AS_ERRORS`.
 - AddressSanitizer, UndefinedBehaviorSanitizer and MemorySanitizer run the tests.
 - gcovr fails below 100 % of the lines and branches covered by the tests.
@@ -31,7 +31,7 @@ The ruleset of `main` requires every test job and the coverage job, so the pull 
 > November 21, 2026
 
 clang-tidy entered the CI with [#86](https://github.com/VMNL/vmnl-net/pull/86).
-The current `.clang-tidy`, run on `main` just before it (b96de83) on macOS, reports 39 warnings in the library.
+The current `.clang-tidy`, run on `main` just before it ([b96de83](https://github.com/VMNL/vmnl-net/commit/b96de83)) on macOS, reports 39 warnings in the library.
 
 - 35 `misc-include-cleaner`, for headers used without being included directly
 - 2 `readability-magic-numbers` and 1 `bugprone-signed-bitwise`, in `src/version/version.c`

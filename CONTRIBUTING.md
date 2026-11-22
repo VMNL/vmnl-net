@@ -6,6 +6,7 @@ Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUC
 
 - [Build](docs/build.md): the requirements and the presets that build, test, measure and document the library
 - [Conventions](docs/conventions.md): the names, the files, the errors, the Doxygen comments and the rules clang-format and clang-tidy do not check
+- [Quality](docs/quality.md): the checks of the CI, the changes they stopped, the clang-tidy rules and the technical debt
 - [Testing](docs/testing.md): the tests and the benchmarks
 
 ## Layout

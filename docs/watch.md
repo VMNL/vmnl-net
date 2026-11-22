@@ -24,7 +24,7 @@ A generic doubly linked list whose links live inside the structures they chain.
 > November 22, 2026
 
 - Status: Tested
-- Source: [random interleaving](https://github.com/google/benchmark/blob/v1.9.5/docs/random_interleaving.md) and [paused timing](https://github.com/google/benchmark/blob/v1.9.5/docs/user_guide.md) in the docs of Google Benchmark 1.9.5, and "Rigorous Benchmarking in Reasonable Time" by Tomas Kalibera and Richard Jones (ISMM 2013)
+- Source: [random interleaving](https://github.com/google/benchmark/blob/v1.9.5/docs/random_interleaving.md) and [paused timing](https://github.com/google/benchmark/blob/v1.9.5/docs/user_guide.md) in the docs of Google Benchmark 1.9.5, and [Rigorous Benchmarking in Reasonable Time](https://doi.org/10.1145/2464157.2464160) by Tomas Kalibera and Richard Jones (ISMM 2013)
 
 #### Subject
 
@@ -44,7 +44,7 @@ Google Benchmark can interleave the repetitions of different benchmarks at rando
 
 The App Store requires apps to work on IPv6-only networks, where getaddrinfo turns an IPv4 literal into a synthesized IPv6 address.
 
-- What it changes: inet_pton keeps an IPv4 literal as an IPv4-mapped address, which reaches nothing on such a network
+- What it changes: inet_pton parses an IPv4 literal as an IPv4 address, which reaches nothing on such a network
 - What I did: A remote peer's address goes through the resolution, even when it is a numeric IP
 
 ## AF_UNIX sockets on Windows
@@ -213,7 +213,7 @@ When an asynchronous resolution completes, glibc notifies the application with a
 glibc waits 5 s for a name server before retrying, and tries twice by default.
 
 - What it changes: A blocking getaddrinfo can freeze a game's loop for seconds, against the README's non-blocking promise
-- What I did: A blocking resolution would need a documented exception in the README
+- What I did: Option 1 of [decision 0005](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0005-dns-resolution.md), with a documented exception in the README
 
 ## RFC 8305
 
