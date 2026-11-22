@@ -137,7 +137,7 @@ block-beta
 ```
 
 The application gives the time to its context, so the timers never read the clock themselves.
-The bytes never go through a library copy. The application writes into the free space a buffer exposes and reads the stored bytes in place.
+The bytes never go through a library copy on their way in or out. The application writes into the free space a buffer exposes and reads the stored bytes in place.
 
 ## Modules
 
@@ -231,7 +231,7 @@ A periodic timer that missed several deadlines fires once.
 
 ### The number of active timers grows
 
-Starting a timer can walk the whole sorted list, so its worst cost grows with the number of active timers, while equal timeouts still insert at once from the back.
+Starting a timer can walk the whole sorted list of [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md), so its worst cost grows with the number of active timers, while equal timeouts still insert at once from the back.
 On the reference machine, a start costs 3.3 ns with deadlines in order, and 19 to 21 µs out of order with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process.
 
 ### Two threads use one context
@@ -253,6 +253,7 @@ Memory freed by the wrong allocator, or a data race. Its documentation forbids i
 - [0009 Global allocator](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0009-global-allocator.md)
 - [0010 Buffer operation tables](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0010-buffer-operation-tables.md)
 - [0011 Sorted list of timers](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md)
+- [0012 Timer structure](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md), proposed
 
 ## Data model
 

@@ -1,13 +1,13 @@
 #include <vmnl/net/buffer.h>
 
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 int main(void)
 {
     //! [create_buffer]
     VmnlNetError error;
-    
+
     // We already know the size of the payload, so VMNL_NET_BUFFER_FLAT is the best choice here.
     VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_FLAT, 42, &error);
 
@@ -20,7 +20,7 @@ int main(void)
     //! [write_buffer]
     const char payload[] = "Hello, World!\n";
     size_t payload_size = sizeof payload - 1;
-    
+
     // A flat buffer only requires one view.
     VmnlNetBufferView view;
     size_t nviews = 1;
@@ -46,7 +46,7 @@ int main(void)
     //! [read_buffer]
     // vmnl_net_buffer_prepare() may have updated the value, so we set it back to its original value.
     nviews = 1;
-    
+
     // We want to start at the beginning of the stored bytes, so a 0 offset is required.
     vmnl_net_buffer_data(buffer, 0, &view, &nviews);
 

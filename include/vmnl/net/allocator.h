@@ -8,7 +8,9 @@
  * Every allocation of the library goes through one global allocator, which uses \iso{malloc,memory}, \iso{realloc,memory} and \iso{free,memory} until vmnl_net_allocator_set() replaces them.
  *
  * \par Example
- * Example to be written.
+ * \snippet{trimleft} example_allocator_set.c set
+ *
+ * \see \ref example_allocator_set.c
  * @{
  */
 
@@ -64,3 +66,8 @@ VMNL_NET_API void vmnl_net_allocator_set(VmnlNetAllocatorAllocate allocate, Vmnl
 #endif /* !VMNL_NET_ALLOCATOR_H */
 
 /** @} */
+
+/**
+ * \example example_allocator_set.c
+ * Replaces the allocator of the library before any other call.
+ */

@@ -5,19 +5,33 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 ## Tools
 
 - clang-format checks the formatting, with the `format-check` preset.
-- clang-tidy checks the library on Linux and Windows, with the `tidy` preset (Linux and Windows for `posix` and `win32` dedicated code base). 
+- clang-tidy checks the library with the `tidy` preset, on Linux for its `posix` code and on Windows for its `win32` code.
 - The compilers treat warnings as errors in the CI, through `VMNL_NET_WARNINGS_AS_ERRORS`.
 - AddressSanitizer, UndefinedBehaviorSanitizer and MemorySanitizer run the tests.
 - gcovr fails below 100 % of the lines and branches covered by the tests.
 - Doxygen fails on any documentation warning (like undocumented function).
 - The benchmarks build and run once.
 
+## Changes stopped by the CI
+
+### Warnings on other compilers
+
+> November 20, 2026
+
+[#79](https://github.com/VMNL/vmnl-net/pull/79) turned the warnings into errors in the CI. It built and passed the tests on macOS with AppleClang, but the other compilers found three warnings.
+
+- GCC reported `resizable_types` as unused, a static table of `tests/buffer/buffer_tests.h` that `buffer_create_tests.c` does not use. [d3afd77](https://github.com/VMNL/vmnl-net/commit/d3afd77) made the type tables `const`.
+- MSVC reported C4232 on the addresses of `malloc()`, `realloc()` and `free()`, imported from the DLL of the C runtime, in the default allocator of `src/allocator/allocator_set.c`. [f723f19](https://github.com/VMNL/vmnl-net/commit/f723f19) points it to static wrappers.
+- MSVC reported C4013 on `Sleep()`, called without a declaration in `tests/clock/clock_now_tests.c`. [7e46881](https://github.com/VMNL/vmnl-net/commit/7e46881) includes `windows.h`, or `unistd.h` elsewhere, before `utest.h`.
+
+The ruleset of `main` requires every test job and the coverage job, so the pull request stayed blocked until the last run passed.
+
 ## Baseline
 
 > November 21, 2026
 
 clang-tidy entered the CI with [#86](https://github.com/VMNL/vmnl-net/pull/86).
-The current `.clang-tidy`, run on `main` just before it (b96de83) on macOS, reports 39 warnings in the library.
+The current `.clang-tidy`, run on `main` just before it ([b96de83](https://github.com/VMNL/vmnl-net/commit/b96de83)) on macOS, reports 39 warnings in the library.
 
 - 35 `misc-include-cleaner`, for headers used without being included directly
 - 2 `readability-magic-numbers` and 1 `bugprone-signed-bitwise`, in `src/version/version.c`
@@ -60,7 +74,7 @@ The utest.h macros inflate the cognitive complexity and the magic numbers of the
 
 > Since October 12, 2026
 
-- Why it stays: the naive list came first, as [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md) explains, and [#100](https://github.com/VMNL/vmnl-net/issues/100) compares a wheel and a heap in 0.4.0
+- Why it stays: the naive list came first, as [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md) explains, and [#100](https://github.com/VMNL/vmnl-net/issues/100) compares a wheel and a heap in 0.5.0 for [decision 0012](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md)
 - What it costs: a start walks the list with deadlines out of order, which takes 19 to 21 µs with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process
 - What fixing it would cost: to estimate
 

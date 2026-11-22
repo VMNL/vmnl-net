@@ -60,4 +60,5 @@ Benchmarks use [Google Benchmark](https://github.com/google/benchmark), fetched 
 Each public function has its file, `bench/<module>/<name>_benchmarks.cpp`, listed in `bench/CMakeLists.txt`.
 A benchmark is named `<function>/<case>`, like the suite and the condition of a test: its function without `vmnl_net_`, then its case when there are several, like `buffer_prepare/ring`, and covers its sizes with `Range` or `Args`.
 Compare a change with `tools/compare_benchmarks.sh <base>` on a quiet machine, after comparing a commit with itself to measure the noise of the day, as [decision 0004](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0004-benchmark-comparison-on-a-reference-machine.md) explains.
+A gap of up to 3 % between two runs is tolerated. A larger gap after a code change is worth investigating, to see whether it is a real regression.
 The CI only runs each benchmark once.

@@ -2,6 +2,9 @@
 
 This file keeps track of every watch this library's decisions are built on, see [references](references.md) for papers and articles.
 
+The watch follows the RFCs, LWN.net for the networking and the timers of Linux, Gaffer On Games for the netcode of games, and the docs of Microsoft, man7.org and Apple for the system calls.
+It also follows the releases of the candidate dependencies, like c-ares, OpenSSL and BearSSL, and of libraries with the same goals, like libuv, ENet and SDL_net.
+
 ## The intrusive list of Linux
 
 > October 12, 2026
@@ -21,7 +24,7 @@ A generic doubly linked list whose links live inside the structures they chain.
 > November 22, 2026
 
 - Status: Tested
-- Source: [random interleaving](https://github.com/google/benchmark/blob/v1.9.5/docs/random_interleaving.md) and [paused timing](https://github.com/google/benchmark/blob/v1.9.5/docs/user_guide.md) in the docs of Google Benchmark 1.9.5, and "Rigorous Benchmarking in Reasonable Time" by Tomas Kalibera and Richard Jones (ISMM 2013)
+- Source: [random interleaving](https://github.com/google/benchmark/blob/v1.9.5/docs/random_interleaving.md) and [paused timing](https://github.com/google/benchmark/blob/v1.9.5/docs/user_guide.md) in the docs of Google Benchmark 1.9.5, and [Rigorous Benchmarking in Reasonable Time](https://doi.org/10.1145/2464157.2464160) by Tomas Kalibera and Richard Jones (ISMM 2013)
 
 #### Subject
 
@@ -41,7 +44,7 @@ Google Benchmark can interleave the repetitions of different benchmarks at rando
 
 The App Store requires apps to work on IPv6-only networks, where getaddrinfo turns an IPv4 literal into a synthesized IPv6 address.
 
-- What it changes: inet_pton keeps an IPv4 literal as an IPv4-mapped address, which reaches nothing on such a network
+- What it changes: inet_pton parses an IPv4 literal as an IPv4 address, which reaches nothing on such a network
 - What I did: A remote peer's address goes through the resolution, even when it is a numeric IP
 
 ## AF_UNIX sockets on Windows
@@ -140,7 +143,7 @@ In the high-resolution timers of Linux, a late periodic timer counts the periods
 Linux dropped the cascading of its timer wheel and gave up accuracy, since timeouts are almost always canceled before they expire.
 
 - What it changes: A network library's timeouts, like retransmissions, are mostly canceled too, so the model is worth a look
-- What I did: The timer benchmarks rule out the sorted list for deadlines out of order, so a wheel is to prototype against a heap
+- What I did: The timer benchmarks rule out the sorted list for deadlines out of order, so a wheel is to prototype against a heap, in [decision 0012](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md)
 
 ## Hashed and Hierarchical Timing Wheels
 
@@ -154,7 +157,7 @@ Linux dropped the cascading of its timer wheel and gave up accuracy, since timeo
 A timer wheel starts and stops a timer in constant time, where a sorted list has to find the place of each new deadline.
 
 - What it changes: The library's sorted list searches from its back, so it can walk all its timers on each start unless their timeouts are equal
-- What I did: The benchmarks confirmed it on the reference machine. A start costs 3.3 ns with deadlines in order, but 19 to 21 µs out of order with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process, so the 1,000 starts of a frame take longer than a 60 Hz frame. A wheel and a heap come next, measured with the same benchmarks
+- What I did: The benchmarks confirmed it on the reference machine. A start costs 3.3 ns with deadlines in order, but 19 to 21 µs out of order with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process, so the 1,000 starts of a frame take longer than a 60 Hz frame. A wheel and a heap come next, measured with the same benchmarks in [decision 0012](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md)
 
 ## DNS RFCs and the DNS configuration of macOS
 
@@ -210,7 +213,7 @@ When an asynchronous resolution completes, glibc notifies the application with a
 glibc waits 5 s for a name server before retrying, and tries twice by default.
 
 - What it changes: A blocking getaddrinfo can freeze a game's loop for seconds, against the README's non-blocking promise
-- What I did: A blocking resolution would need a documented exception in the README
+- What I did: Option 1 of [decision 0005](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0005-dns-resolution.md), with a documented exception in the README
 
 ## RFC 8305
 

@@ -12,8 +12,16 @@
  * - A timer expires at the first advance whose time reaches its deadline, so late but never early.
  * - A late periodic timer is called once, with its lateness, and its next deadlines do not shift.
  *
- * \par Example
- * Example to be written.
+ * \par Writing a callback
+ * \snippet example_timer_start.c callback
+ *
+ * \par Starting a timer
+ * \snippet{trimleft} example_timer_start.c start
+ *
+ * \par Advancing the context
+ * \snippet{trimleft} example_timer_start.c advance
+ *
+ * \see \ref example_timer_start.c
  * @{
  */
 
@@ -121,3 +129,8 @@ VMNL_NET_API void vmnl_net_timer_destroy(VmnlNetTimer *timer);
 #endif /* !VMNL_NET_TIMER_H */
 
 /** @} */
+
+/**
+ * \example example_timer_start.c
+ * Starts a periodic timer and advances its context frame by frame.
+ */

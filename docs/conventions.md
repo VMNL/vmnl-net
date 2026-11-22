@@ -1,6 +1,6 @@
 # Conventions
 
-clang-format takes care of the layout of the sources, the tests and the benchmarks, clang-tidy checks the library with the rules of `.clang-tidy`, and the rules below cover the rest.
+clang-format takes care of the layout of the sources, the tests, the benchmarks and the examples, clang-tidy checks the library with the rules of `.clang-tidy`, and the rules below cover the rest.
 
 ## Names
 
