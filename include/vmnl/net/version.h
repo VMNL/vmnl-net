@@ -9,7 +9,9 @@
  * Before 1.0.0, a new minor version may break the API.
  *
  * \par Example
- * Example to be written.
+ * \snippet{trimleft} example_version_string.c version
+ *
+ * \see \ref example_version_string.c
  * @{
  */
 
@@ -62,3 +64,8 @@ VMNL_NET_API const char *vmnl_net_version_string(void);
 #endif /* !VMNL_NET_VERSION_H */
 
 /** @} */
+
+/**
+ * \example example_version_string.c
+ * Prints the version of the library and compares it.
+ */

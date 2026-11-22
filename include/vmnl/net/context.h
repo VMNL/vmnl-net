@@ -8,7 +8,9 @@
  * A context holds the state shared by the objects of one thread, such as its timers.
  *
  * \par Example
- * Example to be written.
+ * \snippet{trimleft} example_context_create.c create
+ *
+ * \see \ref example_context_create.c
  * @{
  */
 
@@ -68,3 +70,8 @@ VMNL_NET_API void vmnl_net_context_destroy(VmnlNetContext *context);
 #endif /* !VMNL_NET_CONTEXT_H */
 
 /** @} */
+
+/**
+ * \example example_context_create.c
+ * Creates a context and destroys it.
+ */
