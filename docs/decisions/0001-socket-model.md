@@ -25,6 +25,7 @@ Each kind of socket implements its family's operations through a table, like the
 The diagram shows the families and their planned kinds. A solid line goes from a family to its kinds, and a dotted one from a kind to what it runs over or wraps.
 
 ```mermaid
+%%{init: {"theme": "neutral"}}%%
 flowchart TB
     Handle["Handle"]
     Stream["Stream"]
