@@ -29,6 +29,7 @@ The CI builds the benchmarks and runs each one once, which catches a benchmark t
 **Reason**
 
 In an Ubuntu 24.04 container on the main maintainer's machine, five runs of the same code gave medians within 3.0 % of each other for `buffer_resize/ring/capacity:16384`, 4.6 % for `timer_set_interval` and 8.8 % for `buffer_clear/chunked/bytes:4096`, against 13 % to 27 % on the runners.
+On November 22, 2026, a run of a commit against itself on the same machine moved 3 of the 179 benchmarks by more than 5 % and none by more than 10 %, up to 8.8 % on `buffer_consume/chunked/bytes:65536`, against 47 % on the runners.
 Option 1 spreads a runner's jumps over both sides but does not lower them.
 Option 2 would run the code of any pull request from a fork on the virtual machine, which does not control its host's frequency either.
 Option 3 misses cache and memory effects, which decide between the timer structures.
@@ -39,3 +40,4 @@ Option 3 misses cache and memory effects, which decide between the timer structu
 - The numbers hold for one machine. A contributor can compare on their own machine, but those numbers do not compare with the reference machine's.
 - The reference machine's noise changes from day to day, so each comparison runs in the same conditions and starts with a run of a commit against itself.
 - Two different binaries also differ in memory layout, which can shift times by itself, as Mytkowicz, Diwan, Hauswirth and Sweeney showed in "Producing Wrong Data Without Doing Anything Obviously Wrong!" (ASPLOS 2009). A change within the day's noise proves nothing.
+- The test of `compare.py` still reported 122 of the 179 benchmarks of that run as changed, with p < 0.05, on identical code. Only a change above the noise of the day's run of a commit against itself counts.

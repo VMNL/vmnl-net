@@ -16,14 +16,14 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 
 > November 21, 2026
 
-clang-tidy entered the CI with #86.
+clang-tidy entered the CI with [#86](https://github.com/VMNL/vmnl-net/pull/86).
 The current `.clang-tidy`, run on `main` just before it (b96de83) on macOS, reports 39 warnings in the library.
 
 - 35 `misc-include-cleaner`, for headers used without being included directly
 - 2 `readability-magic-numbers` and 1 `bugprone-signed-bitwise`, in `src/version/version.c`
 - 1 `readability-math-missing-parentheses`, in `src/context/context_advance.c`
 
-#86 fixed all of them, and each source now includes the headers it uses.
+[#86](https://github.com/VMNL/vmnl-net/pull/86) fixed all of them, and each source now includes the headers it uses.
 Since then the count stays at 0, as the CI runs clang-tidy with `--warnings-as-errors`.
 
 ## Final measurement
@@ -50,20 +50,24 @@ Two checks are off.
 
 `misc-include-cleaner` ignores the system headers whose name starts with an underscore and the internal headers of the Windows SDK, which a source never includes directly.
 
+clang-tidy only checks the library.
+On November 22, 2026, the same configuration reported 737 distinct warnings in the tests, 383 in the benchmarks and 19 in the examples, and almost all of them were noise.
+The utest.h macros inflate the cognitive complexity and the magic numbers of the tests, the benchmarks are C++ while the configuration targets C, and the examples print with `printf()` without checking its result.
+
 ## Technical debt
 
 ### Sorted list of timers
 
 > Since October 12, 2026
 
-- Why it stays: the naive list came first, as [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md) explains, and #100 compares a wheel and a heap in 0.4.0
+- Why it stays: the naive list came first, as [decision 0011](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md) explains, and [#100](https://github.com/VMNL/vmnl-net/issues/100) compares a wheel and a heap in 0.4.0
 - What it costs: a start walks the list with deadlines out of order, 25.6 µs with 32,000 active timers
 - What fixing it would cost: to estimate
 
-### clang-tidy only checks the library
+### One allocation per object
 
-> Since November 21, 2026
+> Since October 21, 2026
 
-- Why it stays: the `tidy` preset sets `C_CLANG_TIDY` on the library target only
-- What it costs: the tests, the benchmarks and the examples escape the checks
+- Why it stays: [decision 0008](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0008-opaque-handles.md) keeps opaque handles, and pools owned by the context only come once the benchmarks show the need
+- What it costs: each buffer and timer is a call to the allocator, which the `buffer_create` and `timer_create` benchmarks measure
 - What fixing it would cost: to estimate

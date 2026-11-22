@@ -1,8 +1,8 @@
-data = "< awk '" . \
+data = "< LC_ALL=C awk '" . \
     "$1 ~ /_median$/ { median[substr($1, 1, length($1) - 7)] = $2 * 100 } " . \
     "$1 ~ /_pvalue$/ { pvalue[substr($1, 1, length($1) - 7)] = $2 } " . \
     "END { for (name in median) { color = pvalue[name] >= 0.05 ? 3 : (median[name] > 0 ? 1 : 2); print name, median[name], color } }" . \
-    "' " . ARG1 . " | sort -k2,2n"
+    "' " . ARG1 . " | LC_ALL=C sort -k2,2n"
 
 stats data using 2 nooutput
 rows = STATS_records
