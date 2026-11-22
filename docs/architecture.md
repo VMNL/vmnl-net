@@ -137,7 +137,7 @@ block-beta
 ```
 
 The application gives the time to its context, so the timers never read the clock themselves.
-The bytes never go through a library copy. The application writes into the free space a buffer exposes and reads the stored bytes in place.
+The bytes never go through a library copy on their way in or out. The application writes into the free space a buffer exposes and reads the stored bytes in place.
 
 ## Modules
 

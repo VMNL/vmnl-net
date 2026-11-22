@@ -8,7 +8,7 @@
  * A buffer is a queue of bytes, read in the order they were written.
  * Its memory holds the stored bytes, written and not consumed yet, then the free space for the next ones.
  *
- * The buffer functions never copy bytes themselves. They return views, a pointer and a size in the memory of the buffer, where the application writes and reads directly, so recv() and send() need no intermediate copy, see VmnlNetBufferView.
+ * The buffer functions never copy the bytes on their way in or out. They return views, a pointer and a size in the memory of the buffer, where the application writes and reads directly, so recv() and send() need no intermediate copy, see VmnlNetBufferView.
  *
  * \par Types
  * The four types answer different memory needs behind the same functions, as the views describe their memory whatever its layout.
@@ -26,32 +26,32 @@
  *
  * \par Creating a buffer
  * Buffers are allocated with the global allocator, see vmnl_net_allocator_set(), and their type is picked from the table of the types above.
- *
- * \snippet example_buffer_basics.c create_buffer
+ * \snippet{trimleft} example_buffer_basics.c create_buffer
  *
  * \par Writing to a view
  * 1. vmnl_net_buffer_prepare() returns views on at least the free bytes asked for.
  * 2. The bytes are written into these views, with memcpy() or recv() for example.
  * 3. vmnl_net_buffer_commit() turns the bytes written into stored bytes.
- *
- * \snippet example_buffer_basics.c write_buffer
+ * .
+ * \snippet{trimleft} example_buffer_basics.c write_buffer
  *
  * \par Reading from a view
  * 1. vmnl_net_buffer_data() returns views on the stored bytes, and keeps them stored.
  * 2. The bytes are read from these views, with memcpy() or send() for example, as many times as needed.
  * 3. vmnl_net_buffer_consume() drops the bytes that were handled, which frees their space.
- *
- * \snippet example_buffer_basics.c read_buffer
+ * .
+ * \snippet{trimleft} example_buffer_basics.c read_buffer
  *
  * \par Destroying a buffer
  * Destroying a buffer frees its memory, and invalidates its views.
- *
- * \snippet example_buffer_basics.c destroy_buffer
+ * \snippet{trimleft} example_buffer_basics.c destroy_buffer
  *
  * \par Holding a secret
  * No function erases bytes, as consuming, clearing and destroying only move offsets or free memory.
  * Erase the bytes of a secret through the views of vmnl_net_buffer_data() before dropping them, with a call the compiler cannot remove, like explicit_bzero(), memset_s() or SecureZeroMemory().
  * Keep it in a chunked buffer, or in a ring buffer never resized. Flat and dynamic buffers move their stored bytes, and resizing leaves a copy of them in the memory it frees, out of reach of the views.
+ *
+ * \see \ref example_buffer_basics.c
  * @{
  */
 
@@ -233,3 +233,8 @@ VMNL_NET_API void vmnl_net_buffer_destroy(VmnlNetBuffer *buffer);
 #endif /* !VMNL_NET_BUFFER_H */
 
 /** @} */
+
+/**
+ * \example example_buffer_basics.c
+ * Creates a flat buffer, writes a message into it, reads it back and destroys the buffer.
+ */
