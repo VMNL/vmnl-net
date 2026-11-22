@@ -19,44 +19,13 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  BASE: ${{ github.event.pull_request.base.sha }}
   BASE_BENCHMARKS: ../base/build/bench/bin/vmnl_net_benchmarks
   HEAD_BENCHMARKS: build/bench/bin/vmnl_net_benchmarks
-  PARTS: 10
 
 jobs:
-  plan:
-    name: Split the benchmarks
-    runs-on: ubuntu-24.04
-    outputs:
-      filters: ${{ steps.split.outputs.filters }}
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        timeout-minutes: 5
-
-      - name: Build the benchmarks of the pull request
-        run: cmake --workflow --preset bench
-        timeout-minutes: 30
-
-      - name: Split the benchmarks in turn into parts
-        id: split
-        run: |
-          "$HEAD_BENCHMARKS" --benchmark_list_tests | sed 's/[][\.*^$+?(){}|]/\\&/g' | awk -v parts="$PARTS" '{ print > ("part-" (NR - 1) % parts) }'
-          echo "filters=$(for part in part-*; do printf '^(%s)$\n' "$(paste -sd '|' "$part")"; done | jq -R . | jq -sc .)" >> "$GITHUB_OUTPUT"
-        timeout-minutes: 5
-
   times:
-    name: Compare the times (${{ strategy.job-index }})
-    needs: plan
+    name: Compare the times
     runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        filter: ${{ fromJSON(needs.plan.outputs.filters) }}
-    env:
-      FILTER: ${{ matrix.filter }}
-      INDEX: ${{ strategy.job-index }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -67,69 +36,34 @@ jobs:
       - name: Build the benchmarks of the pull request and of its base
         run: |
           cmake --workflow --preset bench
-          git worktree add ../base "$BASE"
+          git worktree add ../base ${{ github.event.pull_request.base.sha }}
           cd ../base && cmake --workflow --preset bench
         timeout-minutes: 30
 
-      - name: Install the requirements of compare.py
+      - name: Install the requirements of compare.py and gnuplot
         run: |
-          python3 -m venv ../venv
-          ../venv/bin/pip install -r build/bench/_deps/benchmark-src/tools/requirements.txt
+          python3 -m venv ./venv
+          ./venv/bin/pip install -r build/bench/_deps/benchmark-src/tools/requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y gnuplot-nox
         timeout-minutes: 10
 
       - name: Compare the times
         run: |
           mkdir -p report
-          "$BASE_BENCHMARKS" --benchmark_filter="$FILTER" --benchmark_repetitions=9 --benchmark_out="report/base-$INDEX.json" --benchmark_out_format=json
-          "$HEAD_BENCHMARKS" --benchmark_filter="$FILTER" --benchmark_repetitions=9 --benchmark_out="report/head-$INDEX.json" --benchmark_out_format=json
-          ../venv/bin/python build/bench/_deps/benchmark-src/tools/compare.py --no-color -a benchmarks "report/base-$INDEX.json" "report/head-$INDEX.json" > "report/times-$INDEX.txt"
-        timeout-minutes: 60
-
-      - name: Upload the comparison
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: benchmark-times-${{ strategy.job-index }}
-          path: report
-        timeout-minutes: 5
-
-  report:
-    name: Report the times
-    needs: times
-    if: ${{ !cancelled() }}
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Check out the repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        timeout-minutes: 5
-
-      - name: Download the comparisons
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          pattern: benchmark-times-*
-          path: report
-          merge-multiple: true
-        timeout-minutes: 5
-
-      - name: Install gnuplot
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gnuplot-nox
-        timeout-minutes: 10
+          "$BASE_BENCHMARKS" --benchmark_repetitions=9 --benchmark_out=report/base.json --benchmark_out_format=json
+          "$HEAD_BENCHMARKS" --benchmark_repetitions=9 --benchmark_out=report/head.json --benchmark_out_format=json
+          ./venv/bin/python build/bench/_deps/benchmark-src/tools/compare.py --no-color -a benchmarks report/base.json report/head.json > report/times.txt
+          { echo '```'; cat report/times.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+        timeout-minutes: 90
 
       - name: Write the report
-        run: |
-          cat report/times-*.txt > report/times.txt
-          { echo '```'; cat report/times.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
-          gnuplot -c bench/report.gp report/times.txt report/times.svg
-          { echo '<img src="times.svg" style="width: 100%"><pre>'; cat report/times.txt; echo '</pre>'; } > report/times.html
-          google-chrome --headless=new --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf=report/times.pdf "file://$PWD/report/times.html" 2> /dev/null
+        run: gnuplot -c bench/report.gp report/times.txt benchmarks-report.pdf
         timeout-minutes: 10
 
       - name: Upload the report
-        if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: benchmark-times
-          path: report
+          path: benchmarks-report.pdf
+          archive: false
         timeout-minutes: 5
