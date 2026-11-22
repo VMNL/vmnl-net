@@ -50,6 +50,10 @@ Two checks are off.
 
 `misc-include-cleaner` ignores the system headers whose name starts with an underscore and the internal headers of the Windows SDK, which a source never includes directly.
 
+clang-tidy only checks the library.
+On November 22, 2026, the same configuration reported 737 distinct warnings in the tests, 383 in the benchmarks and 19 in the examples, and almost all of them were noise.
+The utest.h macros inflate the cognitive complexity and the magic numbers of the tests, the benchmarks are C++ while the configuration targets C, and the examples print with `printf()` without checking its result.
+
 ## Technical debt
 
 ### Sorted list of timers
@@ -60,10 +64,10 @@ Two checks are off.
 - What it costs: a start walks the list with deadlines out of order, 25.6 µs with 32,000 active timers
 - What fixing it would cost: to estimate
 
-### clang-tidy only checks the library
+### One allocation per object
 
-> Since November 21, 2026
+> Since October 21, 2026
 
-- Why it stays: the `tidy` preset sets `C_CLANG_TIDY` on the library target only
-- What it costs: the tests, the benchmarks and the examples escape the checks
+- Why it stays: [decision 0008](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0008-opaque-handles.md) keeps opaque handles, and pools owned by the context only come once the benchmarks show the need
+- What it costs: each buffer and timer is a call to the allocator, which the `buffer_create` and `timer_create` benchmarks measure
 - What fixing it would cost: to estimate
