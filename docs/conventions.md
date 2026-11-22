@@ -4,7 +4,7 @@ clang-format takes care of the layout of the sources, the tests and the benchmar
 
 ## Names
 
-They follow the [rules of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INSTRUCTIONS.md).
+They follow the [rules of VMNL](https://github.com/VMNL/vmnl-graphics/blob/main/docs/INSTRUCTIONS.md).
 
 | Element | Form | Example |
 | --- | --- | --- |

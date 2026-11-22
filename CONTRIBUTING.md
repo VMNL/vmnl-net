@@ -35,7 +35,7 @@ One push has one contributor, its author, with no AI co-author nor trailer such 
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/): `<type>[optional scope]: <description>`, in the imperative, starting with a lowercase letter and without a final period.
 The subject stays under 72 characters and the lines of the body under 80.
-The types are `build`, `cicd`, `chore`, `docs`, `feat`, `fix`, `perf`, `refactor`, `style` and `test`, described in the [instructions of VMNL](https://github.com/VMNL/vmnl/blob/main/docs/INSTRUCTIONS.md#commit-type-usage-guidelines).
+The types are `build`, `cicd`, `chore`, `docs`, `feat`, `fix`, `perf`, `refactor`, `style` and `test`, described in the [instructions of VMNL](https://github.com/VMNL/vmnl-graphics/blob/main/docs/INSTRUCTIONS.md#commit-type-usage-guidelines).
 Before `1.0.0`, any version may break the API, so breaking changes are not marked with `!`.
 
 Install the hook that checks every message before the commit:
