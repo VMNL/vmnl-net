@@ -7,7 +7,7 @@ checker=$(mktemp)
 
 trap 'rm -f "$checker"' EXIT
 
-if ! curl -fsSL --max-time 5 -o "$checker" https://raw.githubusercontent.com/VMNL/vmnl/main/tools/commit_message.py; then
+if ! curl -fsSL --max-time 5 -o "$checker" https://raw.githubusercontent.com/VMNL/vmnl-graphics/main/tools/commit_message.py; then
     echo "commit-msg: cannot fetch the convention checker" >&2
     exit 1
 fi
