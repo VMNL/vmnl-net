@@ -51,6 +51,8 @@ target_sources(vmnl_net
         src/version/version.c
         src/version/version_string.c
         src/error/error_as_string.c
+        $<$<NOT:$<PLATFORM_ID:Windows>>:src/error/posix/error_from_system.c>
+        $<$<PLATFORM_ID:Windows>:src/error/win32/error_from_system.c>
         src/allocator/allocator_set.c
         src/context/context_create.c
         src/context/context_remaining.c
