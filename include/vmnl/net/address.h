@@ -8,8 +8,16 @@
  * An address is a plain struct, copied by value, whose fields are read and written directly.
  * IPv4 and IPv6 share one type, as an IPv4 address is stored mapped into IPv6.
  *
- * \par Example
- * Example to be written.
+ * \par Making an address
+ * \snippet example_address_basics.c make
+ *
+ * \par Writing an address as text
+ * \snippet example_address_basics.c as_string
+ *
+ * \par Comparing two addresses
+ * \snippet example_address_basics.c is_equal
+ *
+ * \see \ref example_address_basics.c
  * @{
  */
 
@@ -95,3 +103,8 @@ VMNL_NET_API bool vmnl_net_address_as_string(const VmnlNetAddress *address, char
 #endif /* !VMNL_NET_ADDRESS_H */
 
 /** @} */
+
+/**
+ * \example example_address_basics.c
+ * Makes an address from its text, writes it back as text and compares it with the same address mapped into IPv6.
+ */
