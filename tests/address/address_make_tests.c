@@ -136,6 +136,49 @@ UTEST(vmnl_net_address_make, rejects_hex_ipv4_octet)
     EXPECT_EQ(error, VMNL_NET_EINVAL);
 }
 
+UTEST(vmnl_net_address_make, rejects_leading_zero_in_first_byte)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAddress address;
+
+    EXPECT_FALSE(vmnl_net_address_make("0192.0.2.1", 8080, &address, &error));
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
+}
+
+UTEST(vmnl_net_address_make, rejects_leading_zero_in_last_byte)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAddress address;
+
+    EXPECT_FALSE(vmnl_net_address_make("192.0.2.01", 8080, &address, &error));
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
+}
+
+UTEST(vmnl_net_address_make, rejects_leading_zero_in_mapped_text)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAddress address;
+
+    EXPECT_FALSE(vmnl_net_address_make("::ffff:192.0.02.1", 8080, &address, &error));
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
+}
+
+UTEST(vmnl_net_address_make, accepts_zero_bytes)
+{
+    VmnlNetAddress address;
+
+    EXPECT_TRUE(vmnl_net_address_make("192.0.0.0", 8080, &address, NULL));
+}
+
+UTEST(vmnl_net_address_make, accepts_leading_zeros_in_ipv6_groups)
+{
+    const uint8_t expected[16] = {0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
+    VmnlNetAddress address;
+
+    EXPECT_TRUE(vmnl_net_address_make("2001:0db8::0001", 8080, &address, NULL));
+    EXPECT_EQ(memcmp(address.ip, expected, sizeof expected), 0);
+}
+
 UTEST(vmnl_net_address_make, rejects_leading_space)
 {
     VmnlNetError error = UINT32_MAX;

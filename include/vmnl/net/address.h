@@ -47,7 +47,7 @@ typedef struct VmnlNetAddress {
  * \param port Port in host byte order.
  * \param address Address made, unchanged on failure.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p ip_address is not the text of an IP address, or has a zone.
+ * - #VMNL_NET_EINVAL: \p ip_address is not the text of an IP address, has a zone, or writes an IPv4 byte with a leading zero, like 010.0.0.1.
  * \return true on success, false otherwise.
  */
 VMNL_NET_API bool vmnl_net_address_make(const char *ip_address, uint16_t port, VmnlNetAddress *address, VmnlNetError *error);
