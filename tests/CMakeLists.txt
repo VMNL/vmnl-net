@@ -91,6 +91,8 @@ if(NOT BUILD_SHARED_LIBS)
       PRIVATE
         $<$<NOT:$<PLATFORM_ID:Windows>>:error/posix/error_from_system_tests.c>
         $<$<PLATFORM_ID:Windows>:error/win32/error_from_system_tests.c>
+        $<$<NOT:$<PLATFORM_ID:Windows>>:error/posix/error_from_last_system_tests.c>
+        $<$<PLATFORM_ID:Windows>:error/win32/error_from_last_system_tests.c>
     )
 endif()
 
