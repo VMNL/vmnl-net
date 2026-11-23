@@ -9,6 +9,7 @@ Checks: >
   portability-*,
   readability-*,
   -readability-implicit-bool-conversion,
+  -readability-trivial-switch,
   custom-*
 HeaderFilterRegex: '(include|src)[/\\]'
 CheckOptions:
@@ -27,6 +28,7 @@ CheckOptions:
   readability-identifier-naming.TypedefPrefix: VmnlNet
   readability-identifier-naming.MacroDefinitionCase: UPPER_CASE
   readability-identifier-naming.MacroDefinitionPrefix: VMNL_NET_
+  readability-magic-numbers.IgnorePowersOf2IntegerValues: true
 CustomChecks:
   - Name: explicit-comparison
     Query: |

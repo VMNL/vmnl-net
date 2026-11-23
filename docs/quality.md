@@ -57,12 +57,15 @@ Five custom checks cover the conventions that no check covers.
 - `ternary-condition` asks for the condition of a ternary in parentheses.
 - `const-value` keeps `const` for what a pointer points to and for static tables.
 
-Two checks are off.
+Three checks are off.
 
 - `clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling` flags `memcpy()` or `memmove()` and asks for their bounds-checked versions, like `memcpy_s()`. These come from Annex K of C11, an optional part of the standard. glibc never provided it, as WG14 noted in [N1967](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1967.htm), and macOS only provides `memset_s()`, so the library cannot call them on Linux and macOS.
 - `readability-implicit-bool-conversion` flags every comparison the conventions ask for. In C, `true` and `false` are integers, so `vmnl_net_buffer_is_empty(buffer) == false` converts the bool to an integer, and the check has no option to ignore it. `conversion-to-bool` keeps its useful part, the real conversions like `bool set = pointer;`.
+- `readability-trivial-switch` asks to write a `switch` with few cases as an `if`/`else`. The library keeps a `switch` when it reads better, like the one on the result of `inet_pton()` in `vmnl_net_address_make()`.
 
 `misc-include-cleaner` ignores the system headers whose name starts with an underscore and the internal headers of the Windows SDK, which a source never includes directly.
+
+`readability-magic-numbers` ignores the powers of 2, like the 16 bytes of an IPv6 address in `VmnlNetAddress`, which a named constant would only repeat.
 
 clang-tidy only checks the library.
 On November 22, 2026, the same configuration reported 737 distinct warnings in the tests, 383 in the benchmarks and 19 in the examples, and almost all of them were noise.
