@@ -5,7 +5,7 @@
 UTEST(vmnl_net_address_as_sockaddr, converts_ipv4_address_for_ipv4_socket)
 {
     const uint8_t expected[4] = {192, 0, 2, 1};
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     struct sockaddr_in ipv4;
     socklen_t socklen = 0;
     VmnlNetAddress address;
@@ -22,7 +22,7 @@ UTEST(vmnl_net_address_as_sockaddr, converts_ipv4_address_for_ipv4_socket)
 UTEST(vmnl_net_address_as_sockaddr, keeps_ipv4_address_mapped_for_ipv6_socket)
 {
     const uint8_t expected[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff, 192, 0, 2, 1};
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     struct sockaddr_in6 ipv6;
     socklen_t socklen = 0;
     VmnlNetAddress address;
@@ -38,7 +38,7 @@ UTEST(vmnl_net_address_as_sockaddr, keeps_ipv4_address_mapped_for_ipv6_socket)
 UTEST(vmnl_net_address_as_sockaddr, converts_ipv6_address)
 {
     const uint8_t expected[16] = {0x20, 0x01, 0x0d, 0xb8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     struct sockaddr_in6 ipv6;
     socklen_t socklen = 0;
     VmnlNetAddress address;
@@ -55,7 +55,7 @@ UTEST(vmnl_net_address_as_sockaddr, converts_ipv6_address)
 
 UTEST(vmnl_net_address_as_sockaddr, keeps_scope)
 {
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     struct sockaddr_in6 ipv6;
     socklen_t socklen = 0;
     VmnlNetAddress address;
@@ -69,7 +69,7 @@ UTEST(vmnl_net_address_as_sockaddr, keeps_scope)
 
 UTEST(vmnl_net_address_as_sockaddr, writes_port_in_network_byte_order)
 {
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     struct sockaddr_in ipv4;
     socklen_t socklen = 0;
     VmnlNetAddress address;
@@ -85,7 +85,7 @@ UTEST(vmnl_net_address_as_sockaddr, writes_port_in_network_byte_order)
 
 UTEST(vmnl_net_address_as_sockaddr, rejects_ipv6_address_for_ipv4_socket)
 {
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     socklen_t socklen = 0;
     VmnlNetAddress address;
 
@@ -96,7 +96,7 @@ UTEST(vmnl_net_address_as_sockaddr, rejects_ipv6_address_for_ipv4_socket)
 
 UTEST(vmnl_net_address_as_sockaddr, rejects_other_family)
 {
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     socklen_t socklen = 0;
     VmnlNetAddress address;
 

@@ -110,6 +110,7 @@ target_link_libraries(vmnl_net_tests
   PRIVATE
     vmnl::net
     vmnl_net_warnings
+    $<$<PLATFORM_ID:Windows>:ws2_32>
 )
 
 utest_discover_tests(vmnl_net_tests)

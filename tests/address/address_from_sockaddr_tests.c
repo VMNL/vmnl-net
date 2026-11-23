@@ -68,7 +68,7 @@ UTEST(vmnl_net_address_from_sockaddr, reads_port_in_network_byte_order)
 
 UTEST(vmnl_net_address_from_sockaddr, returns_same_address_after_as_sockaddr)
 {
-    struct sockaddr_storage storage;
+    struct sockaddr_storage storage = {0};
     socklen_t socklen = 0;
     VmnlNetAddress address;
     VmnlNetAddress converted;
