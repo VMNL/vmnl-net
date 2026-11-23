@@ -34,6 +34,7 @@ typedef struct VmnlNetContext VmnlNetContext;
  * \brief Creates a context.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOMEM: memory allocation failure.
+ * - #VMNL_NET_FSYSTEM: Windows cannot start its sockets.
  * \return Created context on success, NULL otherwise.
  */
 VMNL_NET_API VMNL_NET_NODISCARD VmnlNetContext *vmnl_net_context_create(VmnlNetError *error);
