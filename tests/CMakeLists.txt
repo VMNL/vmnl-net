@@ -89,6 +89,8 @@ target_sources(vmnl_net_tests
     address/address_is_ipv6_tests.c
     address/address_is_equal_tests.c
     address/address_as_string_tests.c
+    address/address_as_sockaddr_tests.c
+    address/address_from_sockaddr_tests.c
 )
 
 if(NOT BUILD_SHARED_LIBS)
