@@ -18,3 +18,16 @@ UTEST_F(vmnl_net_buffer_ring_commit, stores_bytes_around_end_of_block)
     EXPECT_TRUE(vmnl_net_buffer_commit(utest_fixture->buffer, 6, NULL));
     EXPECT_TRUE(data_equals(utest_fixture->buffer, "efghijkl"));
 }
+
+UTEST_F(vmnl_net_buffer_ring_commit, rejects_more_than_free_space_with_stored_bytes)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetBufferView views[2];
+    size_t nviews = 2;
+
+    ASSERT_TRUE(append(utest_fixture->buffer, "abc"));
+    ASSERT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, 5, views, &nviews, NULL));
+    EXPECT_FALSE(vmnl_net_buffer_commit(utest_fixture->buffer, 6, &error));
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
+    EXPECT_TRUE(data_equals(utest_fixture->buffer, "abc"));
+}

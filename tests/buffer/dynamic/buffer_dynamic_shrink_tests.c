@@ -20,7 +20,10 @@ UTEST_F(vmnl_net_buffer_dynamic_shrink, moves_stored_bytes_to_front)
 
 UTEST_F(vmnl_net_buffer_dynamic_shrink, frees_every_byte_with_zero_capacity)
 {
-    EXPECT_TRUE(vmnl_net_buffer_shrink(utest_fixture->buffer, 0, NULL));
+    VmnlNetError error = UINT32_MAX;
+
+    EXPECT_TRUE(vmnl_net_buffer_shrink(utest_fixture->buffer, 0, &error));
+    EXPECT_EQ(error, VMNL_NET_SUCCESS);
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), (size_t) 0);
 }
 
@@ -29,6 +32,16 @@ UTEST_F(vmnl_net_buffer_dynamic_shrink, allocates_again_after_freeing_every_byte
     ASSERT_TRUE(vmnl_net_buffer_shrink(utest_fixture->buffer, 0, NULL));
     EXPECT_TRUE(append(utest_fixture->buffer, "hello"));
     EXPECT_TRUE(data_equals(utest_fixture->buffer, "hello"));
+}
+
+UTEST_F(vmnl_net_buffer_dynamic_shrink, prepares_whole_capacity_after_freeing_every_byte)
+{
+    VmnlNetBufferView view;
+    size_t nviews = 1;
+
+    ASSERT_TRUE(vmnl_net_buffer_shrink(utest_fixture->buffer, 0, NULL));
+    ASSERT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, 1, &view, &nviews, NULL));
+    EXPECT_EQ(view.size, vmnl_net_buffer_capacity(utest_fixture->buffer));
 }
 
 UTEST_F(vmnl_net_buffer_dynamic_shrink, fails_without_memory)

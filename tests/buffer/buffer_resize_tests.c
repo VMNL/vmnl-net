@@ -27,6 +27,7 @@ UTEST_I(vmnl_net_buffer_resize, ignores_current_capacity, NRESIZABLE_TYPES)
     size_t capacity = vmnl_net_buffer_capacity(utest_fixture->buffer);
     VmnlNetError error = UINT32_MAX;
 
+    allocator_limit(0);
     EXPECT_TRUE(vmnl_net_buffer_resize(utest_fixture->buffer, capacity, &error));
     EXPECT_EQ(error, VMNL_NET_SUCCESS);
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), capacity);

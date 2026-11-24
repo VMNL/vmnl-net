@@ -25,6 +25,7 @@ UTEST_I(vmnl_net_buffer_shrink, ignores_current_capacity, NRESIZABLE_TYPES)
 {
     VmnlNetError error = UINT32_MAX;
 
+    allocator_limit(0);
     EXPECT_TRUE(vmnl_net_buffer_shrink(utest_fixture->buffer, 4 * VMNL_NET_BUFFER_CHUNK_SIZE, &error));
     EXPECT_EQ(error, VMNL_NET_SUCCESS);
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), 4 * VMNL_NET_BUFFER_CHUNK_SIZE);
