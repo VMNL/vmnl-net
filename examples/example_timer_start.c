@@ -20,7 +20,7 @@ static void send_heartbeat(VmnlNetTimer *timer, uint64_t lateness, void *data)
 
 int main(void)
 {
-    VmnlNetError error = VMNL_NET_SUCCESS;
+    VmnlNetError error;
     VmnlNetContext *context = vmnl_net_context_create(&error);
 
     if (context == NULL) {

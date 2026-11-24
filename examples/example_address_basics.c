@@ -4,31 +4,35 @@
 #include <stdio.h>
 
 //! [make]
-static bool make_server(VmnlNetAddress *server)
+static bool fill_server_address(VmnlNetAddress *server_address)
 {
-    VmnlNetError error = VMNL_NET_SUCCESS;
+    VmnlNetError error;
 
     // A host name like localhost is refused, only an IP is parsed.
-    if (vmnl_net_address_make("192.0.2.1", 8080, server, &error) == false) {
+    if (vmnl_net_address_make("192.0.2.1", 8080, server_address, &error) == false) {
         printf("%s\n", vmnl_net_error_as_string(error));
         return false;
     }
-    return vmnl_net_address_is_ipv4(server); // true
+    return vmnl_net_address_is_ipv4(server_address); // true
 }
 //! [make]
 
 //! [as_string]
-static void print_peer(const VmnlNetAddress *peer)
+static void log_peer_address(const VmnlNetAddress *peer)
 {
-    char text[VMNL_NET_ADDRESS_AS_STRING_SIZE];
+    char ip_address[VMNL_NET_ADDRESS_AS_STRING_SIZE];
 
-    vmnl_net_address_as_string(peer, text, sizeof text, NULL);
-    printf("%s port %u\n", text, (unsigned) peer->port); // 192.0.2.1 port 8080
+    vmnl_net_address_as_string(peer, ip_address, sizeof ip_address, NULL);
+    if (vmnl_net_address_is_ipv4(peer) == true) {
+        printf("%s:%u\n", ip_address, (unsigned) peer->port); // 192.0.2.1:8080
+    } else {
+        printf("[%s]:%u\n", ip_address, (unsigned) peer->port); // [2001:db8::1]:8080
+    }
 }
 //! [as_string]
 
 //! [is_equal]
-static bool is_server(const VmnlNetAddress *peer, const VmnlNetAddress *server)
+static bool is_server_address(const VmnlNetAddress *peer, const VmnlNetAddress *server)
 {
     // Never memcmp(), as the struct has padding bytes.
     return vmnl_net_address_is_equal(peer, server);
@@ -37,16 +41,16 @@ static bool is_server(const VmnlNetAddress *peer, const VmnlNetAddress *server)
 
 int main(void)
 {
-    VmnlNetAddress server;
-    VmnlNetAddress peer;
+    VmnlNetAddress server_address;
+    VmnlNetAddress peer_address;
 
-    if (make_server(&server) == false) {
+    if (fill_server_address(&server_address) == false) {
         return 1;
     }
-    print_peer(&server);
+    log_peer_address(&server_address);
     // The same IPv4 address, written mapped into IPv6.
-    if (vmnl_net_address_make("::ffff:192.0.2.1", 8080, &peer, NULL) == false) {
+    if (vmnl_net_address_make("::ffff:192.0.2.1", 8080, &peer_address, NULL) == false) {
         return 1;
     }
-    return (is_server(&peer, &server) == true) ? 0 : 1;
+    return is_server_address(&peer_address, &server_address) == false;
 }

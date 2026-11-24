@@ -5,7 +5,7 @@
 int main(void)
 {
     //! [create]
-    VmnlNetError error = VMNL_NET_SUCCESS;
+    VmnlNetError error;
     VmnlNetContext *context = vmnl_net_context_create(&error);
 
     if (context == NULL) {
