@@ -79,7 +79,7 @@ struct VmnlNetBufferContiguous {
  */
 struct VmnlNetBufferChunked {
     struct VmnlNetBuffer base; /*!< Common part, first so that a VmnlNetBuffer pointer converts to it. */
-    struct VmnlNetListLink chunks; /*!< Head of the chunks, from the first stored byte to the free space. */
+    struct VmnlNetListLink chunks; /*!< Head of the chunks, from the first stored byte to the free space, empty exactly when the capacity is 0, as each chunk adds #VMNL_NET_BUFFER_CHUNK_SIZE to it. */
     struct VmnlNetBufferChunk *commit_tail; /*!< Last chunk holding stored bytes, NULL when the buffer stores none. */
 };
 
@@ -417,7 +417,7 @@ static inline size_t vmnl_net_buffer_chunk_free_space(const struct VmnlNetBuffer
 static inline size_t vmnl_net_buffer_chunked_free_space(const VmnlNetBuffer *buffer)
 {
     const struct VmnlNetListLink *chunks = &((const struct VmnlNetBufferChunked *) buffer)->chunks;
-    size_t consumed_bytes = (vmnl_net_list_is_empty(chunks) == true) ? 0 : VMNL_NET_LIST_FRONT(chunks, const struct VmnlNetBufferChunk, link)->offset;
+    size_t consumed_bytes = (buffer->capacity == 0) ? 0 : VMNL_NET_LIST_FRONT(chunks, const struct VmnlNetBufferChunk, link)->offset;
 
     return buffer->capacity - buffer->size - consumed_bytes;
 }
@@ -429,7 +429,7 @@ static inline size_t vmnl_net_buffer_chunked_free_space(const VmnlNetBuffer *buf
  */
 static inline struct VmnlNetBufferChunk *vmnl_net_buffer_chunked_writing_chunk(struct VmnlNetBufferChunked *buffer)
 {
-    if (buffer->commit_tail == NULL && vmnl_net_list_is_empty(&buffer->chunks) == false) {
+    if (buffer->commit_tail == NULL && buffer->base.capacity != 0) {
         return VMNL_NET_LIST_FRONT(&buffer->chunks, struct VmnlNetBufferChunk, link);
     }
     return buffer->commit_tail;
