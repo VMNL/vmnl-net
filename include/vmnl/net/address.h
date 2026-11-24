@@ -48,7 +48,8 @@ typedef struct VmnlNetAddress {
 /**
  * \brief Makes an address from the text of an IP address and a port.
  *
- * The text is an IPv4 address in dotted decimal, like 192.0.2.1, or an IPv6 address, like 2001:db8::1 or ::ffff:192.0.2.1.
+ * The text is an IPv4 address in dotted decimal, like 192.0.2.1, or an IPv6 address in full, like 2001:0db8:0000:0000:0000:0000:0000:0001, or compressed, like 2001:db8::1.
+ * The texts 192.0.2.1 and ::ffff:192.0.2.1 make the same IPv4 address.
  * A host name, like localhost, is not resolved.
  * The scope of the address made is 0.
  * \param ip_address Text of the IP address, without brackets nor zone, like the \%1 of fe80::1\%1.
@@ -63,14 +64,14 @@ VMNL_NET_API bool vmnl_net_address_make(const char *ip_address, uint16_t port, V
 /**
  * \brief Checks whether an address is IPv4.
  * \param address Address to check.
- * \return true if \p address is mapped as ::ffff:a.b.c.d, false otherwise.
+ * \return true if \p address is IPv4, mapped as ::ffff:a.b.c.d, false otherwise.
  */
 VMNL_NET_API bool vmnl_net_address_is_ipv4(const VmnlNetAddress *address);
 
 /**
  * \brief Checks whether an address is IPv6.
  * \param address Address to check.
- * \return true if \p address is not mapped as ::ffff:a.b.c.d, false otherwise.
+ * \return true if \p address is IPv6, false if it is IPv4.
  */
 VMNL_NET_API bool vmnl_net_address_is_ipv6(const VmnlNetAddress *address);
 
