@@ -37,7 +37,7 @@ Google Benchmark can interleave the repetitions of different benchmarks at rando
 
 > November 24, 2026
 
-- Status: Tested
+- Status: Adopted in [63392a7](https://github.com/VMNL/vmnl-net/commit/63392a7)
 - Source: A [reel by Stanislav Zmiev](https://www.instagram.com/reel/DgGDjy5A2hy/) on mutation testing with mutmut, and the [docs of Mull 0.39.1](https://mull.readthedocs.io/en/latest/)
 
 #### Subject
@@ -45,7 +45,7 @@ Google Benchmark can interleave the repetitions of different benchmarks at rando
 Mutation testing changes the code one small edit at a time and runs the tests on each change. A change that no test catches shows code that runs without being checked. mutmut only handles Python, and Mull handles C through a plugin of Clang, on Linux and macOS.
 
 - What it changes: The tests caught 445 of 493 mutants on Linux, 446 of 488 on macOS, and 457 of 498 once both reports are merged. The 7 mutants in the address module's leading zero check survive on Linux, where inet_pton already refuses leading zeros, and are caught on macOS. No test checks the error code of a chunked buffer created with a capacity of 0
-- What I did: Ran Mull 0.39.1 with LLVM 19 on Ubuntu 24.04 in a container and on macOS 26.5.1, merged both reports with jq, added the missing tests, simplified the code that served nothing, left out the boundary mutators, and planned a CI job on both systems, as [decision 0013](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0013-mutation-testing.md) explains
+- What I did: Ran Mull 0.39.1 with LLVM 19 on Ubuntu 24.04 in a container and on macOS 26.5.1, merged both reports with jq, added the missing tests, simplified the code that served nothing, left out the boundary mutators, and added a CI job on both systems, as [decision 0013](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0013-mutation-testing.md) explains
 
 ## Apple App Review Guidelines, rule 2.5.5
 
