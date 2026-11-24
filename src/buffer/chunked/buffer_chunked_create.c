@@ -15,10 +15,9 @@ VmnlNetBuffer *vmnl_net_buffer_chunked_create(const struct VmnlNetBufferOps *ops
     }
     *buffer = (struct VmnlNetBufferChunked) {.base = (VmnlNetBuffer) {.ops = ops}};
     vmnl_net_list_init(&buffer->chunks);
-    if (capacity > 0 && vmnl_net_buffer_chunked_resize(&buffer->base, capacity, error) == false) {
+    if (vmnl_net_buffer_chunked_resize(&buffer->base, capacity, error) == false) {
         vmnl_net_allocator.deallocate(buffer);
         return NULL;
     }
-    vmnl_net_error_set(error, VMNL_NET_SUCCESS);
     return &buffer->base;
 }
