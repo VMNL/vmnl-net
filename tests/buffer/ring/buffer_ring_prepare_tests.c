@@ -79,6 +79,19 @@ UTEST_F(vmnl_net_buffer_ring_prepare, prepares_one_view_from_start_when_stored_b
     EXPECT_EQ(views[0].size, (size_t) 4);
 }
 
+UTEST_F(vmnl_net_buffer_ring_prepare, prepares_with_one_view_when_stored_bytes_reach_end_of_block)
+{
+    VmnlNetBufferView view;
+    size_t nviews = 1;
+
+    ASSERT_TRUE(append(utest_fixture->buffer, "abcdef"));
+    ASSERT_TRUE(vmnl_net_buffer_consume(utest_fixture->buffer, 4, NULL));
+    ASSERT_TRUE(append(utest_fixture->buffer, "gh"));
+    EXPECT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, 4, &view, &nviews, NULL));
+    EXPECT_EQ(view.data, data_start(utest_fixture->buffer) - 4);
+    EXPECT_EQ(view.size, (size_t) 4);
+}
+
 UTEST_F(vmnl_net_buffer_ring_prepare, rejects_one_view_when_requested_bytes_wrap)
 {
     VmnlNetError error = UINT32_MAX;

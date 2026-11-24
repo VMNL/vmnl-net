@@ -11,6 +11,17 @@ UTEST(vmnl_net_buffer_chunked_create, rounds_capacity_up_to_whole_chunks)
     vmnl_net_buffer_destroy(buffer);
 }
 
+UTEST(vmnl_net_buffer_chunked_create, creates_empty_buffer_with_zero_capacity)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_CHUNKED, 0, &error);
+
+    ASSERT_NE(buffer, NULL);
+    EXPECT_EQ(error, VMNL_NET_SUCCESS);
+    EXPECT_TRUE(vmnl_net_buffer_is_empty(buffer));
+    vmnl_net_buffer_destroy(buffer);
+}
+
 UTEST(vmnl_net_buffer_chunked_create, allocates_no_chunk_with_zero_capacity)
 {
     VmnlNetBuffer *buffer;

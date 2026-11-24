@@ -9,6 +9,7 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 - The compilers treat warnings as errors in the CI, through `VMNL_NET_WARNINGS_AS_ERRORS`.
 - AddressSanitizer, UndefinedBehaviorSanitizer and MemorySanitizer run the tests.
 - gcovr fails below 100 % of the lines and branches covered by the tests.
+- Mull fails while a mutant survives on both Linux and macOS, as [decision 0013](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0013-mutation-testing.md) explains.
 - Doxygen fails on any documentation warning (like undocumented function).
 - The benchmarks build and run once.
 

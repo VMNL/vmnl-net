@@ -284,9 +284,6 @@ static inline void vmnl_net_list_remove(struct VmnlNetListLink *link)
  */
 static inline void vmnl_net_list_splice(struct VmnlNetListLink *head, struct VmnlNetListLink *other)
 {
-    if (vmnl_net_list_is_empty(other) == true) {
-        return;
-    }
     other->next->prev = head->prev;
     head->prev->next = other->next;
     other->prev->next = head;
@@ -307,9 +304,6 @@ static inline void vmnl_net_list_rotate_left(struct VmnlNetListLink *head)
 {
     struct VmnlNetListLink *first = head->next;
 
-    if (vmnl_net_list_is_empty(head) == true) {
-        return;
-    }
     vmnl_net_list_remove(first);
     vmnl_net_list_push_back(head, first);
 }

@@ -32,6 +32,17 @@ UTEST_I(vmnl_net_buffer_clear, frees_whole_capacity, NTYPES)
     EXPECT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, vmnl_net_buffer_capacity(utest_fixture->buffer), views, &nviews, NULL));
 }
 
+UTEST_I(vmnl_net_buffer_clear, prepares_whole_capacity, NTYPES)
+{
+    VmnlNetBufferView views[8];
+    size_t nviews = 8;
+
+    ASSERT_TRUE(append(utest_fixture->buffer, "hello"));
+    vmnl_net_buffer_clear(utest_fixture->buffer);
+    ASSERT_TRUE(vmnl_net_buffer_prepare(utest_fixture->buffer, 1, views, &nviews, NULL));
+    EXPECT_EQ(views_size(views, nviews), vmnl_net_buffer_capacity(utest_fixture->buffer));
+}
+
 UTEST_I(vmnl_net_buffer_clear, ignores_empty_buffer, NTYPES)
 {
     vmnl_net_buffer_clear(utest_fixture->buffer);
