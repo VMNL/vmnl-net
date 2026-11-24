@@ -111,7 +111,7 @@
     },
     {
       "name": "tidy",
-      "displayName": "clang-tidy",
+      "displayName": "Static analysis",
       "inherits": "release",
       "generator": "Ninja",
       "cacheVariables": {
@@ -195,7 +195,7 @@
     },
     {
       "name": "tidy",
-      "displayName": "clang-tidy",
+      "displayName": "Static analysis",
       "configurePreset": "tidy",
       "nativeToolOptions": ["-k", "0"]
     }
@@ -331,7 +331,7 @@
     },
     {
       "name": "tidy",
-      "displayName": "clang-tidy",
+      "displayName": "Static analysis",
       "steps": [
         { "type": "configure", "name": "tidy" },
         { "type": "build", "name": "tidy" }
