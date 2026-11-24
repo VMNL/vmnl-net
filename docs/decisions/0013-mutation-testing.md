@@ -33,6 +33,7 @@ On November 25, 2026, no test could catch 16 of the 47 boundary mutants on macOS
 
 - Mull and LLVM are pinned together, as Mull's plugin is built for one version of LLVM.
 - Each system took more than 3 minutes on the main maintainer's machine, with 12 threads. A runner has fewer, and the time grows with the library and its tests.
+- A mutant can allocate until the memory runs out, which killed the whole Linux job on the first run. The mutants run with 2 GB of address space each, a limit that Linux applies and macOS ignores.
 - A mutant caught on one system counts as caught, even when the other system runs that code without checking it.
 - A new surviving mutant blocks the CI until a test catches it or the code changes.
 - A comparison moved by one is no longer checked. Testing every limit at its value and one past it rests on the review again, although the boundary mutants found 5 gaps in the tests.
