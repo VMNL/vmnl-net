@@ -8,9 +8,6 @@
       "cacheVariables": {
         "VMNL_NET_BUILD_TESTS": "OFF",
         "VMNL_NET_BUILD_EXAMPLES": "OFF",
-        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
-        "VMNL_NET_BUILD_DOCS": "OFF",
-        "VMNL_NET_BUILD_DOCS_INTERNAL": "OFF",
         "VMNL_NET_WARNINGS_AS_ERRORS": "$env{VMNL_NET_WARNINGS_AS_ERRORS}"
       }
     },
