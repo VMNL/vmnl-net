@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 
+#ifdef _WIN32
 static void *vmnl_net_allocator_default_allocator(size_t size)
 {
     return malloc(size);
@@ -22,6 +23,13 @@ VmnlNetAllocator vmnl_net_allocator = {
     .reallocate = vmnl_net_allocator_default_reallocator,
     .deallocate = vmnl_net_allocator_default_deallocator,
 };
+#else
+VmnlNetAllocator vmnl_net_allocator = {
+    .allocate = malloc,
+    .reallocate = realloc,
+    .deallocate = free,
+};
+#endif
 
 void vmnl_net_allocator_set(VmnlNetAllocatorAllocate allocate, VmnlNetAllocatorReallocate reallocate, VmnlNetAllocatorDeallocate deallocate)
 {
