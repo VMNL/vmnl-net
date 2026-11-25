@@ -20,6 +20,12 @@ UTEST_F(vmnl_net_timer_start, counts_timeout_from_last_advance)
     EXPECT_EQ(vmnl_net_timer_remaining(utest_fixture->timer, START_TIME + 500), TIMEOUT);
 }
 
+UTEST_F(vmnl_net_timer_start, counts_timeout_equal_to_current_time)
+{
+    vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, START_TIME);
+    EXPECT_EQ(vmnl_net_timer_remaining(utest_fixture->timer, START_TIME), START_TIME);
+}
+
 UTEST(vmnl_net_timer_start, counts_timeout_from_context_creation_before_advance)
 {
     struct Calls calls = {0};

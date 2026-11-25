@@ -1,0 +1,9 @@
+mutators:
+  - cxx_all
+ignoreMutators:
+  - cxx_boundary
+includePaths:
+  - ".*src/.*"
+excludePaths:
+  - ".*tests/.*"
+  - ".*_deps/.*"

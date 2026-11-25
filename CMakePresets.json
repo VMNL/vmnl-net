@@ -58,6 +58,16 @@
       }
     },
     {
+      "name": "mutation",
+      "displayName": "Mutation (Debug)",
+      "inherits": ["test", "unix"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VMNL_NET_BUILD_EXAMPLES": "OFF",
+        "CMAKE_C_FLAGS": "-fpass-plugin=$env{MULL_PLUGIN} -g -grecord-command-line"
+      }
+    },
+    {
       "name": "sanitize-address",
       "displayName": "Sanitize address (RelWithDebInfo)",
       "inherits": ["test", "unix"],
@@ -150,6 +160,19 @@
       "configurePreset": "coverage",
       "configuration": "Debug",
       "targets": ["coverage"]
+    },
+    {
+      "name": "mutation",
+      "displayName": "Mutation (Debug)",
+      "configurePreset": "mutation",
+      "configuration": "Debug"
+    },
+    {
+      "name": "mutation-report",
+      "displayName": "Mutation (report)",
+      "configurePreset": "mutation",
+      "configuration": "Debug",
+      "targets": ["mutation"]
     },
     {
       "name": "sanitize-address",
@@ -269,6 +292,15 @@
         { "type": "build", "name": "coverage" },
         { "type": "test", "name": "coverage" },
         { "type": "build", "name": "coverage-report" }
+      ]
+    },
+    {
+      "name": "mutation",
+      "displayName": "Mutation (Debug)",
+      "steps": [
+        { "type": "configure", "name": "mutation" },
+        { "type": "build", "name": "mutation" },
+        { "type": "build", "name": "mutation-report" }
       ]
     },
     {

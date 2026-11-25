@@ -24,6 +24,14 @@ UTEST_F(vmnl_net_buffer_chunked_consume, recycles_emptied_chunks)
     EXPECT_EQ(vmnl_net_buffer_capacity(utest_fixture->buffer), 2 * VMNL_NET_BUFFER_CHUNK_SIZE);
 }
 
+UTEST_F(vmnl_net_buffer_chunked_consume, writes_from_first_chunk_after_dropping_every_byte)
+{
+    ASSERT_TRUE(commit(utest_fixture->buffer, 2 * VMNL_NET_BUFFER_CHUNK_SIZE));
+    ASSERT_TRUE(vmnl_net_buffer_consume(utest_fixture->buffer, 2 * VMNL_NET_BUFFER_CHUNK_SIZE, NULL));
+    ASSERT_TRUE(commit(utest_fixture->buffer, VMNL_NET_BUFFER_CHUNK_SIZE + 1));
+    EXPECT_EQ(vmnl_net_buffer_size(utest_fixture->buffer), VMNL_NET_BUFFER_CHUNK_SIZE + 1);
+}
+
 UTEST_F(vmnl_net_buffer_chunked_consume, keeps_chunk_with_one_byte_left)
 {
     VmnlNetBufferView views[8];

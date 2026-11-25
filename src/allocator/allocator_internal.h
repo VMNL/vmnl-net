@@ -28,6 +28,8 @@ typedef struct {
 
 /**
  * \brief Global allocator of every allocation of the library.
+ *
+ * It starts with malloc(), realloc() and free(). On Windows, it calls them through static functions, as MSVC warns about the address of a function of the C runtime DLL in a constant initializer (C4232).
  */
 extern VmnlNetAllocator vmnl_net_allocator;
 

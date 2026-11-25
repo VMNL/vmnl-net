@@ -122,7 +122,7 @@ cmake --build --preset release
 
 `cmake --install build/release --config Release` installs it, with administrator rights, into `/usr/local` on macOS and Linux and `C:/Program Files/vmnl_net` on Windows.
 
-The other presets, for the tests, the sanitizers, the coverage, the benchmarks and the documentation, are listed in [docs/build.md](docs/build.md).
+The other presets, for the tests, the sanitizers, the coverage, the mutation testing, the benchmarks and the documentation, are listed in [docs/build.md](docs/build.md).
 
 ### Using the library
 

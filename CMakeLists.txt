@@ -194,6 +194,7 @@ if(VMNL_NET_BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
     include(${PROJECT_SOURCE_DIR}/cmake/coverage.cmake)
+    include(${PROJECT_SOURCE_DIR}/cmake/mutation.cmake)
 endif()
 
 if(VMNL_NET_BUILD_BENCHMARKS)
