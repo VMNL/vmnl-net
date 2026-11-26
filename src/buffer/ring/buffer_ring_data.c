@@ -6,25 +6,25 @@ static size_t vmnl_net_buffer_ring_data_after_wrap(const VmnlNetBuffer *buffer, 
 {
     const struct VmnlNetBufferContiguous *contiguous_buffer = (const struct VmnlNetBufferContiguous *) buffer;
 
-    views[0].data = contiguous_buffer->pointer + (contiguous_buffer->offset + offset - buffer->capacity);
-    views[0].size = buffer->size - offset;
-    *nviews = 1;
-    return views[0].size;
+    return vmnl_net_buffer_describe(contiguous_buffer->pointer + (contiguous_buffer->offset + offset - buffer->capacity), buffer->size - offset, views, nviews);
 }
 
 static size_t vmnl_net_buffer_ring_data_across_wrap(const VmnlNetBuffer *buffer, size_t offset, VmnlNetBufferView *views, size_t *nviews)
 {
     const struct VmnlNetBufferContiguous *contiguous_buffer = (const struct VmnlNetBufferContiguous *) buffer;
+    size_t first_nbytes = buffer->capacity - contiguous_buffer->offset - offset;
+    size_t first_nviews = *nviews;
+    size_t second_nviews;
+    size_t nbytes = vmnl_net_buffer_describe(contiguous_buffer->pointer + contiguous_buffer->offset + offset, first_nbytes, views, &first_nviews);
 
-    views[0].data = contiguous_buffer->pointer + contiguous_buffer->offset + offset;
-    views[0].size = buffer->capacity - contiguous_buffer->offset - offset;
-    if (*nviews == 1) {
-        return views[0].size;
+    if (first_nviews == *nviews) {
+        *nviews = first_nviews;
+        return nbytes;
     }
-    views[1].data = contiguous_buffer->pointer;
-    views[1].size = buffer->size - offset - views[0].size;
-    *nviews = 2;
-    return buffer->size - offset;
+    second_nviews = *nviews - first_nviews;
+    nbytes += vmnl_net_buffer_describe(contiguous_buffer->pointer, buffer->size - offset - first_nbytes, views + first_nviews, &second_nviews);
+    *nviews = first_nviews + second_nviews;
+    return nbytes;
 }
 
 size_t vmnl_net_buffer_ring_data(const VmnlNetBuffer *buffer, size_t offset, VmnlNetBufferView *views, size_t *nviews)

@@ -63,6 +63,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,15 +76,40 @@ extern "C" {
 typedef struct VmnlNetBuffer VmnlNetBuffer;
 
 /**
+ * \typedef VmnlNetBufferViewSize
+ * \brief Number of bytes in a view, a uint32_t on Windows and a size_t elsewhere.
+ */
+/**
+ * \def VMNL_NET_BUFFER_VIEW_SIZE_MAX
+ * \brief Most bytes in a view, UINT32_MAX on Windows and SIZE_MAX elsewhere.
+ */
+#ifdef _WIN32
+typedef uint32_t VmnlNetBufferViewSize;
+#define VMNL_NET_BUFFER_VIEW_SIZE_MAX UINT32_MAX
+#else
+typedef size_t VmnlNetBufferViewSize;
+#define VMNL_NET_BUFFER_VIEW_SIZE_MAX SIZE_MAX
+#endif
+
+/**
  * \brief Contiguous bytes in the memory of a buffer.
+ *
+ * A view has the layout of a WSABUF on Windows and of a struct iovec elsewhere, so the sockets pass the views to the system without copying them.
+ * A span of more than #VMNL_NET_BUFFER_VIEW_SIZE_MAX bytes takes several views, which only happens on Windows.
  * \attention
  * - The bytes of a view **MUST** not be freed, as the buffer owns them and frees them with vmnl_net_buffer_destroy().
  * - A view **MUST** not be used after a call that modifies its buffer, as the bytes may have moved, or been dropped.
+ * - A view **MUST** be initialized by field names, as the order of its fields differs between systems.
  * \remark The views returned by the buffer functions are never empty.
  */
 typedef struct VmnlNetBufferView {
+#ifdef _WIN32
+    VmnlNetBufferViewSize size; /*!< Number of bytes. */
     uint8_t *data; /*!< First byte. */
-    size_t size; /*!< Number of bytes. */
+#else
+    uint8_t *data; /*!< First byte. */
+    VmnlNetBufferViewSize size; /*!< Number of bytes. */
+#endif
 } VmnlNetBufferView;
 
 /**

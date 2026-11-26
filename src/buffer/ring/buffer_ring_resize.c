@@ -9,16 +9,19 @@ bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNet
 {
     uint8_t *pointer = vmnl_net_allocator.allocate(capacity);
     VmnlNetBufferView views[2] = {0};
+    size_t nviews = 2;
+    size_t copied_bytes = 0;
 
     if (pointer == NULL) {
         vmnl_net_error_set(error, VMNL_NET_ENOMEM);
         return false;
     }
-    if (buffer->ops->data(buffer, 0, views, &(size_t) {2}) > 0) {
-        memcpy(pointer, views[0].data, views[0].size);
-        if (views[1].data != NULL) {
-            memcpy(pointer + views[0].size, views[1].data, views[1].size);
+    while (buffer->ops->data(buffer, copied_bytes, views, &nviews) > 0) {
+        for (size_t it = 0; it < nviews; it++) {
+            memcpy(pointer + copied_bytes, views[it].data, views[it].size);
+            copied_bytes += views[it].size;
         }
+        nviews = 2;
     }
     vmnl_net_allocator.deallocate(((struct VmnlNetBufferContiguous *) buffer)->pointer);
     buffer->capacity = capacity;

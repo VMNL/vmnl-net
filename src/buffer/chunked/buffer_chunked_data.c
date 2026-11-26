@@ -19,7 +19,7 @@ size_t vmnl_net_buffer_chunked_data(const VmnlNetBuffer *buffer, size_t offset, 
             continue;
         }
         views[written_views].data = chunk->bytes + chunk->offset + offset;
-        views[written_views].size = chunk->size - offset;
+        views[written_views].size = (VmnlNetBufferViewSize) (chunk->size - offset);
         nbytes += views[written_views].size;
         offset = 0;
         written_views++;

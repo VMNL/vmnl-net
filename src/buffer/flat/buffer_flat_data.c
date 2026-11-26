@@ -10,8 +10,5 @@ size_t vmnl_net_buffer_flat_data(const VmnlNetBuffer *buffer, size_t offset, Vmn
         *nviews = 0;
         return 0;
     }
-    views[0].data = contiguous_buffer->pointer + contiguous_buffer->offset + offset;
-    views[0].size = buffer->size - offset;
-    *nviews = 1;
-    return views[0].size;
+    return vmnl_net_buffer_describe(contiguous_buffer->pointer + contiguous_buffer->offset + offset, buffer->size - offset, views, nviews);
 }

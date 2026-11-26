@@ -41,7 +41,7 @@ bool vmnl_net_buffer_chunked_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlN
             continue;
         }
         views[written_views].data = chunk->bytes + chunk->offset + chunk->size;
-        views[written_views].size = vmnl_net_buffer_chunk_free_space(chunk);
+        views[written_views].size = (VmnlNetBufferViewSize) vmnl_net_buffer_chunk_free_space(chunk);
         written_views++;
     }
     *nviews = written_views;
