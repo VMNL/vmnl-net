@@ -1,6 +1,5 @@
 #include "error/error_internal.h"
 
-#include <stddef.h>
 #include <winsock2.h>
 
 struct VmnlNetWSAErrorsMapping {

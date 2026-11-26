@@ -1,8 +1,6 @@
 #include "address/address_internal.h"
 #include "error/error_internal.h"
 
-#include <stddef.h>
-
 #ifdef _WIN32
 #include <ws2tcpip.h>
 #else

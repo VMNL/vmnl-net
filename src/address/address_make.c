@@ -2,9 +2,6 @@
 #include "error/error_internal.h"
 
 #include <ctype.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
 
 #ifdef _WIN32
 #include <ws2tcpip.h>

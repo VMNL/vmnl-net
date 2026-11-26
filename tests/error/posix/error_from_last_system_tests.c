@@ -2,8 +2,6 @@
 
 #include "utest.h"
 
-#include <errno.h>
-
 UTEST(vmnl_net_error_from_last_system, returns_enomem_with_errno_enomem)
 {
     VmnlNetError error;

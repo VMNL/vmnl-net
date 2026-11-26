@@ -1,7 +1,6 @@
 #include "error/error_internal.h"
 
 #include <errno.h>
-#include <stddef.h>
 
 struct VmnlNetErrnoErrorsMapping {
     int errno_error;
