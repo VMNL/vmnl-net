@@ -1,8 +1,7 @@
 #include "address/address_internal.h"
-#include "error/error_internal.h"
 #include "socket/socket_internal.h"
 
-#include <stdbool.h>
+#include <mswsock.h>
 
 bool vmnl_net_socket_connect(struct VmnlNetSocket *netsock, const VmnlNetAddress *address, VmnlNetError *error)
 {

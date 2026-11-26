@@ -13,14 +13,11 @@
 #ifndef VMNL_NET_SOCKET_INTERNAL_H
 #define VMNL_NET_SOCKET_INTERNAL_H
 
-#include <vmnl/net/address.h> /* IWYU pragma: export */
-#include <vmnl/net/buffer.h> /* IWYU pragma: export */
-#include <vmnl/net/error.h> /* IWYU pragma: export */
-#include <vmnl/net/handle.h> /* IWYU pragma: export */
+#include <vmnl/net/address.h>
+#include <vmnl/net/buffer.h>
+#include <vmnl/net/handle.h>
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
+#include "error/error_internal.h"
 
 /**
  * \def VMNL_NET_SOCKET_INVALID
@@ -33,8 +30,8 @@
  * \remark SD_SEND on Windows, SHUT_WR elsewhere.
  */
 #ifdef _WIN32
-#include <winsock2.h> /* IWYU pragma: export */
-#include <ws2tcpip.h> /* IWYU pragma: export */
+#include <winsock2.h>
+#include <ws2tcpip.h>
 
 #define VMNL_NET_SOCKET_INVALID       INVALID_SOCKET
 #define VMNL_NET_SOCKET_SHUTDOWN_SEND SD_SEND
@@ -43,9 +40,9 @@ _Static_assert(sizeof(VmnlNetBufferView) == sizeof(WSABUF), "a VmnlNetBufferView
 _Static_assert(offsetof(VmnlNetBufferView, size) == offsetof(WSABUF, len), "a VmnlNetBufferView must have the layout of a WSABUF");
 _Static_assert(offsetof(VmnlNetBufferView, data) == offsetof(WSABUF, buf), "a VmnlNetBufferView must have the layout of a WSABUF");
 #else
-#include <netinet/in.h> /* IWYU pragma: export */
-#include <netinet/tcp.h> /* IWYU pragma: export */
-#include <sys/socket.h> /* IWYU pragma: export */
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
 
 #define VMNL_NET_SOCKET_INVALID       (-1)
 #define VMNL_NET_SOCKET_SHUTDOWN_SEND SHUT_WR
@@ -61,7 +58,6 @@ extern "C" {
 
 /**
  * \brief System socket, its address family and its type.
- * \remark Embedded by value in each kind with a system socket, like TCP or UDP.
  */
 struct VmnlNetSocket {
     VmnlNetHandle handle; /*!< System socket, a SOCKET on Windows and a file descriptor elsewhere. */
@@ -70,21 +66,40 @@ struct VmnlNetSocket {
 };
 
 #ifdef _WIN32
-#include <mswsock.h> /* IWYU pragma: export */
-
 /**
  * \brief Sets whether a datagram socket reports an ICMP error that an earlier datagram drew, on Windows.
  * \param netsock Datagram socket to set.
  * \param control SIO_UDP_CONNRESET for a port unreachable, reported with WSAECONNRESET, or SIO_UDP_NETRESET for an expired time to live, reported with WSAENETRESET.
  * \param enabled true to report the error, false to drop it.
  * \return true on success, false otherwise, with the error in WSAGetLastError().
- * \remark Windows reports both errors on any datagram socket by default. POSIX reports a port unreachable on a connected socket only, so vmnl_net_socket_open() clears both and vmnl_net_socket_connect() sets SIO_UDP_CONNRESET again.
+ * \remark Windows reports both errors on any datagram socket by default, while POSIX reports a port unreachable on a connected socket only.
  */
 static inline bool vmnl_net_socket_report_unreachable(const struct VmnlNetSocket *netsock, DWORD control, BOOL enabled)
 {
     return WSAIoctl(netsock->handle, control, &enabled, sizeof enabled, NULL, 0, &(DWORD) {0}, NULL, NULL) == 0;
 }
 #endif
+
+/**
+ * \brief Sets an integer option of a socket.
+ * \param netsock Socket to set.
+ * \param level Level of the option, like SOL_SOCKET or IPPROTO_TCP.
+ * \param name Option to set, like SO_KEEPALIVE.
+ * \param value Value of the option.
+ * \param error Error code of the call, nullable, a translated system error on failure.
+ * \return true on success, false otherwise.
+ * \remark Passes \p value through a const char pointer, which Windows requires and POSIX accepts.
+ * \attention \p name **MUST** be an option that behaves the same on Windows, macOS and Linux, as the wrapper hides the differences between systems.
+ */
+static inline bool vmnl_net_socket_set_option(struct VmnlNetSocket *netsock, int level, int name, int value, VmnlNetError *error)
+{
+    if (setsockopt(netsock->handle, level, name, (const char *) &value, sizeof value) == -1) {
+        vmnl_net_error_set(error, vmnl_net_error_from_last_system());
+        return false;
+    }
+    vmnl_net_error_set(error, VMNL_NET_SUCCESS);
+    return true;
+}
 
 /**
  * \brief Opens a system socket, non-blocking and not inherited by child processes.
@@ -157,7 +172,10 @@ bool vmnl_net_socket_reuse_address(struct VmnlNetSocket *netsock, VmnlNetError *
  * \remark Clears IPV6_V6ONLY, as its default differs between systems.
  * \attention \p netsock **MUST** be an AF_INET6 socket, as an AF_INET socket rejects the option.
  */
-bool vmnl_net_socket_dual_stack(struct VmnlNetSocket *netsock, VmnlNetError *error);
+static inline bool vmnl_net_socket_dual_stack(struct VmnlNetSocket *netsock, VmnlNetError *error)
+{
+    return vmnl_net_socket_set_option(netsock, IPPROTO_IPV6, IPV6_V6ONLY, 0, error);
+}
 
 /**
  * \brief Sends the small writes of a stream socket at once, instead of grouping them.
@@ -174,7 +192,10 @@ bool vmnl_net_socket_dual_stack(struct VmnlNetSocket *netsock, VmnlNetError *err
  * \remark Sets TCP_NODELAY.
  * \attention \p netsock **MUST** be a stream socket.
  */
-bool vmnl_net_socket_set_no_delay(struct VmnlNetSocket *netsock, bool enabled, VmnlNetError *error);
+static inline bool vmnl_net_socket_set_no_delay(struct VmnlNetSocket *netsock, bool enabled, VmnlNetError *error)
+{
+    return vmnl_net_socket_set_option(netsock, IPPROTO_TCP, TCP_NODELAY, (int) enabled, error);
+}
 
 /**
  * \brief Sends probes on an idle stream socket, to detect a peer that disappeared.
@@ -190,7 +211,10 @@ bool vmnl_net_socket_set_no_delay(struct VmnlNetSocket *netsock, bool enabled, V
  * \return true on success, false otherwise.
  * \remark Sets SO_KEEPALIVE, with the system's delays.
  */
-bool vmnl_net_socket_set_keep_alive(struct VmnlNetSocket *netsock, bool enabled, VmnlNetError *error);
+static inline bool vmnl_net_socket_set_keep_alive(struct VmnlNetSocket *netsock, bool enabled, VmnlNetError *error)
+{
+    return vmnl_net_socket_set_option(netsock, SOL_SOCKET, SO_KEEPALIVE, (int) enabled, error);
+}
 
 /**
  * \brief Sets how long closing a stream socket waits for unsent bytes.
@@ -252,7 +276,10 @@ bool vmnl_net_socket_set_send_buffer_size(struct VmnlNetSocket *netsock, size_t 
  * \return true on success, false otherwise.
  * \remark Sets SO_BROADCAST. IPv6 has no broadcast.
  */
-bool vmnl_net_socket_set_broadcast(struct VmnlNetSocket *netsock, bool enabled, VmnlNetError *error);
+static inline bool vmnl_net_socket_set_broadcast(struct VmnlNetSocket *netsock, bool enabled, VmnlNetError *error)
+{
+    return vmnl_net_socket_set_option(netsock, SOL_SOCKET, SO_BROADCAST, (int) enabled, error);
+}
 
 /**
  * \brief Reads and clears the pending error of a socket.
@@ -374,53 +401,6 @@ bool vmnl_net_socket_accept(struct VmnlNetSocket *netsock, struct VmnlNetSocket 
 bool vmnl_net_socket_connect(struct VmnlNetSocket *netsock, const VmnlNetAddress *address, VmnlNetError *error);
 
 /**
- * \brief Sends bytes on a connected socket.
- * \param netsock Socket to send on.
- * \param views Bytes to send, in order.
- * \param nviews Number of elements of \p views.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_EAGAIN: the system's send buffer is full.
- * - #VMNL_NET_EPIPE: vmnl_net_socket_shutdown() stopped sending, or the connection is closed on POSIX, a reset included on macOS.
- * - #VMNL_NET_ECONNRESET: the peer reset the connection.
- * - #VMNL_NET_ETIMEDOUT: the peer stopped acknowledging the data, on Linux.
- * - #VMNL_NET_ECONNABORTED: the connection failed, like on a timeout, on Windows.
- * - #VMNL_NET_ENETRESET: keep-alive detected a failure, on Windows.
- * - #VMNL_NET_ENOTCONN: \p netsock is not connected.
- * - #VMNL_NET_ENETUNREACH or #VMNL_NET_EHOSTUNREACH: no route reaches the peer, on macOS.
- * - #VMNL_NET_ENETDOWN: the local interface is down on macOS, or the network subsystem failed on Windows.
- * - #VMNL_NET_EADDRNOTAVAIL: the local address is no longer available, on macOS.
- * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, or \p views are too large on Windows, like 2 GiB.
- * - #VMNL_NET_EMSGSIZE: \p nviews is more than IOV_MAX on POSIX.
- * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes on macOS.
- * - Any other translated system error.
- * \return Number of bytes sent, which can be less than \p views holds, 0 on failure.
- * \remark Never raises SIGPIPE.
- */
-size_t vmnl_net_socket_send(struct VmnlNetSocket *netsock, const VmnlNetBufferView *views, size_t nviews, VmnlNetError *error);
-
-/**
- * \brief Receives bytes from a connected socket.
- * \param netsock Socket to receive from.
- * \param views Space to fill, in order.
- * \param nviews Number of elements of \p views.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_EAGAIN: no byte is waiting.
- * - #VMNL_NET_ECONNRESET: the peer reset the connection.
- * - #VMNL_NET_ECONNREFUSED: the peer refused the connection, on Linux.
- * - #VMNL_NET_ETIMEDOUT: the connection timed out.
- * - #VMNL_NET_ECONNABORTED: the connection failed, like on a timeout, on Windows.
- * - #VMNL_NET_ENETRESET: keep-alive detected a failure, on Windows.
- * - #VMNL_NET_ENOTCONN: \p netsock is not connected.
- * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
- * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on POSIX.
- * - #VMNL_NET_EMSGSIZE: \p nviews is more than IOV_MAX on POSIX.
- * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes on macOS.
- * - Any other translated system error.
- * \return Number of bytes received, 0 with #VMNL_NET_SUCCESS when the peer closed the connection, 0 on failure.
- */
-size_t vmnl_net_socket_receive(struct VmnlNetSocket *netsock, const VmnlNetBufferView *views, size_t nviews, VmnlNetError *error);
-
-/**
  * \brief Sends one datagram to an address.
  *
  * A datagram is sent whole or not at all.
@@ -467,6 +447,59 @@ size_t vmnl_net_socket_send_to(struct VmnlNetSocket *netsock, const VmnlNetAddre
  * \remark With a NULL \p address on a stream socket, it behaves like vmnl_net_socket_receive(), whose errors apply.
  */
 size_t vmnl_net_socket_receive_from(struct VmnlNetSocket *netsock, const VmnlNetBufferView *views, size_t nviews, VmnlNetAddress *address, VmnlNetError *error);
+
+/**
+ * \brief Sends bytes on a connected socket.
+ * \param netsock Socket to send on.
+ * \param views Bytes to send, in order.
+ * \param nviews Number of elements of \p views.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EAGAIN: the system's send buffer is full.
+ * - #VMNL_NET_EPIPE: vmnl_net_socket_shutdown() stopped sending, or the connection is closed on POSIX, a reset included on macOS.
+ * - #VMNL_NET_ECONNRESET: the peer reset the connection.
+ * - #VMNL_NET_ETIMEDOUT: the peer stopped acknowledging the data, on Linux.
+ * - #VMNL_NET_ECONNABORTED: the connection failed, like on a timeout, on Windows.
+ * - #VMNL_NET_ENETRESET: keep-alive detected a failure, on Windows.
+ * - #VMNL_NET_ENOTCONN: \p netsock is not connected.
+ * - #VMNL_NET_ENETUNREACH or #VMNL_NET_EHOSTUNREACH: no route reaches the peer, on macOS.
+ * - #VMNL_NET_ENETDOWN: the local interface is down on macOS, or the network subsystem failed on Windows.
+ * - #VMNL_NET_EADDRNOTAVAIL: the local address is no longer available, on macOS.
+ * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, or \p views are too large on Windows, like 2 GiB.
+ * - #VMNL_NET_EMSGSIZE: \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes on macOS.
+ * - Any other translated system error.
+ * \return Number of bytes sent, which can be less than \p views holds, 0 on failure.
+ * \remark Never raises SIGPIPE.
+ */
+static inline size_t vmnl_net_socket_send(struct VmnlNetSocket *netsock, const VmnlNetBufferView *views, size_t nviews, VmnlNetError *error)
+{
+    return vmnl_net_socket_send_to(netsock, NULL, views, nviews, error);
+}
+
+/**
+ * \brief Receives bytes from a connected socket.
+ * \param netsock Socket to receive from.
+ * \param views Space to fill, in order.
+ * \param nviews Number of elements of \p views.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EAGAIN: no byte is waiting.
+ * - #VMNL_NET_ECONNRESET: the peer reset the connection.
+ * - #VMNL_NET_ECONNREFUSED: the peer refused the connection, on Linux.
+ * - #VMNL_NET_ETIMEDOUT: the connection timed out.
+ * - #VMNL_NET_ECONNABORTED: the connection failed, like on a timeout, on Windows.
+ * - #VMNL_NET_ENETRESET: keep-alive detected a failure, on Windows.
+ * - #VMNL_NET_ENOTCONN: \p netsock is not connected.
+ * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
+ * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on POSIX.
+ * - #VMNL_NET_EMSGSIZE: \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes on macOS.
+ * - Any other translated system error.
+ * \return Number of bytes received, 0 with #VMNL_NET_SUCCESS when the peer closed the connection, 0 on failure.
+ */
+static inline size_t vmnl_net_socket_receive(struct VmnlNetSocket *netsock, const VmnlNetBufferView *views, size_t nviews, VmnlNetError *error)
+{
+    return vmnl_net_socket_receive_from(netsock, views, nviews, NULL, error);
+}
 
 /**
  * \brief Stops sending on a connected socket, so the peer receives the end of the stream after the bytes already sent.

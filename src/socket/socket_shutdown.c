@@ -1,7 +1,4 @@
-#include "error/error_internal.h"
 #include "socket/socket_internal.h"
-
-#include <stdbool.h>
 
 bool vmnl_net_socket_shutdown(struct VmnlNetSocket *netsock, VmnlNetError *error)
 {

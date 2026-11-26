@@ -131,13 +131,9 @@ target_sources(vmnl_net
             src/socket/win32/socket_no_inheritance.c
             src/socket/win32/socket_reuse_address.c
         >
-        src/socket/socket_dual_stack.c
-        src/socket/socket_set_no_delay.c
-        src/socket/socket_set_keep_alive.c
         src/socket/socket_set_linger.c
         src/socket/socket_set_receive_buffer_size.c
         src/socket/socket_set_send_buffer_size.c
-        src/socket/socket_set_broadcast.c
         src/socket/socket_pending_error.c
         src/socket/socket_local_address.c
         src/socket/socket_bind.c
@@ -145,17 +141,11 @@ target_sources(vmnl_net
         src/socket/socket_accept.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:
             src/socket/posix/socket_connect.c
-        >
-        $<$<PLATFORM_ID:Windows>:
-            src/socket/win32/socket_connect.c
-        >
-        src/socket/socket_send.c
-        src/socket/socket_receive.c
-        $<$<NOT:$<PLATFORM_ID:Windows>>:
             src/socket/posix/socket_send_to.c
             src/socket/posix/socket_receive_from.c
         >
         $<$<PLATFORM_ID:Windows>:
+            src/socket/win32/socket_connect.c
             src/socket/win32/socket_send_to.c
             src/socket/win32/socket_receive_from.c
         >

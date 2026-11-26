@@ -1,8 +1,5 @@
 #include "address/address_internal.h"
-#include "error/error_internal.h"
 #include "socket/socket_internal.h"
-
-#include <stdbool.h>
 
 bool vmnl_net_socket_accept(struct VmnlNetSocket *netsock, struct VmnlNetSocket *peer, VmnlNetAddress *address, VmnlNetError *error)
 {

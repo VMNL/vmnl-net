@@ -1,8 +1,4 @@
-#include "error/error_internal.h"
 #include "socket/socket_internal.h"
-
-#include <stdbool.h>
-#include <stdint.h>
 
 bool vmnl_net_socket_set_linger(struct VmnlNetSocket *netsock, bool enabled, uint16_t seconds, VmnlNetError *error)
 {

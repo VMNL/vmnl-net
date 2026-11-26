@@ -1,8 +1,6 @@
-#include "error/error_internal.h"
 #include "socket/socket_internal.h"
 
 #include <fcntl.h>
-#include <stdbool.h>
 
 bool vmnl_net_socket_no_inheritance(struct VmnlNetSocket *netsock, VmnlNetError *error)
 {

@@ -1,8 +1,5 @@
 #include "address/address_internal.h"
-#include "error/error_internal.h"
 #include "socket/socket_internal.h"
-
-#include <stddef.h>
 
 size_t vmnl_net_socket_send_to(struct VmnlNetSocket *netsock, const VmnlNetAddress *address, const VmnlNetBufferView *views, size_t nviews, VmnlNetError *error)
 {
