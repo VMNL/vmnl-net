@@ -57,7 +57,9 @@ block-beta
         BUFFER["<sup>0.2</sup> buffer API"]
         space:3
         SER["<sup>0.4</sup> serialization"]
-        space:4
+        space:2
+        ADDRESS["<sup>0.3</sup> addresses"]
+        space
     end
 
     block:BUFFERS
@@ -108,7 +110,8 @@ block-beta
     TCP -.-> SOCKET
     UDP -.-> SOCKET
     SOCKET -.-> POLL
-    SOCKET -.-> BUFFER
+    SOCKET --> BUFFER
+    SOCKET --> ADDRESS
     SER -.-> BUFFER
     BUFFER --> FLAT
     BUFFER --> DYNAMIC
@@ -133,7 +136,7 @@ block-beta
     classDef planned stroke:#6f7e8e,stroke-dasharray: 4 3
 
     class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
-    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,SOCKET,POLL,DNS,SER planned
+    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,POLL,DNS,SER planned
 ```
 
 The application gives the time to its context, so the timers never read the clock themselves.
@@ -165,7 +168,7 @@ The version of the library linked at run time.
 
 > 0.1
 
-- Uses: allocator, clock, timers, list
+- Uses: allocator, clock, timers, list, Winsock2 on Windows
 
 The state of one thread, with its active timers and the time given to its last advance.
 
@@ -199,6 +202,24 @@ One-shot and periodic timers, fired by the time the application gives to its con
 
 Byte queues written and read in place, as flat, ring, dynamic or chunked buffers behind one API.
 
+### addresses
+
+> 0.3
+
+- Uses: `inet_pton()` and `inet_ntop()`
+
+IP addresses with a port, IPv4 and IPv6 alike, as a plain struct copied by value.
+An IPv4 address is stored mapped into IPv6, so both share one type.
+
+### sockets
+
+> 0.3
+
+- Uses: buffers, addresses, the BSD sockets on POSIX and Winsock2 on Windows
+
+An internal wrapper that merges the BSD sockets and Winsock2 into one set of functions.
+A socket is non-blocking, never inherited by child processes and never raises `SIGPIPE`, and an IPv6 socket also reaches IPv4 peers.
+
 The planned modules follow the [roadmap](../README.md#roadmap) and appear dotted in the diagram.
 
 ## Dependencies
@@ -218,6 +239,10 @@ It lives in the application's process, and the application owns the loop. A cont
 ### An allocation fails
 
 The function reports `VMNL_NET_ENOMEM`.
+
+### Windows cannot start its sockets
+
+`vmnl_net_context_create()` reports `VMNL_NET_FSYSTEM`, as each context starts Winsock, which [decision 0016](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0016-winsock-startup.md) explains.
 
 ### A buffer lacks free space
 
@@ -254,6 +279,12 @@ Memory freed by the wrong allocator, or a data race. Its documentation forbids i
 - [0010 Buffer operation tables](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0010-buffer-operation-tables.md)
 - [0011 Sorted list of timers](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md)
 - [0012 Timer structure](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md), proposed
+- [0014 Polling](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0014-polling.md), proposed
+- [0015 Buffer view layout](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0015-buffer-view-layout.md)
+- [0016 Winsock startup](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0016-winsock-startup.md)
+- [0017 System socket](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md)
+- [0018 Sends and receives](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0018-sends-and-receives.md)
+- [0019 ICMP errors on Windows](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0019-icmp-errors-on-windows.md)
 
 ## Data model
 

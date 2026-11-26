@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_F(vmnl_net_buffer_ring_shrink, VMNL_NET_BUFFER_RING, 8)
 
 UTEST_F(vmnl_net_buffer_ring_shrink, shrinks_to_exact_capacity)

@@ -1,7 +1,5 @@
 #include "buffer/buffer_internal.h"
 
-#include <stddef.h>
-
 void vmnl_net_buffer_ring_consume(VmnlNetBuffer *buffer, size_t nbytes)
 {
     vmnl_net_buffer_flat_consume(buffer, nbytes);

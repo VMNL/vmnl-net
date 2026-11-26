@@ -1,7 +1,5 @@
 #include <vmnl/net/clock.h>
 
-#include <stddef.h>
-#include <stdint.h>
 #include <windows.h>
 
 static LARGE_INTEGER vmnl_net_clock_now_frequency;

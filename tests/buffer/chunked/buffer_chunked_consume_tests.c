@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_F(vmnl_net_buffer_chunked_consume, VMNL_NET_BUFFER_CHUNKED, 0)
 
 UTEST_F(vmnl_net_buffer_chunked_consume, drops_bytes_across_chunks)

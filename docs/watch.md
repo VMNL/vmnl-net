@@ -47,6 +47,34 @@ Mutation testing changes the code one small edit at a time and runs the tests on
 - What it changes: The tests caught 445 of 493 mutants on Linux, 446 of 488 on macOS, and 457 of 498 once both reports are merged. The 7 mutants in the address module's leading zero check survive on Linux, where inet_pton already refuses leading zeros, and are caught on macOS. No test checks the error code of a chunked buffer created with a capacity of 0
 - What I did: Ran Mull 0.39.1 with LLVM 19 on Ubuntu 24.04 in a container and on macOS 26.5.1, merged both reports with jq, added the missing tests, simplified the code that served nothing, left out the boundary mutators, and added a CI job on both systems, as [decision 0013](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0013-mutation-testing.md) explains
 
+## SIO_UDP_CONNRESET in OpenJDK, Go, libuv and ENet
+
+> November 26, 2026
+
+- Status: Tested
+- Source: [Winsock IOCTLs](https://learn.microsoft.com/en-us/windows/win32/winsock/winsock-ioctls) in the docs of Microsoft, the Windows code of [OpenJDK](https://github.com/openjdk/jdk/blob/master/src/java.base/windows/native/libnio/ch/Net.c), [libuv](https://github.com/libuv/libuv/blob/v1.x/src/win/udp.c) and [ENet](https://github.com/lsalzman/enet/blob/master/win32.c), and the [Windows code of Go](https://github.com/golang/go/blob/master/src/net/fd_windows.go) with its issues [5834](https://github.com/golang/go/issues/5834) and [68614](https://github.com/golang/go/issues/68614)
+
+#### Subject
+
+Windows reports an ICMP port unreachable on every UDP socket, connected or not, as WSAECONNRESET at the next receive. It reports an expired time to live as WSAENETRESET. OpenJDK clears SIO_UDP_CONNRESET when it creates a datagram socket, and sets it again after a connect. Go clears SIO_UDP_CONNRESET and SIO_UDP_NETRESET on every UDP socket and never sets them again. libuv and ENet set neither, and ignore WSAECONNRESET at each receive.
+
+- What it changes: A client that disappears makes the next receive of a Windows server fail. In a test, an unconnected socket gave EAGAIN on Linux and macOS and WSAECONNRESET on Windows, and a connected socket gave ECONNREFUSED on Linux and macOS and WSAECONNRESET on Windows
+- What I did: Followed OpenJDK, and also cleared SIO_UDP_NETRESET like Go, as [decision 0019](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0019-icmp-errors-on-windows.md) explains. A connected socket now reports a port unreachable as VMNL_NET_ECONNREFUSED on every system
+
+## Socket inheritance after accept on Windows
+
+> November 26, 2026
+
+- Status: Tested
+- Source: [accept](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept), [WSAAccept](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaaccept) and [WSASocketW](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasocketw) in the docs of Microsoft, the post [accept() and socket inheritance](https://purplesyringa.moe/blog/accept-and-socket-inheritance/), the Windows code of [CPython](https://github.com/python/cpython/blob/main/Modules/socketmodule.c) and [Rust](https://github.com/rust-lang/rust/blob/master/library/std/src/sys/net/connection/socket/windows.rs), and the review of [libplctag #678](https://github.com/libplctag/libplctag/pull/678)
+
+#### Subject
+
+The docs of Microsoft say that a socket from accept() has the same properties as its listener, without naming the inheritance. The post found that an accepted socket follows the flag its listener got at creation, not one set later with SetHandleInformation(), and that Wine always returns inheritable sockets. Rust relies on the listener, while CPython and libplctag still clear the flag after accept().
+
+- What it changes: An accepted socket is not inheritable when its listener was created with WSA_FLAG_NO_HANDLE_INHERIT. In a test on Windows 11, the IPv4 and IPv6 sockets accepted by such a listener kept its flag
+- What I did: Kept SetHandleInformation() after accept(), as [decision 0017](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md) explains, since Microsoft does not document the behavior and Wine differs
+
 ## Apple App Review Guidelines, rule 2.5.5
 
 > November 19, 2026
@@ -172,6 +200,34 @@ A timer wheel starts and stops a timer in constant time, where a sorted list has
 
 - What it changes: The library's sorted list searches from its back, so it can walk all its timers on each start unless their timeouts are equal
 - What I did: The benchmarks confirmed it on the reference machine. A start costs 3.3 ns with deadlines in order, but 19 to 21 µs out of order with 32,000 active timers in a new process, up to 26 µs after repeated runs in the same process, so the 1,000 starts of a frame take longer than a 60 Hz frame. A wheel and a heap come next, measured with the same benchmarks in [decision 0012](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md)
+
+## Polling APIs of libuv, ENet and mio
+
+> November 25, 2026
+
+- Status: Deferred to 0.6.0
+- Source: Documentation of [libuv](https://docs.libuv.org/en/v1.x/design.html) and its [streams](https://docs.libuv.org/en/v1.x/stream.html), the [header of ENet](https://github.com/lsalzman/enet/blob/master/include/enet/enet.h) and the [Poll of mio](https://docs.rs/mio/latest/mio/struct.Poll.html)
+
+#### Subject
+
+All three keep the watched sockets in one object. libuv runs its timers and its I/O poll in the same loop iteration, over epoll, kqueue or IOCP, and reports through callbacks like the read callback of `uv_read_start()`. ENet's `enet_host_service()` returns one event at a time, a connect, a disconnect or a receive. mio registers each socket with a token and an interest, then `poll()` fills a list of events, and its page says nothing of timers.
+
+- What it changes: A wait on many sockets needs an object that keeps them, and a library with timers runs them in the same loop
+- What I did: [Decision 0014](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0014-polling.md) proposes a reactor inside the context, with events for the application and callbacks per type of event
+
+## recvmmsg, sendmmsg, WSARecvMsg and Registered I/O
+
+> November 26, 2026
+
+- Status: Deferred to 0.6.0
+- Source: [recvmmsg(2)](https://man7.org/linux/man-pages/man2/recvmmsg.2.html) and [sendmmsg(2)](https://man7.org/linux/man-pages/man2/sendmmsg.2.html) on man7.org, [WSARecvMsg](https://learn.microsoft.com/en-us/windows/win32/api/mswsock/nc-mswsock-lpfn_wsarecvmsg) and [Registered I/O](https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/hh997032(v=ws.11)) in the docs of Microsoft
+
+#### Subject
+
+recvmmsg and sendmmsg move several datagrams in one system call, since Linux 2.6.33 and 3.0, and the SDK of macOS declares neither. WSARecvMsg receives one datagram with its control data, like IP_PKTINFO, through a pointer that WSAIoctl gives. Registered I/O queues sends and receives on registered buffers and reports them through completion queues, since Windows Server 2012.
+
+- What it changes: Batching saves system calls on a busy UDP socket, but only on Linux, and one call then receives several datagrams, each with its own address and size. Registered I/O reports finished operations instead of ready sockets, unlike the poll of [decision 0014](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0014-polling.md). WSARecvMsg only adds control data, which no feature needs yet
+- What I did: Kept sendmsg and recvmsg on POSIX, and WSASendTo and WSARecvFrom on Windows, one datagram per call. Batching waits for the UDP benchmarks and for the poll of 0.6.0
 
 ## DNS RFCs and the DNS configuration of macOS
 

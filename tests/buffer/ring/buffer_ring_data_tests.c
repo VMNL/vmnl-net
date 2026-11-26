@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_F(vmnl_net_buffer_ring_data, VMNL_NET_BUFFER_RING, 8)
 
 UTEST_F(vmnl_net_buffer_ring_data, describes_two_views_when_wrapped)

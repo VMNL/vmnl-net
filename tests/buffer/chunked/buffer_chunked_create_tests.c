@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 UTEST(vmnl_net_buffer_chunked_create, rounds_capacity_up_to_whole_chunks)
 {
     VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_CHUNKED, VMNL_NET_BUFFER_CHUNK_SIZE + 1, NULL);

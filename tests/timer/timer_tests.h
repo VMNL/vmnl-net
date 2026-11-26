@@ -9,8 +9,6 @@
 #include <vmnl/net/allocator.h>
 #include <vmnl/net/timer.h>
 
-#include "utest.h"
-
 #define START_TIME UINT64_C(1000) /*!< Time of the context at the start of a #TIMER_FIXTURE test. */
 #define TIMEOUT    UINT64_C(100) /*!< Timeout of the timers of the tests. */
 

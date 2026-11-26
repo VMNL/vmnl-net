@@ -1,7 +1,10 @@
 #include "allocator/allocator_internal.h"
 #include "context/context_internal.h"
-#include "list/list_internal.h"
 #include "timer/timer_internal.h"
+
+#ifdef _WIN32
+#include <winsock2.h>
+#endif
 
 void vmnl_net_context_destroy(VmnlNetContext *context)
 {
@@ -15,4 +18,7 @@ void vmnl_net_context_destroy(VmnlNetContext *context)
         vmnl_net_list_remove(&timer->link);
     }
     vmnl_net_allocator.deallocate(context);
+#ifdef _WIN32
+    WSACleanup();
+#endif
 }

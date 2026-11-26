@@ -1,7 +1,5 @@
 #include <vmnl/net/version.h>
 
-#include <stdint.h>
-
 #define VMNL_NET_VERSION_MAJOR_SHIFT 16
 #define VMNL_NET_VERSION_MINOR_SHIFT 8
 

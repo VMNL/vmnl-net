@@ -51,8 +51,14 @@ target_sources(vmnl_net
         src/version/version.c
         src/version/version_string.c
         src/error/error_as_string.c
-        $<$<NOT:$<PLATFORM_ID:Windows>>:src/error/posix/error_from_system.c>
-        $<$<PLATFORM_ID:Windows>:src/error/win32/error_from_system.c>
+        $<$<NOT:$<PLATFORM_ID:Windows>>:
+            src/error/posix/error_from_system.c
+            src/error/posix/error_from_last_system.c
+        >
+        $<$<PLATFORM_ID:Windows>:
+            src/error/win32/error_from_system.c
+            src/error/win32/error_from_last_system.c
+        >
         src/allocator/allocator_set.c
         src/context/context_create.c
         src/context/context_remaining.c
@@ -108,6 +114,47 @@ target_sources(vmnl_net
         src/buffer/chunked/buffer_chunked_data.c
         src/buffer/chunked/buffer_chunked_consume.c
         src/buffer/chunked/buffer_chunked_destroy.c
+        src/address/address_make.c
+        src/address/address_version.c
+        src/address/address_is_equal.c
+        src/address/address_as_string.c
+        $<$<NOT:$<PLATFORM_ID:Windows>>:
+            src/socket/posix/socket_open.c
+            src/socket/posix/socket_non_blocking.c
+            src/socket/posix/socket_no_inheritance.c
+            src/socket/posix/socket_reuse_address.c
+        >
+        $<$<PLATFORM_ID:Windows>:
+            src/socket/win32/socket_open.c
+            src/socket/win32/socket_non_blocking.c
+            src/socket/win32/socket_no_inheritance.c
+            src/socket/win32/socket_reuse_address.c
+        >
+        src/socket/socket_set_linger.c
+        src/socket/socket_set_receive_buffer_size.c
+        src/socket/socket_set_send_buffer_size.c
+        src/socket/socket_pending_error.c
+        src/socket/socket_local_address.c
+        src/socket/socket_bind.c
+        src/socket/socket_listen.c
+        src/socket/socket_accept.c
+        $<$<NOT:$<PLATFORM_ID:Windows>>:
+            src/socket/posix/socket_connect.c
+            src/socket/posix/socket_send_to.c
+            src/socket/posix/socket_receive_from.c
+        >
+        $<$<PLATFORM_ID:Windows>:
+            src/socket/win32/socket_connect.c
+            src/socket/win32/socket_send_to.c
+            src/socket/win32/socket_receive_from.c
+        >
+        src/socket/socket_shutdown.c
+        $<$<NOT:$<PLATFORM_ID:Windows>>:
+            src/socket/posix/socket_close.c
+        >
+        $<$<PLATFORM_ID:Windows>:
+            src/socket/win32/socket_close.c
+        >
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS include ${PROJECT_BINARY_DIR}/include
@@ -121,6 +168,8 @@ target_sources(vmnl_net
             include/vmnl/net/clock.h
             include/vmnl/net/timer.h
             include/vmnl/net/buffer.h
+            include/vmnl/net/address.h
+            include/vmnl/net/handle.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)

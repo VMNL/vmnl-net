@@ -3,16 +3,18 @@
 #include <stdio.h>
 
 //! [as_string]
-static void drop_header(VmnlNetBuffer *buffer)
+#define HEADER_SIZE 64
+
+static void remove_header(VmnlNetBuffer *buffer)
 {
-    VmnlNetError error = VMNL_NET_SUCCESS;
+    VmnlNetError error;
 
     // Fails while the buffer holds fewer than 64 bytes.
-    if (vmnl_net_buffer_consume(buffer, 64, &error) == false) {
+    if (vmnl_net_buffer_consume(buffer, HEADER_SIZE, &error) == false) {
         printf("%s\n", vmnl_net_error_as_string(error)); // Invalid argument
     }
     // Fails too, without writing a code.
-    vmnl_net_buffer_consume(buffer, 64, NULL); // == false
+    vmnl_net_buffer_consume(buffer, HEADER_SIZE, NULL); // == false
 }
 //! [as_string]
 
@@ -23,7 +25,7 @@ int main(void)
     if (buffer == NULL) {
         return 1;
     }
-    drop_header(buffer);
+    remove_header(buffer);
     vmnl_net_buffer_destroy(buffer);
     return 0;
 }

@@ -1,8 +1,5 @@
 #include "context/context_internal.h"
-#include "list/list_internal.h"
 #include "timer/timer_internal.h"
-
-#include <stdint.h>
 
 void vmnl_net_timer_start(VmnlNetContext *context, VmnlNetTimer *timer, uint64_t timeout)
 {

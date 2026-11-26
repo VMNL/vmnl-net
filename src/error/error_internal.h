@@ -42,6 +42,16 @@ static inline void vmnl_net_error_set(VmnlNetError *error, VmnlNetError value)
  */
 VmnlNetError vmnl_net_error_from_system(int error_code);
 
+/**
+ * \brief Translates the last error of the system into a code of the library.
+ *
+ * It reads errno on POSIX and WSAGetLastError() on Windows.
+ * A call that returns its code directly, like WSAStartup(), goes through vmnl_net_error_from_system() instead.
+ * \return Code of the library with the same meaning, #VMNL_NET_FSYSTEM if none matches.
+ * \attention It **MUST** be called right after the failed call, as any call in between can overwrite errno or the code of WSAGetLastError().
+ */
+VmnlNetError vmnl_net_error_from_last_system(void);
+
 #ifdef __cplusplus
 }
 #endif

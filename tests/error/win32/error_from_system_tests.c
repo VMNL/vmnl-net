@@ -111,6 +111,11 @@ UTEST(vmnl_net_error_from_system, returns_enotconn_with_wsaenotconn)
     EXPECT_EQ(vmnl_net_error_from_system(WSAENOTCONN), VMNL_NET_ENOTCONN);
 }
 
+UTEST(vmnl_net_error_from_system, returns_enotconn_with_wsaedestaddrreq)
+{
+    EXPECT_EQ(vmnl_net_error_from_system(WSAEDESTADDRREQ), VMNL_NET_ENOTCONN);
+}
+
 UTEST(vmnl_net_error_from_system, returns_epipe_with_wsaeshutdown)
 {
     EXPECT_EQ(vmnl_net_error_from_system(WSAESHUTDOWN), VMNL_NET_EPIPE);

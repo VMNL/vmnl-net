@@ -1,7 +1,6 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
-#include <stdint.h>
 #include <string.h>
 
 static size_t vmnl_net_buffer_dynamic_compute_grown_capacity(const VmnlNetBuffer *buffer, size_t nbytes)
@@ -17,12 +16,12 @@ bool vmnl_net_buffer_dynamic_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlN
 {
     struct VmnlNetBufferContiguous *contiguous_buffer = (struct VmnlNetBufferContiguous *) buffer;
 
-    if (*nviews == 0) {
-        vmnl_net_error_set(error, VMNL_NET_EINVAL);
-        return false;
-    }
     if (nbytes > SIZE_MAX - buffer->size) {
         vmnl_net_error_set(error, VMNL_NET_ENOMEM);
+        return false;
+    }
+    if (vmnl_net_buffer_count_views(nbytes, VMNL_NET_BUFFER_VIEW_SIZE_MAX) > *nviews) {
+        vmnl_net_error_set(error, VMNL_NET_EINVAL);
         return false;
     }
     if (nbytes > buffer->capacity - buffer->size && vmnl_net_buffer_dynamic_resize(buffer, vmnl_net_buffer_dynamic_compute_grown_capacity(buffer, nbytes), error) == false) {
@@ -32,9 +31,7 @@ bool vmnl_net_buffer_dynamic_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlN
         memmove(contiguous_buffer->pointer, contiguous_buffer->pointer + contiguous_buffer->offset, buffer->size);
         contiguous_buffer->offset = 0;
     }
-    views[0].data = contiguous_buffer->pointer + contiguous_buffer->offset + buffer->size;
-    views[0].size = buffer->capacity - contiguous_buffer->offset - buffer->size;
-    *nviews = 1;
+    (void) vmnl_net_buffer_describe(contiguous_buffer->pointer + contiguous_buffer->offset + buffer->size, buffer->capacity - contiguous_buffer->offset - buffer->size, VMNL_NET_BUFFER_VIEW_SIZE_MAX, views, nviews);
     vmnl_net_error_set(error, VMNL_NET_SUCCESS);
     return true;
 }

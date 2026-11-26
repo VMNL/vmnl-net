@@ -8,9 +8,6 @@
       "cacheVariables": {
         "VMNL_NET_BUILD_TESTS": "OFF",
         "VMNL_NET_BUILD_EXAMPLES": "OFF",
-        "VMNL_NET_BUILD_BENCHMARKS": "OFF",
-        "VMNL_NET_BUILD_DOCS": "OFF",
-        "VMNL_NET_BUILD_DOCS_INTERNAL": "OFF",
         "VMNL_NET_WARNINGS_AS_ERRORS": "$env{VMNL_NET_WARNINGS_AS_ERRORS}"
       }
     },
@@ -124,7 +121,7 @@
     },
     {
       "name": "tidy",
-      "displayName": "clang-tidy",
+      "displayName": "Static analysis",
       "inherits": "release",
       "generator": "Ninja",
       "cacheVariables": {
@@ -221,7 +218,7 @@
     },
     {
       "name": "tidy",
-      "displayName": "clang-tidy",
+      "displayName": "Static analysis",
       "configurePreset": "tidy",
       "nativeToolOptions": ["-k", "0"]
     }
@@ -366,7 +363,7 @@
     },
     {
       "name": "tidy",
-      "displayName": "clang-tidy",
+      "displayName": "Static analysis",
       "steps": [
         { "type": "configure", "name": "tidy" },
         { "type": "build", "name": "tidy" }

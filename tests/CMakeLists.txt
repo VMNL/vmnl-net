@@ -61,6 +61,10 @@ target_sources(vmnl_net_tests
     buffer/buffer_data_tests.c
     buffer/buffer_consume_tests.c
     buffer/buffer_destroy_tests.c
+    buffer/buffer_describe_tests.c
+    buffer/buffer_describe_pair_tests.c
+    buffer/buffer_count_views_tests.c
+    buffer/buffer_count_views_pair_tests.c
     buffer/flat/buffer_flat_create_tests.c
     buffer/flat/buffer_flat_resize_tests.c
     buffer/flat/buffer_flat_shrink_tests.c
@@ -84,13 +88,25 @@ target_sources(vmnl_net_tests
     buffer/chunked/buffer_chunked_commit_tests.c
     buffer/chunked/buffer_chunked_data_tests.c
     buffer/chunked/buffer_chunked_consume_tests.c
+    address/address_make_tests.c
+    address/address_version_tests.c
+    address/address_is_equal_tests.c
+    address/address_as_string_tests.c
+    address/address_as_sockaddr_tests.c
+    address/address_from_sockaddr_tests.c
 )
 
 if(NOT BUILD_SHARED_LIBS)
     target_sources(vmnl_net_tests
       PRIVATE
-        $<$<NOT:$<PLATFORM_ID:Windows>>:error/posix/error_from_system_tests.c>
-        $<$<PLATFORM_ID:Windows>:error/win32/error_from_system_tests.c>
+        $<$<NOT:$<PLATFORM_ID:Windows>>:
+            error/posix/error_from_system_tests.c
+            error/posix/error_from_last_system_tests.c
+        >
+        $<$<PLATFORM_ID:Windows>:
+            error/win32/error_from_system_tests.c
+            error/win32/error_from_last_system_tests.c
+        >
     )
 endif()
 
@@ -101,6 +117,7 @@ target_link_libraries(vmnl_net_tests
   PRIVATE
     vmnl::net
     vmnl_net_warnings
+    $<$<PLATFORM_ID:Windows>:ws2_32>
 )
 
 utest_discover_tests(vmnl_net_tests)

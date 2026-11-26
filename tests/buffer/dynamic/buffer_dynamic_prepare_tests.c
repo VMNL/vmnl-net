@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_F(vmnl_net_buffer_dynamic_prepare, VMNL_NET_BUFFER_DYNAMIC, 0)
 
 UTEST_F(vmnl_net_buffer_dynamic_prepare, grows_to_256_bytes_at_least)

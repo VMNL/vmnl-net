@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_F(vmnl_net_buffer_chunked_shrink, VMNL_NET_BUFFER_CHUNKED, 4 * VMNL_NET_BUFFER_CHUNK_SIZE)
 
 UTEST_F(vmnl_net_buffer_chunked_shrink, rounds_capacity_up_to_whole_chunks)

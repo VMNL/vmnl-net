@@ -1,7 +1,5 @@
 #include "buffer_tests.h"
 
-#include "utest.h"
-
 struct vmnl_net_buffer_destroy {
     VmnlNetBufferType type;
 };

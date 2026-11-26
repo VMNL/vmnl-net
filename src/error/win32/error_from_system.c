@@ -1,6 +1,5 @@
 #include "error/error_internal.h"
 
-#include <stddef.h>
 #include <winsock2.h>
 
 struct VmnlNetWSAErrorsMapping {
@@ -30,6 +29,7 @@ static const struct VmnlNetWSAErrorsMapping vmnl_net_error_system_table[] = {
     {WSAENOBUFS, VMNL_NET_ENOBUFS},
     {WSAEISCONN, VMNL_NET_EISCONN},
     {WSAENOTCONN, VMNL_NET_ENOTCONN},
+    {WSAEDESTADDRREQ, VMNL_NET_ENOTCONN},
     {WSAESHUTDOWN, VMNL_NET_EPIPE},
     {WSAETIMEDOUT, VMNL_NET_ETIMEDOUT},
     {WSAECONNREFUSED, VMNL_NET_ECONNREFUSED},
