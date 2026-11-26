@@ -39,6 +39,7 @@ static const struct VmnlNetErrnoErrorsMapping vmnl_net_error_system_table[] = {
     {ENOBUFS, VMNL_NET_ENOBUFS},
     {EISCONN, VMNL_NET_EISCONN},
     {ENOTCONN, VMNL_NET_ENOTCONN},
+    {EDESTADDRREQ, VMNL_NET_ENOTCONN},
     {EPIPE, VMNL_NET_EPIPE},
     {ETIMEDOUT, VMNL_NET_ETIMEDOUT},
     {ECONNREFUSED, VMNL_NET_ECONNREFUSED},

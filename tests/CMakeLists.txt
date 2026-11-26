@@ -98,10 +98,14 @@ target_sources(vmnl_net_tests
 if(NOT BUILD_SHARED_LIBS)
     target_sources(vmnl_net_tests
       PRIVATE
-        $<$<NOT:$<PLATFORM_ID:Windows>>:error/posix/error_from_system_tests.c>
-        $<$<PLATFORM_ID:Windows>:error/win32/error_from_system_tests.c>
-        $<$<NOT:$<PLATFORM_ID:Windows>>:error/posix/error_from_last_system_tests.c>
-        $<$<PLATFORM_ID:Windows>:error/win32/error_from_last_system_tests.c>
+        $<$<NOT:$<PLATFORM_ID:Windows>>:
+            error/posix/error_from_system_tests.c
+            error/posix/error_from_last_system_tests.c
+        >
+        $<$<PLATFORM_ID:Windows>:
+            error/win32/error_from_system_tests.c
+            error/win32/error_from_last_system_tests.c
+        >
     )
 endif()
 
