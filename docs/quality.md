@@ -27,6 +27,16 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 
 The ruleset of `main` requires every test job and the coverage job, so the pull request stayed blocked until the last run passed.
 
+### Views split on Windows
+
+> November 26, 2026
+
+[#109](https://github.com/VMNL/vmnl-net/pull/109) gave the buffer views the layout of the system buffers, so a span larger than a view takes several views on Windows. The CI stopped it on three points.
+
+- The Windows tests saw `vmnl_net_buffer_prepare()` fail with `VMNL_NET_EINVAL` instead of `VMNL_NET_ENOMEM` for `SIZE_MAX` bytes. The dynamic buffer counted the views before checking the overflow, and `SIZE_MAX` bytes take more views than the caller gave on Windows. [aca5b18](https://github.com/VMNL/vmnl-net/commit/aca5b18) checks the overflow first, like the ring and chunked buffers.
+- clang-tidy reported two adjacent `size_t` parameters easily swapped in the ring buffer, the glibc headers of `iovec` and `ssize_t` that no source included, and the cast of a `SOCKET` to a `HANDLE`. [802988a](https://github.com/VMNL/vmnl-net/commit/802988a) computes the ring buffer's two spans in one helper, [beb4b46](https://github.com/VMNL/vmnl-net/commit/beb4b46) makes `misc-include-cleaner` report only unused includes, and [b1a970d](https://github.com/VMNL/vmnl-net/commit/b1a970d) covers the cast that `SetHandleInformation()` requires with a `NOLINT`.
+- Mull found 11 mutants alive in the ring buffer's split code, which only splits on Windows, where Mull does not run. [802988a](https://github.com/VMNL/vmnl-net/commit/802988a) adds two helpers that describe and count two spans with the limit as a parameter, and their tests split bytes on every system.
+
 ## Baseline
 
 > November 21, 2026
@@ -38,7 +48,7 @@ The current `.clang-tidy`, run on `main` just before it ([b96de83](https://githu
 - 2 `readability-magic-numbers` and 1 `bugprone-signed-bitwise`, in `src/version/version.c`
 - 1 `readability-math-missing-parentheses`, in `src/context/context_advance.c`
 
-[#86](https://github.com/VMNL/vmnl-net/pull/86) fixed all of them, and each source now includes the headers it uses.
+[#86](https://github.com/VMNL/vmnl-net/pull/86) fixed all of them, and each source then included the headers it used.
 Since then the count stays at 0, as the CI runs clang-tidy with `--warnings-as-errors`.
 
 ## Final measurement
@@ -64,7 +74,7 @@ Three checks are off.
 - `readability-implicit-bool-conversion` flags every comparison the conventions ask for. In C, `true` and `false` are integers, so `vmnl_net_buffer_is_empty(buffer) == false` converts the bool to an integer, and the check has no option to ignore it. `conversion-to-bool` keeps its useful part, the real conversions like `bool set = pointer;`.
 - `readability-trivial-switch` asks to write a `switch` with few cases as an `if`/`else`. The library keeps a `switch` when it reads better, like the one on the result of `inet_pton()` in `vmnl_net_address_make()`.
 
-`misc-include-cleaner` ignores the system headers whose name starts with an underscore and the internal headers of the Windows SDK, which a source never includes directly.
+`misc-include-cleaner` only reports the includes that a source does not use. A missing include breaks the build on the system that lacks it, and the CI builds on Linux, macOS and Windows.
 
 `readability-magic-numbers` ignores the powers of 2, like the 16 bytes of an IPv6 address in `VmnlNetAddress`, which a named constant would only repeat.
 
