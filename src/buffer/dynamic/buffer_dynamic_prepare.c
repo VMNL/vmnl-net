@@ -17,12 +17,12 @@ bool vmnl_net_buffer_dynamic_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlN
 {
     struct VmnlNetBufferContiguous *contiguous_buffer = (struct VmnlNetBufferContiguous *) buffer;
 
-    if (vmnl_net_buffer_count_views(nbytes) > *nviews) {
-        vmnl_net_error_set(error, VMNL_NET_EINVAL);
-        return false;
-    }
     if (nbytes > SIZE_MAX - buffer->size) {
         vmnl_net_error_set(error, VMNL_NET_ENOMEM);
+        return false;
+    }
+    if (vmnl_net_buffer_count_views(nbytes) > *nviews) {
+        vmnl_net_error_set(error, VMNL_NET_EINVAL);
         return false;
     }
     if (nbytes > buffer->capacity - buffer->size && vmnl_net_buffer_dynamic_resize(buffer, vmnl_net_buffer_dynamic_compute_grown_capacity(buffer, nbytes), error) == false) {
