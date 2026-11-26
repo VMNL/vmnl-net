@@ -78,3 +78,18 @@ Invalid combinations do not compile, a new family or kind reuses the base, and o
 - Kinds without a system socket, like RUDP, an in-memory pair or a decorator, cannot use the system socket setters.
 - Each socket costs an allocation behind its opaque handle.
 - Kinds that behave differently on Windows, macOS and Linux stay out of the public API. Windows refuses local datagrams with `WSAEAFNOSUPPORT`, only Linux has local `SOCK_SEQPACKET`, and `WSAPoll` cannot wait on pipes.
+
+**Completed on November 23, 2026**
+
+- The native handle type is `VmnlNetNativeHandle`. It is a `uintptr_t` on Windows, where a `SOCKET` is a `UINT_PTR`, and an `int` elsewhere, so the public headers include neither `winsock2.h` nor `windows.h`. A raw handle was rejected, as a raw socket means `SOCK_RAW`.
+- The Handle base stays internal. Each family has its own public destroy and native handle getter, as each family also has its own create. A conversion to a public base, like `vmnl_net_stream_as_handle()`, was rejected. [Decision 0014](0014-polling.md) proposes how the poll of 0.6.0 reaches every family.
+- The Handle base comes with the poll of 0.6.0, its only caller, as its operations depend on how the wait works. Writing it in 0.3.0 was rejected, as it would only hold a destroy and the native handle, which each family carries itself. Adding it later stays internal, as the families are opaque.
+
+**Completed on November 25, 2026**
+
+- The native handle type became `VmnlNetHandle`, declared in `handle.h`, instead of the `VmnlNetNativeHandle` chosen on November 23.
+- The native handle lives in the system socket that TCP, UDP and Local embed, not in the Handle base, as a pair, an RUDP connection or a decorator has none. The Handle base keeps the poll, as [decision 0014](0014-polling.md) proposes.
+
+**Moved on November 26, 2026**
+
+The Winsock startup, the system socket, its sends and receives, and the ICMP errors on Windows moved to decisions [0016](0016-winsock-startup.md), [0017](0017-system-socket.md), [0018](0018-sends-and-receives.md) and [0019](0019-icmp-errors-on-windows.md), each with its own options.
