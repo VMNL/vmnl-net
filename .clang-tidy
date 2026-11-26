@@ -1,20 +1,20 @@
 Checks: >
   -*,
-  bugprone-*,
-  cert-*,
-  clang-analyzer-*,
-  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
-  misc-*,
   performance-*,
   portability-*,
   readability-*,
+  clang-analyzer-*,
+  bugprone-*,
+  cert-*,
+  misc-*,
+  custom-*,
   -readability-implicit-bool-conversion,
   -readability-trivial-switch,
-  custom-*
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling
 HeaderFilterRegex: '(include|src)[/\\]'
 CheckOptions:
   bugprone-signed-bitwise.IgnorePositiveIntegerLiterals: true
-  misc-include-cleaner.IgnoreHeaders: '(^|[/\\])_[^/\\]*\.h;Windows Kits[/\\].*[/\\](um|shared)[/\\].*;(asm-generic|bits|sys)[/\\]errno(-base)?\.h'
+  misc-include-cleaner.MissingIncludes: false
   readability-identifier-naming.FunctionCase: lower_case
   readability-identifier-naming.FunctionPrefix: vmnl_net_
   readability-identifier-naming.GlobalVariableCase: lower_case
@@ -32,14 +32,15 @@ CheckOptions:
 CustomChecks:
   - Name: explicit-comparison
     Query: |
+        let condition expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value")
         match stmt(anyOf(
-          ifStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
-          whileStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
-          doStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
-          forStmt(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
-          conditionalOperator(hasCondition(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
-          binaryOperator(hasAnyOperatorName("&&", "||"), hasEitherOperand(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value"))),
-          unaryOperator(hasOperatorName("!"), hasUnaryOperand(expr(unless(ignoringParenImpCasts(binaryOperator(anyOf(isComparisonOperator(), hasAnyOperatorName("&&", "||", ","))))), unless(ignoringParenImpCasts(unaryOperator(hasOperatorName("!"))))).bind("value")))
+          ifStmt(hasCondition(condition)),
+          whileStmt(hasCondition(condition)),
+          doStmt(hasCondition(condition)),
+          forStmt(hasCondition(condition)),
+          conditionalOperator(hasCondition(condition)),
+          binaryOperator(hasAnyOperatorName("&&", "||"), hasEitherOperand(condition)),
+          unaryOperator(hasOperatorName("!"), hasUnaryOperand(condition))
         ))
     Diagnostic:
       - BindName: value
