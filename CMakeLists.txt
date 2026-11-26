@@ -115,8 +115,7 @@ target_sources(vmnl_net
         src/buffer/chunked/buffer_chunked_consume.c
         src/buffer/chunked/buffer_chunked_destroy.c
         src/address/address_make.c
-        src/address/address_is_ipv4.c
-        src/address/address_is_ipv6.c
+        src/address/address_version.c
         src/address/address_is_equal.c
         src/address/address_as_string.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:

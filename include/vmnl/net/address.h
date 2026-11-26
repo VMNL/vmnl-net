@@ -62,18 +62,19 @@ typedef struct VmnlNetAddress {
 VMNL_NET_API bool vmnl_net_address_make(const char *ip_address, uint16_t port, VmnlNetAddress *address, VmnlNetError *error);
 
 /**
- * \brief Checks whether an address is IPv4.
- * \param address Address to check.
- * \return true if \p address is IPv4, mapped as ::ffff:a.b.c.d, false otherwise.
+ * \brief Version of the Internet Protocol of an address.
  */
-VMNL_NET_API bool vmnl_net_address_is_ipv4(const VmnlNetAddress *address);
+typedef uint32_t VmnlNetAddressVersion;
+
+#define VMNL_NET_ADDRESS_IPV4 UINT32_C(4) /*!< IPv4, stored mapped as ::ffff:a.b.c.d. */
+#define VMNL_NET_ADDRESS_IPV6 UINT32_C(6) /*!< IPv6. */
 
 /**
- * \brief Checks whether an address is IPv6.
- * \param address Address to check.
- * \return true if \p address is IPv6, false if it is IPv4.
+ * \brief Gets the IP version of an address.
+ * \param address Address to read.
+ * \return #VMNL_NET_ADDRESS_IPV4 if \p address is IPv4, mapped as ::ffff:a.b.c.d, #VMNL_NET_ADDRESS_IPV6 otherwise.
  */
-VMNL_NET_API bool vmnl_net_address_is_ipv6(const VmnlNetAddress *address);
+VMNL_NET_API VmnlNetAddressVersion vmnl_net_address_version(const VmnlNetAddress *address);
 
 /**
  * \brief Compares two addresses.

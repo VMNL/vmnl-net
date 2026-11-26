@@ -62,8 +62,7 @@ target_sources(vmnl_net_benchmarks
     buffer/buffer_destroy_benchmarks.cpp
     buffer/buffer_cycle_benchmarks.cpp
     address/address_make_benchmarks.cpp
-    address/address_is_ipv4_benchmarks.cpp
-    address/address_is_ipv6_benchmarks.cpp
+    address/address_version_benchmarks.cpp
     address/address_is_equal_benchmarks.cpp
     address/address_as_string_benchmarks.cpp
 )

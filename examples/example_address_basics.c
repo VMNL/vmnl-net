@@ -13,7 +13,7 @@ static bool fill_server_address(VmnlNetAddress *server_address)
         printf("%s\n", vmnl_net_error_as_string(error));
         return false;
     }
-    return vmnl_net_address_is_ipv4(server_address); // true
+    return vmnl_net_address_version(server_address) == VMNL_NET_ADDRESS_IPV4; // true
 }
 //! [make]
 
@@ -23,7 +23,7 @@ static void log_peer_address(const VmnlNetAddress *peer)
     char ip_address[VMNL_NET_ADDRESS_AS_STRING_SIZE];
 
     vmnl_net_address_as_string(peer, ip_address, sizeof ip_address, NULL);
-    if (vmnl_net_address_is_ipv4(peer) == true) {
+    if (vmnl_net_address_version(peer) == VMNL_NET_ADDRESS_IPV4) {
         printf("%s:%u\n", ip_address, (unsigned) peer->port); // 192.0.2.1:8080
     } else {
         printf("[%s]:%u\n", ip_address, (unsigned) peer->port); // [2001:db8::1]:8080

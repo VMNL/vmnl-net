@@ -49,7 +49,7 @@ UTEST(vmnl_net_address_from_sockaddr, keeps_mapped_ipv6_socket_address)
     memcpy(&ipv6.sin6_addr, bytes, sizeof bytes);
     memcpy(&storage, &ipv6, sizeof ipv6);
     EXPECT_TRUE(vmnl_net_address_from_sockaddr(&storage, &address));
-    EXPECT_TRUE(vmnl_net_address_is_ipv4(&address));
+    EXPECT_EQ(vmnl_net_address_version(&address), VMNL_NET_ADDRESS_IPV4);
 }
 
 UTEST(vmnl_net_address_from_sockaddr, reads_port_in_network_byte_order)

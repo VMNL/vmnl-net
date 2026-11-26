@@ -89,8 +89,7 @@ target_sources(vmnl_net_tests
     buffer/chunked/buffer_chunked_data_tests.c
     buffer/chunked/buffer_chunked_consume_tests.c
     address/address_make_tests.c
-    address/address_is_ipv4_tests.c
-    address/address_is_ipv6_tests.c
+    address/address_version_tests.c
     address/address_is_equal_tests.c
     address/address_as_string_tests.c
     address/address_as_sockaddr_tests.c

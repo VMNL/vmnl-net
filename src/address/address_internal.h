@@ -64,7 +64,7 @@ static inline bool vmnl_net_address_as_sockaddr(const VmnlNetAddress *address, i
             return true;
         }
         case AF_INET: {
-            if (vmnl_net_address_is_ipv4(address) == false) {
+            if (vmnl_net_address_version(address) == VMNL_NET_ADDRESS_IPV6) {
                 return false;
             }
             ipv4 = (struct sockaddr_in) {.sin_family = AF_INET, .sin_port = htons(address->port)};

@@ -14,7 +14,7 @@ bool vmnl_net_address_as_string(const VmnlNetAddress *address, char *bytes, size
         vmnl_net_error_set(error, VMNL_NET_EINVAL);
         return false;
     }
-    if (vmnl_net_address_is_ipv4(address) == true) {
+    if (vmnl_net_address_version(address) == VMNL_NET_ADDRESS_IPV4) {
         inet_ntop(AF_INET, &address->ip[VMNL_NET_ADDRESS_IPV4_OFFSET], bytes, VMNL_NET_ADDRESS_AS_STRING_SIZE);
     } else {
         inet_ntop(AF_INET6, address->ip, bytes, VMNL_NET_ADDRESS_AS_STRING_SIZE);
