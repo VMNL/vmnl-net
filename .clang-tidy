@@ -14,6 +14,7 @@ Checks: >
 HeaderFilterRegex: '(include|src)[/\\]'
 CheckOptions:
   bugprone-signed-bitwise.IgnorePositiveIntegerLiterals: true
+  misc-include-cleaner.IgnoreHeaders: 'Windows Kits[/\\].*[/\\](um|shared)[/\\].*'
   misc-include-cleaner.MissingIncludes: false
   readability-identifier-naming.FunctionCase: lower_case
   readability-identifier-naming.FunctionPrefix: vmnl_net_

@@ -5,9 +5,9 @@ size_t vmnl_net_socket_send_to(struct VmnlNetSocket *netsock, const VmnlNetAddre
 {
     struct sockaddr_storage storage;
     socklen_t socklen = 0;
-    const struct sockaddr *to = (address == NULL) ? NULL : (const struct sockaddr *) &storage;
+    const struct sockaddr *recipient = (address == NULL) ? NULL : (const struct sockaddr *) &storage;
     DWORD nbytes = 0;
-    int code;
+    int wsa_error;
 
     if (nviews == 0) {
         vmnl_net_error_set(error, VMNL_NET_EINVAL);
@@ -17,9 +17,9 @@ size_t vmnl_net_socket_send_to(struct VmnlNetSocket *netsock, const VmnlNetAddre
         vmnl_net_error_set(error, VMNL_NET_EAFNOSUPPORT);
         return 0;
     }
-    if (WSASendTo(netsock->handle, (LPWSABUF) views, (DWORD) nviews, &nbytes, 0, to, socklen, NULL, NULL) == SOCKET_ERROR) {
-        code = WSAGetLastError();
-        vmnl_net_error_set(error, (netsock->type == SOCK_DGRAM && code == WSAECONNRESET) ? VMNL_NET_ECONNREFUSED : vmnl_net_error_from_system(code));
+    if (WSASendTo(netsock->handle, (LPWSABUF) views, (DWORD) nviews, &nbytes, 0, recipient, socklen, NULL, NULL) == SOCKET_ERROR) {
+        wsa_error = WSAGetLastError();
+        vmnl_net_error_set(error, (netsock->type == SOCK_DGRAM && wsa_error == WSAECONNRESET) ? VMNL_NET_ECONNREFUSED : vmnl_net_error_from_system(wsa_error));
         return 0;
     }
     vmnl_net_error_set(error, VMNL_NET_SUCCESS);

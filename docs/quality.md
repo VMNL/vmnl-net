@@ -74,7 +74,7 @@ Three checks are off.
 - `readability-implicit-bool-conversion` flags every comparison the conventions ask for. In C, `true` and `false` are integers, so `vmnl_net_buffer_is_empty(buffer) == false` converts the bool to an integer, and the check has no option to ignore it. `conversion-to-bool` keeps its useful part, the real conversions like `bool set = pointer;`.
 - `readability-trivial-switch` asks to write a `switch` with few cases as an `if`/`else`. The library keeps a `switch` when it reads better, like the one on the result of `inet_pton()` in `vmnl_net_address_make()`.
 
-`misc-include-cleaner` only reports the includes that a source does not use. A missing include breaks the build on the system that lacks it, and the CI builds on Linux, macOS and Windows.
+`misc-include-cleaner` only reports the includes that a source does not use. A missing include breaks the build on the system that lacks it, and the CI builds on Linux, macOS and Windows. It ignores the headers of the Windows SDK, which a source reaches through `windows.h` or `winsock2.h`, as Microsoft documents.
 
 `readability-magic-numbers` ignores the powers of 2, like the 16 bytes of an IPv6 address in `VmnlNetAddress`, which a named constant would only repeat.
 
