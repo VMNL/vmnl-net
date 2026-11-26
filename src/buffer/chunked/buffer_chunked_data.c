@@ -1,7 +1,4 @@
 #include "buffer/buffer_internal.h"
-#include "list/list_internal.h"
-
-#include <stddef.h>
 
 size_t vmnl_net_buffer_chunked_data(const VmnlNetBuffer *buffer, size_t offset, VmnlNetBufferView *views, size_t *nviews)
 {

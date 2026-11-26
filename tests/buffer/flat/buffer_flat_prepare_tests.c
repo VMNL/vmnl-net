@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_F(vmnl_net_buffer_flat_prepare, VMNL_NET_BUFFER_FLAT, 8)
 
 UTEST_F(vmnl_net_buffer_flat_prepare, prepares_one_view)

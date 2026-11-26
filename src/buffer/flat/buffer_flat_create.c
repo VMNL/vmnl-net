@@ -1,8 +1,6 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
-#include <stddef.h>
-
 VmnlNetBuffer *vmnl_net_buffer_flat_create(const struct VmnlNetBufferOps *ops, size_t capacity, VmnlNetError *error)
 {
     if (capacity == 0) {

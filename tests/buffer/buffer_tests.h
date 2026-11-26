@@ -6,8 +6,6 @@
 #ifndef VMNL_NET_BUFFER_TESTS_H
 #define VMNL_NET_BUFFER_TESTS_H
 
-#include <vmnl/net/allocator.h>
-
 #include "buffer/buffer_internal.h"
 
 #include "utest.h"

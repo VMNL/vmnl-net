@@ -61,8 +61,10 @@ target_sources(vmnl_net_tests
     buffer/buffer_data_tests.c
     buffer/buffer_consume_tests.c
     buffer/buffer_destroy_tests.c
-    buffer/buffer_describe_up_to_tests.c
-    buffer/buffer_count_views_up_to_tests.c
+    buffer/buffer_describe_tests.c
+    buffer/buffer_describe_pair_tests.c
+    buffer/buffer_count_views_tests.c
+    buffer/buffer_count_views_pair_tests.c
     buffer/flat/buffer_flat_create_tests.c
     buffer/flat/buffer_flat_resize_tests.c
     buffer/flat/buffer_flat_shrink_tests.c

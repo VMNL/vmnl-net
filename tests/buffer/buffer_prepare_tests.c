@@ -1,7 +1,5 @@
 #include "buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_I(vmnl_net_buffer_prepare, types, 16)
 
 UTEST_I(vmnl_net_buffer_prepare, prepares_requested_bytes, NTYPES)

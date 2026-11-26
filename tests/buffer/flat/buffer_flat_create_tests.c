@@ -1,7 +1,5 @@
 #include "../buffer_tests.h"
 
-#include "utest.h"
-
 UTEST(vmnl_net_buffer_flat_create, creates_exact_capacity)
 {
     VmnlNetBuffer *buffer = vmnl_net_buffer_create(VMNL_NET_BUFFER_FLAT, 1, NULL);

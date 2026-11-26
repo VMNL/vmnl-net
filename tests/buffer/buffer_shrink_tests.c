@@ -1,7 +1,5 @@
 #include "buffer_tests.h"
 
-#include "utest.h"
-
 BUFFER_FIXTURE_I(vmnl_net_buffer_shrink, resizable_types, 4 * VMNL_NET_BUFFER_CHUNK_SIZE)
 
 UTEST_I(vmnl_net_buffer_shrink, reduces_capacity, NRESIZABLE_TYPES)

@@ -63,7 +63,6 @@
 
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -94,7 +93,7 @@ typedef size_t VmnlNetBufferViewSize;
 /**
  * \brief Contiguous bytes in the memory of a buffer.
  *
- * A view has the layout of a WSABUF on Windows and of a struct iovec elsewhere, so the sockets pass the views to the system without copying them.
+ * A view has the layout of a WSABUF on Windows and of a struct iovec elsewhere.
  * A span of more than #VMNL_NET_BUFFER_VIEW_SIZE_MAX bytes takes several views, which only happens on Windows.
  * \attention
  * - The bytes of a view **MUST** not be freed, as the buffer owns them and frees them with vmnl_net_buffer_destroy().

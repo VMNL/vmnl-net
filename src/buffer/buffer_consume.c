@@ -1,8 +1,6 @@
 #include "buffer/buffer_internal.h"
 #include "error/error_internal.h"
 
-#include <stddef.h>
-
 bool vmnl_net_buffer_consume(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetError *error)
 {
     if (nbytes > buffer->size) {

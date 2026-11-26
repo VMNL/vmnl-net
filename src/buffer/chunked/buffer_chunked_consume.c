@@ -1,7 +1,4 @@
 #include "buffer/buffer_internal.h"
-#include "list/list_internal.h"
-
-#include <stddef.h>
 
 void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, size_t nbytes)
 {

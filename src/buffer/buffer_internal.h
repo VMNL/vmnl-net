@@ -40,6 +40,14 @@ extern "C" {
 #define VMNL_NET_BUFFER_CHUNK_SIZE ((size_t) 16384)
 
 /**
+ * \brief Contiguous bytes, which can hold more than a view.
+ */
+struct VmnlNetBufferSpan {
+    uint8_t *data; /*!< First byte. */
+    size_t size; /*!< Number of bytes, more than #VMNL_NET_BUFFER_VIEW_SIZE_MAX on Windows. */
+};
+
+/**
  * \brief Operations of one type of buffer.
  * \attention An operation **MUST** be called once its public function checked the arguments, as it does not check them again.
  */
@@ -158,10 +166,10 @@ bool vmnl_net_buffer_flat_commit(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetEr
 /**
  * \brief Describes the stored bytes of a flat or dynamic buffer from an offset.
  * \param buffer Buffer to read.
- * \param offset Stored bytes to skip, at most the stored ones.
+ * \param offset Stored bytes to skip, fewer than the stored ones.
  * \param views Stored bytes from \p offset, in one view.
  * \param nviews Number of elements of \p views on input, number of views filled on output.
- * \return Number of bytes described, fewer than the stored ones after \p offset when \p views is too small, 0 with no view filled when \p views has no element or \p offset is the number of stored bytes.
+ * \return Number of bytes described, fewer than the stored ones after \p offset when \p views is too small, 0 with no view filled when \p views has no element.
  * \remark The stored bytes of a flat or dynamic buffer never wrap around the end of the block, so one view describes them all.
  */
 size_t vmnl_net_buffer_flat_data(const VmnlNetBuffer *buffer, size_t offset, VmnlNetBufferView *views, size_t *nviews);
@@ -183,6 +191,7 @@ void vmnl_net_buffer_flat_consume(VmnlNetBuffer *buffer, size_t nbytes);
  * - #VMNL_NET_ENOMEM: memory allocation failure.
  * \return true on success, false otherwise.
  * \remark Copies the stored bytes to the front of a new block, unwrapped, as growing in place would leave a gap in the middle of wrapped bytes, and shrinking in place would cut them.
+ * \remark Splits the stored bytes with vmnl_net_buffer_ring_spans(), and copies each span.
  */
 bool vmnl_net_buffer_ring_resize(VmnlNetBuffer *buffer, size_t capacity, VmnlNetError *error);
 
@@ -208,8 +217,8 @@ bool vmnl_net_buffer_ring_shrink(VmnlNetBuffer *buffer, size_t capacity, VmnlNet
  * - #VMNL_NET_EINVAL: \p views is too small to describe \p nbytes.
  * - #VMNL_NET_ENOBUFS: the free space is less than \p nbytes.
  * \return true on success, false otherwise.
- * \remark Never moves the stored bytes. When they wrap around or reach the end of the block, the free space lies before them, in one view.
- * \remark Otherwise the free space runs from the stored bytes to the end of the block, then from the index 0 to the first stored byte, in two views, or in one when \p views has one element and the first part holds \p nbytes.
+ * \remark Never moves the stored bytes. Splits the free space after them with vmnl_net_buffer_ring_spans(), counts its views with vmnl_net_buffer_count_views_pair(), and describes it with vmnl_net_buffer_describe_pair().
+ * \remark When the stored bytes wrap around or reach the end of the block, the free space lies before them, in one span. Otherwise it runs to the end of the block, then from the index 0 to the first stored byte.
  */
 bool vmnl_net_buffer_ring_prepare(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetBufferView *views, size_t *nviews, VmnlNetError *error);
 
@@ -227,12 +236,11 @@ bool vmnl_net_buffer_ring_commit(VmnlNetBuffer *buffer, size_t nbytes, VmnlNetEr
 /**
  * \brief Describes the stored bytes of a ring buffer from an offset.
  * \param buffer Buffer to read.
- * \param offset Stored bytes to skip, at most the stored ones.
+ * \param offset Stored bytes to skip, fewer than the stored ones.
  * \param views Stored bytes from \p offset, in order, with a second view when they wrap around the end of the block.
  * \param nviews Number of elements of \p views on input, number of views filled on output.
- * \return Number of bytes described, fewer than the stored ones after \p offset when \p views is too small, 0 with no view filled when \p views has no element or \p offset is the number of stored bytes.
- * \remark Calls vmnl_net_buffer_flat_data() when the stored bytes do not wrap around the end of the block, or when \p views has no element.
- * \remark Otherwise the stored bytes run to the end of the block, then from its index 0: one view when \p offset skips past the end of the block, two views otherwise, the second one starting at the index 0.
+ * \return Number of bytes described, fewer than the stored ones after \p offset when \p views is too small, 0 with no view filled when \p views has no element.
+ * \remark Splits the stored bytes from \p offset with vmnl_net_buffer_ring_spans(), and describes them with vmnl_net_buffer_describe_pair().
  */
 size_t vmnl_net_buffer_ring_data(const VmnlNetBuffer *buffer, size_t offset, VmnlNetBufferView *views, size_t *nviews);
 
@@ -386,22 +394,22 @@ void vmnl_net_buffer_chunked_consume(VmnlNetBuffer *buffer, size_t nbytes);
 void vmnl_net_buffer_chunked_destroy(VmnlNetBuffer *buffer);
 
 /**
- * \brief Describes contiguous bytes with views of at most \p max bytes.
+ * \brief Describes contiguous bytes with views of at most \p view_limit bytes.
  * \param data First byte.
  * \param nbytes Bytes to describe, more than 0.
- * \param max Most bytes in a view, more than 0 and at most #VMNL_NET_BUFFER_VIEW_SIZE_MAX.
+ * \param view_limit Most bytes in a view, more than 0 and at most #VMNL_NET_BUFFER_VIEW_SIZE_MAX.
  * \param views Bytes described, in order.
  * \param nviews Number of elements of \p views on input, more than 0, number of views filled on output.
  * \return Number of bytes described, fewer than \p nbytes when \p views is too small.
- * \remark Takes the limit as a parameter, so the tests split bytes outside Windows too, where #VMNL_NET_BUFFER_VIEW_SIZE_MAX is SIZE_MAX.
+ * \remark Fills one view and returns when \p nbytes fits in it, so the loop costs nothing outside Windows, where #VMNL_NET_BUFFER_VIEW_SIZE_MAX is SIZE_MAX.
  */
-static inline size_t vmnl_net_buffer_describe_up_to(uint8_t *data, size_t nbytes, size_t max, VmnlNetBufferView *views, size_t *nviews)
+static inline size_t vmnl_net_buffer_describe(uint8_t *data, size_t nbytes, size_t view_limit, VmnlNetBufferView *views, size_t *nviews)
 {
     size_t written_views = 0;
     size_t described_bytes = 0;
     size_t size;
 
-    if (nbytes <= max) {
+    if (nbytes <= view_limit) {
         views[0].data = data;
         views[0].size = (VmnlNetBufferViewSize) nbytes;
         *nviews = 1;
@@ -410,7 +418,7 @@ static inline size_t vmnl_net_buffer_describe_up_to(uint8_t *data, size_t nbytes
     while (described_bytes < nbytes && written_views < *nviews) {
         size = nbytes - described_bytes;
         views[written_views].data = data + described_bytes;
-        views[written_views].size = (VmnlNetBufferViewSize) ((size < max) ? size : max);
+        views[written_views].size = (VmnlNetBufferViewSize) ((size < view_limit) ? size : view_limit);
         described_bytes += views[written_views].size;
         written_views++;
     }
@@ -419,43 +427,80 @@ static inline size_t vmnl_net_buffer_describe_up_to(uint8_t *data, size_t nbytes
 }
 
 /**
- * \brief Describes contiguous bytes with views of at most #VMNL_NET_BUFFER_VIEW_SIZE_MAX bytes.
- * \param data First byte.
- * \param nbytes Bytes to describe, more than 0.
+ * \brief Describes two spans of bytes, one after the other, with views of at most \p view_limit bytes.
+ * \param span Span described first, more than 0 bytes.
+ * \param other Span described after \p span, 0 bytes for none.
+ * \param view_limit Most bytes in a view, more than 0 and at most #VMNL_NET_BUFFER_VIEW_SIZE_MAX.
  * \param views Bytes described, in order.
  * \param nviews Number of elements of \p views on input, more than 0, number of views filled on output.
- * \return Number of bytes described, fewer than \p nbytes when \p views is too small.
- * \remark Calls vmnl_net_buffer_describe_up_to(), which fills one view and returns when \p nbytes fits in it. The compiler knows it outside Windows, so the loop costs nothing there.
+ * \return Number of bytes described, fewer than both spans hold when \p views is too small.
+ * \remark Calls vmnl_net_buffer_describe() on \p span, then on \p other unless \p span fills \p views.
  */
-static inline size_t vmnl_net_buffer_describe(uint8_t *data, size_t nbytes, VmnlNetBufferView *views, size_t *nviews)
+static inline size_t vmnl_net_buffer_describe_pair(struct VmnlNetBufferSpan span, struct VmnlNetBufferSpan other, size_t view_limit, VmnlNetBufferView *views, size_t *nviews)
 {
-    return vmnl_net_buffer_describe_up_to(data, nbytes, VMNL_NET_BUFFER_VIEW_SIZE_MAX, views, nviews);
+    size_t capacity = *nviews;
+    size_t described_bytes = vmnl_net_buffer_describe(span.data, span.size, view_limit, views, nviews);
+    size_t left_views = capacity - *nviews;
+
+    if (left_views == 0 || other.size == 0) {
+        return described_bytes;
+    }
+    described_bytes += vmnl_net_buffer_describe(other.data, other.size, view_limit, views + *nviews, &left_views);
+    *nviews += left_views;
+    return described_bytes;
 }
 
 /**
- * \brief Counts the views of at most \p max bytes that describe bytes.
+ * \brief Counts the views of at most \p view_limit bytes that describe bytes.
  * \param nbytes Bytes to describe, more than 0.
- * \param max Most bytes in a view, more than 0.
+ * \param view_limit Most bytes in a view, more than 0 and at most #VMNL_NET_BUFFER_VIEW_SIZE_MAX.
  * \return Number of views.
- * \remark Takes the limit as a parameter, so the tests count several views outside Windows too, where #VMNL_NET_BUFFER_VIEW_SIZE_MAX is SIZE_MAX.
+ * \remark Returns 1 before the division when \p nbytes fits in one view, so the division costs nothing outside Windows, where #VMNL_NET_BUFFER_VIEW_SIZE_MAX is SIZE_MAX.
  */
-static inline size_t vmnl_net_buffer_count_views_up_to(size_t nbytes, size_t max)
+static inline size_t vmnl_net_buffer_count_views(size_t nbytes, size_t view_limit)
 {
-    if (nbytes <= max) {
+    if (nbytes <= view_limit) {
         return 1;
     }
-    return (nbytes / max) + (nbytes % max > 0);
+    return (nbytes / view_limit) + (nbytes % view_limit > 0);
 }
 
 /**
- * \brief Counts the views that describe bytes, as a view holds at most #VMNL_NET_BUFFER_VIEW_SIZE_MAX bytes.
- * \param nbytes Bytes to describe, more than 0.
- * \return Number of views, 1 outside Windows.
- * \remark Calls vmnl_net_buffer_count_views_up_to(), which returns before the division when \p nbytes fits in one view. The compiler knows it outside Windows, so the division costs nothing there.
+ * \brief Counts the views of at most \p view_limit bytes that describe bytes spread over a span, then another one.
+ * \param span_size Bytes of the span filled first, more than 0.
+ * \param nbytes Bytes to describe, more than 0, the first ones in the span of \p span_size bytes.
+ * \param view_limit Most bytes in a view, more than 0 and at most #VMNL_NET_BUFFER_VIEW_SIZE_MAX.
+ * \return Number of views.
  */
-static inline size_t vmnl_net_buffer_count_views(size_t nbytes)
+static inline size_t vmnl_net_buffer_count_views_pair(size_t span_size, size_t nbytes, size_t view_limit)
 {
-    return vmnl_net_buffer_count_views_up_to(nbytes, VMNL_NET_BUFFER_VIEW_SIZE_MAX);
+    if (nbytes <= span_size) {
+        return vmnl_net_buffer_count_views(nbytes, view_limit);
+    }
+    return vmnl_net_buffer_count_views(span_size, view_limit) + vmnl_net_buffer_count_views(nbytes - span_size, view_limit);
+}
+
+/**
+ * \brief Splits bytes of a ring buffer at the end of its block.
+ * \param buffer Ring buffer, or dynamic buffer, whose bytes never reach past the end of the block.
+ * \param index Index of the first byte, from the start of the block, less than twice the capacity.
+ * \param nbytes Bytes to split, at most the capacity.
+ * \param span Bytes from the index 0, 0 bytes when the span returned holds all of them.
+ * \return Bytes from \p index, up to the end of the block.
+ * \remark An \p index past the end of the block means that the bytes already wrapped. They start at \p index minus the capacity and fit in the span returned, as neither the stored bytes nor the free space go around the block twice.
+ */
+static inline struct VmnlNetBufferSpan vmnl_net_buffer_ring_spans(const VmnlNetBuffer *buffer, size_t index, size_t nbytes, struct VmnlNetBufferSpan *span)
+{
+    uint8_t *pointer = ((const struct VmnlNetBufferContiguous *) buffer)->pointer;
+    size_t span_size;
+
+    if (index >= buffer->capacity) {
+        *span = (struct VmnlNetBufferSpan) {.data = pointer, .size = 0};
+        return (struct VmnlNetBufferSpan) {.data = pointer + (index - buffer->capacity), .size = nbytes};
+    }
+    span_size = (index + nbytes <= buffer->capacity) ? nbytes : buffer->capacity - index;
+    *span = (struct VmnlNetBufferSpan) {.data = pointer, .size = nbytes - span_size};
+    return (struct VmnlNetBufferSpan) {.data = pointer + index, .size = span_size};
 }
 
 /**
