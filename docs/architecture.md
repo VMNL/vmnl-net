@@ -254,6 +254,12 @@ Memory freed by the wrong allocator, or a data race. Its documentation forbids i
 - [0010 Buffer operation tables](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0010-buffer-operation-tables.md)
 - [0011 Sorted list of timers](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0011-sorted-list-of-timers.md)
 - [0012 Timer structure](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0012-timer-structure.md), proposed
+- [0014 Polling](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0014-polling.md), proposed
+- [0015 Buffer view layout](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0015-buffer-view-layout.md)
+- [0016 Winsock startup](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0016-winsock-startup.md)
+- [0017 System socket](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md)
+- [0018 Sends and receives](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0018-sends-and-receives.md)
+- [0019 ICMP errors on Windows](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0019-icmp-errors-on-windows.md)
 
 ## Data model
 
