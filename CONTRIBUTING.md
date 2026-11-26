@@ -12,7 +12,7 @@ Everyone taking part in the project follows the [Code of Conduct](CODE_OF_CONDUC
 ## Layout
 
 - `include/vmnl/net/`: the public headers, one per module
-- `src/<module>/`: one source file per public function and the private header of the module
+- `src/<module>/`: the sources and the private header of the module
 - `tests/<module>/`: the tests of each module
 - `bench/`: the benchmarks of each module
 - `examples/`: the examples of the modules
