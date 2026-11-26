@@ -61,6 +61,20 @@ Windows reports an ICMP port unreachable on every UDP socket, connected or not, 
 - What it changes: A client that disappears makes the next receive of a Windows server fail. In a test, an unconnected socket gave EAGAIN on Linux and macOS and WSAECONNRESET on Windows, and a connected socket gave ECONNREFUSED on Linux and macOS and WSAECONNRESET on Windows
 - What I did: Followed OpenJDK, and also cleared SIO_UDP_NETRESET like Go, as [decision 0019](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0019-icmp-errors-on-windows.md) explains. A connected socket now reports a port unreachable as VMNL_NET_ECONNREFUSED on every system
 
+## Socket inheritance after accept on Windows
+
+> November 26, 2026
+
+- Status: Tested
+- Source: [accept](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-accept), [WSAAccept](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsaaccept) and [WSASocketW](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsasocketw) in the docs of Microsoft, the post [accept() and socket inheritance](https://purplesyringa.moe/blog/accept-and-socket-inheritance/), the Windows code of [CPython](https://github.com/python/cpython/blob/main/Modules/socketmodule.c) and [Rust](https://github.com/rust-lang/rust/blob/master/library/std/src/sys/net/connection/socket/windows.rs), and the review of [libplctag #678](https://github.com/libplctag/libplctag/pull/678)
+
+#### Subject
+
+The docs of Microsoft say that a socket from accept() has the same properties as its listener, without naming the inheritance. The post found that an accepted socket follows the flag its listener got at creation, not one set later with SetHandleInformation(), and that Wine always returns inheritable sockets. Rust relies on the listener, while CPython and libplctag still clear the flag after accept().
+
+- What it changes: An accepted socket is not inheritable when its listener was created with WSA_FLAG_NO_HANDLE_INHERIT. In a test on Windows 11, the IPv4 and IPv6 sockets accepted by such a listener kept its flag
+- What I did: Kept SetHandleInformation() after accept(), as [decision 0017](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md) explains, since Microsoft does not document the behavior and Wine differs
+
 ## Apple App Review Guidelines, rule 2.5.5
 
 > November 19, 2026

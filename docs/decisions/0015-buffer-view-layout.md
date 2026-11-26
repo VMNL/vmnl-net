@@ -1,7 +1,7 @@
 # 0015 Buffer view layout
 
 - Date: November 26, 2026
-- Status: accepted, to be implemented in 0.3.0
+- Status: accepted
 
 **Context and problem**
 

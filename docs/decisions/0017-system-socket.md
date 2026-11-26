@@ -26,10 +26,10 @@ Option 3, since November 25.
 **Reason**
 
 No caller can forget the fixed settings, and a socket behaves the same on the three systems.
-A struct of options was rejected, as every option set before a bind is a boolean. The flags were replaced, as clang-tidy reports the family next to them as parameters easily swapped. A generic setter was rejected too, as it would take the system's constants outside the wrapper and let through options that differ between systems.
+A struct of options was rejected, as every option set before a bind is a boolean. The flags were replaced, as clang-tidy reports the family next to them as parameters easily swapped. A generic setter was rejected too, as it would take the system's constants outside the wrapper and let through options that differ between systems. The wrapper's option functions share one inside its header, which only takes options that behave the same on every system.
 Falling back to IPv4 when a host without IPv6 refuses an IPv6 socket, with `EAFNOSUPPORT`, was rejected, as the caller would get another family than the one it asked for. A developer knows the machine their program runs on, and when in doubt, they pick IPv4.
 On Windows, creating the socket with `socket()`, then clearing its inheritance with `SetHandleInformation()`, was rejected. A child process created in between could inherit the socket, and a listener created this way accepts inheritable sockets.
-A socket that `accept()` returns still goes through `SetHandleInformation()`, as the doc of `accept()` does not say whether it keeps the flag of its listener, though a test showed it does.
+A socket that `accept()` returns still goes through `SetHandleInformation()`, as the doc of `accept()` does not say whether it keeps the flag of its listener, though a test showed it does. The [research log](../watch.md) gives the sources.
 
 **Consequences accepted**
 
