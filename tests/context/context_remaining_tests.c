@@ -28,7 +28,13 @@ UTEST_F(vmnl_net_context_remaining, returns_zero_at_first_deadline)
     EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME + TIMEOUT), UINT64_C(0));
 }
 
-UTEST_F(vmnl_net_context_remaining, returns_uint64_max_without_active_timer)
+UTEST_F(vmnl_net_context_remaining, returns_inf_without_active_timer)
 {
-    EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME), UINT64_MAX);
+    EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME), VMNL_NET_CLOCK_INF);
+}
+
+UTEST_F(vmnl_net_context_remaining, returns_inf_with_deadline_at_inf)
+{
+    vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, VMNL_NET_CLOCK_INF);
+    EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME), VMNL_NET_CLOCK_INF);
 }

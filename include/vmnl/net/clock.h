@@ -31,6 +31,7 @@ extern "C" {
 #define VMNL_NET_MILLISECONDS_PER_SECOND UINT64_C(1000) /*!< Milliseconds in a second. */
 #define VMNL_NET_MICROSECONDS_PER_SECOND UINT64_C(1000000) /*!< Microseconds in a second. */
 #define VMNL_NET_NANOSECONDS_PER_SECOND  UINT64_C(1000000000) /*!< Nanoseconds in a second. */
+#define VMNL_NET_CLOCK_INF               UINT64_MAX /*!< Duration without end, for a wait without timeout or a time with no deadline. */
 
 /**
  * \brief Gets the current time of a monotonic clock.

@@ -19,6 +19,7 @@
 #define VMNL_NET_CONTEXT_H
 
 #include <vmnl/net/attribute.h>
+#include <vmnl/net/clock.h>
 #include <vmnl/net/error.h>
 
 #ifdef __cplusplus
@@ -44,7 +45,7 @@ VMNL_NET_API VMNL_NET_NODISCARD VmnlNetContext *vmnl_net_context_create(VmnlNetE
  * \brief Gets the time left before a context's next timer deadline, to use as the timeout of a wait.
  * \param context Context of the timers.
  * \param now Current time, see vmnl_net_clock_now().
- * \return Number of nanoseconds left, 0 if the deadline passed, UINT64_MAX if no timer is active.
+ * \return Number of nanoseconds left, 0 if the deadline passed, #VMNL_NET_CLOCK_INF if no timer is active or the next deadline stopped at #VMNL_NET_CLOCK_INF.
  */
 VMNL_NET_API uint64_t vmnl_net_context_remaining(const VmnlNetContext *context, uint64_t now);
 

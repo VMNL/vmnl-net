@@ -37,11 +37,11 @@ struct VmnlNetTimer {
  * \brief Computes the deadline a delay after a time, without wrapping around.
  * \param time Time in nanoseconds of vmnl_net_clock_now().
  * \param delay Nanoseconds after \p time.
- * \return \p time + \p delay, UINT64_MAX if the sum does not fit.
+ * \return \p time + \p delay, #VMNL_NET_CLOCK_INF if the sum does not fit.
  */
 static inline uint64_t vmnl_net_timer_compute_deadline(uint64_t time, uint64_t delay)
 {
-    return (delay > UINT64_MAX - time) ? UINT64_MAX : time + delay;
+    return (delay > UINT64_MAX - time) ? VMNL_NET_CLOCK_INF : time + delay;
 }
 
 /**
