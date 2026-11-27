@@ -119,42 +119,65 @@ target_sources(vmnl_net
         src/address/address_is_equal.c
         src/address/address_as_string.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:
-            src/socket/posix/socket_open.c
-            src/socket/posix/socket_non_blocking.c
-            src/socket/posix/socket_no_inheritance.c
-            src/socket/posix/socket_reuse_address.c
+            src/socket/system/posix/socket_system_open.c
+            src/socket/system/posix/socket_system_non_blocking.c
+            src/socket/system/posix/socket_system_no_inheritance.c
+            src/socket/system/posix/socket_system_reuse_address.c
         >
         $<$<PLATFORM_ID:Windows>:
-            src/socket/win32/socket_open.c
-            src/socket/win32/socket_non_blocking.c
-            src/socket/win32/socket_no_inheritance.c
-            src/socket/win32/socket_reuse_address.c
+            src/socket/system/win32/socket_system_open.c
+            src/socket/system/win32/socket_system_non_blocking.c
+            src/socket/system/win32/socket_system_no_inheritance.c
+            src/socket/system/win32/socket_system_reuse_address.c
         >
-        src/socket/socket_set_linger.c
-        src/socket/socket_set_receive_buffer_size.c
-        src/socket/socket_set_send_buffer_size.c
-        src/socket/socket_pending_error.c
-        src/socket/socket_local_address.c
-        src/socket/socket_bind.c
-        src/socket/socket_listen.c
-        src/socket/socket_accept.c
+        src/socket/system/socket_system_set_linger.c
+        src/socket/system/socket_system_set_receive_buffer_size.c
+        src/socket/system/socket_system_set_send_buffer_size.c
+        src/socket/system/socket_system_set_broadcast.c
+        src/socket/system/socket_system_pending_error.c
+        src/socket/system/socket_system_local_address.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:
-            src/socket/posix/socket_connect.c
-            src/socket/posix/socket_send_to.c
-            src/socket/posix/socket_receive_from.c
+            src/socket/system/posix/socket_system_wait_for.c
         >
         $<$<PLATFORM_ID:Windows>:
-            src/socket/win32/socket_connect.c
-            src/socket/win32/socket_send_to.c
-            src/socket/win32/socket_receive_from.c
+            src/socket/system/win32/socket_system_wait_for.c
         >
-        src/socket/socket_shutdown.c
+        src/socket/system/socket_system_bind.c
+        src/socket/system/socket_system_listen.c
+        src/socket/system/socket_system_accept.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:
-            src/socket/posix/socket_close.c
+            src/socket/system/posix/socket_system_connect.c
+            src/socket/system/posix/socket_system_send_to.c
+            src/socket/system/posix/socket_system_receive_from.c
         >
         $<$<PLATFORM_ID:Windows>:
-            src/socket/win32/socket_close.c
+            src/socket/system/win32/socket_system_connect.c
+            src/socket/system/win32/socket_system_send_to.c
+            src/socket/system/win32/socket_system_receive_from.c
         >
+        src/socket/system/socket_system_shutdown.c
+        $<$<NOT:$<PLATFORM_ID:Windows>>:
+            src/socket/system/posix/socket_system_close.c
+        >
+        $<$<PLATFORM_ID:Windows>:
+            src/socket/system/win32/socket_system_close.c
+        >
+        src/socket/datagram/socket_datagram_create.c
+        src/socket/datagram/socket_datagram_bind.c
+        src/socket/datagram/socket_datagram_connect.c
+        src/socket/datagram/socket_datagram_set_broadcast.c
+        src/socket/datagram/socket_datagram_set_receive_buffer_size.c
+        src/socket/datagram/socket_datagram_set_send_buffer_size.c
+        src/socket/datagram/socket_datagram_local_address.c
+        src/socket/datagram/socket_datagram_handle.c
+        src/socket/datagram/socket_datagram_wait_for.c
+        src/socket/datagram/socket_datagram_send.c
+        src/socket/datagram/socket_datagram_send_to.c
+        src/socket/datagram/socket_datagram_receive.c
+        src/socket/datagram/socket_datagram_receive_from.c
+        src/socket/datagram/socket_datagram_destroy.c
+        src/socket/datagram/udp/socket_datagram_udp_create.c
+        src/socket/datagram/udp/socket_datagram_udp_destroy.c
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS include ${PROJECT_BINARY_DIR}/include
@@ -170,6 +193,8 @@ target_sources(vmnl_net
             include/vmnl/net/buffer.h
             include/vmnl/net/address.h
             include/vmnl/net/handle.h
+            include/vmnl/net/socket.h
+            include/vmnl/net/socket/datagram.h
 )
 
 set_target_properties(vmnl_net_options PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)

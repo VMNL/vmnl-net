@@ -29,5 +29,12 @@ Options 1 and 2 would hide the error of a connected socket on Windows only. Opti
 - An unconnected datagram socket never learns that a port is closed.
 - A forged ICMP message can fail the receive of a connected socket, on every system.
 - The drop of an expired time to live is not tested, as it needs a router on the path.
+- Only the port unreachable moves from a send to the next receive. On POSIX, the other ICMP errors that a connected socket stores, like a host administratively prohibited or a parameter problem, still fail the next send, which then sends nothing. They also have causes of their own at a send, like a missing route for `EHOSTUNREACH` or a datagram too large for `EMSGSIZE`, so a send cannot tell them apart, and only Linux could test them, with ICMP messages from iptables. OpenJDK, libuv, ENet, Go and Rust pass them through too.
 
 The sources and the tests are in the [research log](../watch.md).
+
+**Completed on November 27, 2026**
+
+- A send never reports a port unreachable. Windows only reports it at the receive, while macOS and Linux also report it at the next send of a connected socket, which then sends nothing.
+- On POSIX, a send that draws `ECONNREFUSED` sends the datagram again, and the system socket keeps the refusal in a flag for the next receive, which reports it first. A wait reports the socket ready at once while the flag is set.
+- A refusal pending before a connect to another peer stays for the next receive. Linux and Windows keep it across the connect, while macOS reports it at the connect, which is done again with the flag set. Clearing it was rejected, as Windows only drops it at a receive, which would also drop the datagrams waiting.

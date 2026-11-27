@@ -35,3 +35,11 @@ A socket that `accept()` returns still goes through `SetHandleInformation()`, as
 
 - On a host without IPv6, creating an IPv6 socket fails, and an IPv4 socket refuses an IPv6 address.
 - An option that differs between systems stays out of the wrapper.
+
+**Completed on November 27, 2026**
+
+- A datagram socket refuses to connect to 255.255.255.255 without the broadcast option, with `VMNL_NET_EACCES`. Linux refused it, while macOS and Windows accepted it, and Windows then sent to the broadcast address without the option.
+- The system socket keeps the option it was given in a bit flag, so the check costs no system call. An option set on the native handle outside the library is not seen.
+- A send to 255.255.255.255 goes through the same check, as an IPv6 socket of Windows sent to the mapped ::ffff:255.255.255.255 without the option, where macOS and Linux refused it.
+- A directed broadcast address, like 192.168.1.255, stays with the system, as it depends on the netmask of an interface. Linux refuses it at the connection and at the send.
+- The [research log](../watch.md) gives the sources and the tests.

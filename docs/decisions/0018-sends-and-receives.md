@@ -33,3 +33,8 @@ A cut length with success everywhere was rejected, as the application could not 
 - The receiving side stays open until the socket closes.
 - A send of more than `INT_MAX` bytes fails with `VMNL_NET_EINVAL` on macOS, and a send of 2 GiB with `VMNL_NET_ENOBUFS` on Windows, until the streams cap their sends.
 - Batching with `recvmmsg()` or Registered I/O is deferred to 0.6.0, as the [research log](../watch.md) explains.
+
+**Completed on November 27, 2026**
+
+- A send to an address on a connected datagram socket fails with `VMNL_NET_EISCONN`. macOS refused it, while Linux and Windows sent the datagram to the address. The system socket remembers a successful connect, so the check costs no system call.
+- A send of an empty datagram returns 0 with success, and the receiver gets an empty datagram, on every system.

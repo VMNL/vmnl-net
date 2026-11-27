@@ -43,7 +43,7 @@ block-beta
     block:IO
         columns 10
         IO_TITLE["I/O"]
-        SOCKET["<sup>0.3</sup> sockets"]
+        SOCKET["<sup>0.3</sup> system sockets"]
         space:4
         POLL["<sup>0.6</sup> polling"]
         space
@@ -108,7 +108,7 @@ block-beta
     RUDP -.-> FRAG
     RUDP -.-> TIMER
     TCP -.-> SOCKET
-    UDP -.-> SOCKET
+    UDP --> SOCKET
     SOCKET -.-> POLL
     SOCKET --> BUFFER
     SOCKET --> ADDRESS
@@ -136,7 +136,7 @@ block-beta
     classDef planned stroke:#6f7e8e,stroke-dasharray: 4 3
 
     class SERVICES_TITLE,PROTOCOLS_TITLE,IO_TITLE,DATA_TITLE,BUFFERS_TITLE,TIME_TITLE,CORE_TITLE,INTERNAL_TITLE title
-    class HTTP,CHAT,VOICE,TCP,UDP,RUDP,FRAG,CRYPT,POLL,DNS,SER planned
+    class HTTP,CHAT,VOICE,TCP,RUDP,FRAG,CRYPT,POLL,DNS,SER planned
 ```
 
 The application gives the time to its context, so the timers never read the clock themselves.
@@ -211,7 +211,7 @@ Byte queues written and read in place, as flat, ring, dynamic or chunked buffers
 IP addresses with a port, IPv4 and IPv6 alike, as a plain struct copied by value.
 An IPv4 address is stored mapped into IPv6, so both share one type.
 
-### sockets
+### system sockets
 
 > 0.3
 
@@ -219,6 +219,17 @@ An IPv4 address is stored mapped into IPv6, so both share one type.
 
 An internal wrapper that merges the BSD sockets and Winsock2 into one set of functions.
 A socket is non-blocking, never inherited by child processes and never raises `SIGPIPE`, and an IPv6 socket also reaches IPv4 peers.
+Where the systems differ, like a broadcast without its option or a send to an address on a connected socket, the wrapper gives one behavior.
+
+### datagram sockets
+
+> 0.3
+
+- Uses: system sockets, buffers, addresses
+
+Sockets that send and receive whole datagrams, one per call, from buffer views.
+UDP is their first type, and the options a type lacks fail with `VMNL_NET_ENOTSUP`.
+A socket waits for the events of `socket.h` with a timeout, and a signal never ends the wait early.
 
 The planned modules follow the [roadmap](../README.md#roadmap) and appear dotted in the diagram.
 
@@ -285,6 +296,7 @@ Memory freed by the wrong allocator, or a data race. Its documentation forbids i
 - [0017 System socket](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md)
 - [0018 Sends and receives](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0018-sends-and-receives.md)
 - [0019 ICMP errors on Windows](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0019-icmp-errors-on-windows.md)
+- [0020 Waiting on one socket](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0020-waiting-on-one-socket.md)
 
 ## Data model
 

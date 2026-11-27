@@ -65,6 +65,20 @@ target_sources(vmnl_net_benchmarks
     address/address_version_benchmarks.cpp
     address/address_is_equal_benchmarks.cpp
     address/address_as_string_benchmarks.cpp
+    socket/datagram/socket_datagram_create_benchmarks.cpp
+    socket/datagram/socket_datagram_bind_benchmarks.cpp
+    socket/datagram/socket_datagram_connect_benchmarks.cpp
+    socket/datagram/socket_datagram_set_broadcast_benchmarks.cpp
+    socket/datagram/socket_datagram_set_receive_buffer_size_benchmarks.cpp
+    socket/datagram/socket_datagram_set_send_buffer_size_benchmarks.cpp
+    socket/datagram/socket_datagram_local_address_benchmarks.cpp
+    socket/datagram/socket_datagram_handle_benchmarks.cpp
+    socket/datagram/socket_datagram_wait_for_benchmarks.cpp
+    socket/datagram/socket_datagram_send_benchmarks.cpp
+    socket/datagram/socket_datagram_send_to_benchmarks.cpp
+    socket/datagram/socket_datagram_receive_benchmarks.cpp
+    socket/datagram/socket_datagram_receive_from_benchmarks.cpp
+    socket/datagram/socket_datagram_destroy_benchmarks.cpp
 )
 
 target_link_libraries(vmnl_net_benchmarks

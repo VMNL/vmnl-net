@@ -8,6 +8,7 @@ Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake.
 
 - one file per public function, named like its source: `tests/buffer/buffer_prepare_tests.c`
 - the behavior of a single buffer type in a folder of its own: `tests/buffer/ring/buffer_ring_prepare_tests.c`
+- the behavior that only one platform can trigger in a `posix/` or `win32/` folder: `tests/socket/datagram/posix/socket_datagram_create_tests.c`
 - the helpers of a module in `tests/<module>/<module>_tests.h`, and every file listed in `tests/CMakeLists.txt`
 - the containers, like the list, and the pure internal functions whose cases no public function can trigger, like the error translation, tested through their internal header, the other internal functions through the public ones
 - a test of an internal function that is not inline only builds with the static library, as the shared one hides the internal symbols
