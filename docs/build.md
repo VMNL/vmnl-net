@@ -26,6 +26,7 @@ Several presets of `CMakePresets.json` build and check the library, each run fro
 | `bench` | Builds the benchmarks in Release, run with `./build/bench/bin/vmnl_net_benchmarks` | All |
 | `docs` | Generates the documentation in `build/docs/docs/html`, and fails on any warning | All |
 | `docs-internal` | Generates the documentation with the internal headers, in `build/docs-internal/docs/html` | All |
+| `man` | Generates the man pages of the public API in `build/docs/docs/man`, one per module and a link per function, macro and type named after the library | All |
 | `format` | Formats the sources with clang-format | All |
 | `format-check` | Checks the formatting, like the CI | All |
 | `tidy` | Builds the library with Ninja and checks it with clang-tidy, like the CI | All |

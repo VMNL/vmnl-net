@@ -205,6 +205,12 @@
       "targets": ["docs"]
     },
     {
+      "name": "man",
+      "displayName": "Man pages",
+      "configurePreset": "docs",
+      "targets": ["man"]
+    },
+    {
       "name": "format",
       "displayName": "Format",
       "configurePreset": "release",

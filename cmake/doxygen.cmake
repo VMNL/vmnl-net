@@ -16,3 +16,13 @@ add_custom_target(docs ALL
   COMMENT "Generating the documentation"
   VERBATIM
 )
+
+configure_file(docs/Doxyfile.man.in Doxyfile.man @ONLY)
+
+add_custom_target(man
+  COMMAND Doxygen::doxygen ${PROJECT_BINARY_DIR}/Doxyfile.man
+  COMMAND ${CMAKE_COMMAND} -D MAN_DIR=${PROJECT_BINARY_DIR}/docs/man/man3 -P ${PROJECT_SOURCE_DIR}/cmake/man_pages.cmake
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+  COMMENT "Generating the man pages"
+  VERBATIM
+)

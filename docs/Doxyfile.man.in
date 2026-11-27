@@ -1,0 +1,7 @@
+@INCLUDE                = @PROJECT_BINARY_DIR@/Doxyfile
+INPUT                   = include/vmnl
+USE_MDFILE_AS_MAINPAGE  =
+ENABLED_SECTIONS        = MAN
+GENERATE_HTML           = NO
+GENERATE_MAN            = YES
+MAN_LINKS               = YES

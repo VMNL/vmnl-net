@@ -13,6 +13,9 @@
  * \par Types
  * The four types answer different memory needs behind the same functions, as the views describe their memory whatever its layout.
  *
+ * \if MAN
+ * The HTML documentation compares the types in a table.
+ * \else
  * |                      | Flat                          | Ring                    | Dynamic                         | Chunked                      |
  * |----------------------|-------------------------------|-------------------------|---------------------------------|------------------------------|
  * | When full            | Fails, fixed memory           | Fails, fixed memory     | Grows, copies its bytes         | Adds a chunk, no copy        |
@@ -21,6 +24,7 @@
  * | Bytes moved on write | To the front, when needed     | Never                   | To the front, or to a new block | Never                        |
  * | Resizable            | No                            | Yes                     | Yes                             | Yes                          |
  * | Best use case        | Packets of known maximum size | Streams in fixed memory | Messages of unknown size        | Large transfers, like files  |
+ * \endif
  *
  * Dynamic suits most uses, while flat and ring keep a fixed memory and chunked grows without copying.
  *
