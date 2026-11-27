@@ -95,7 +95,9 @@ target_sources(vmnl_net_tests
     address/address_as_sockaddr_tests.c
     address/address_from_sockaddr_tests.c
     socket/system/socket_system_poll_events_tests.c
+    socket/system/socket_system_ready_events_tests.c
     socket/system/socket_system_poll_timeout_tests.c
+    socket/system/socket_system_check_views_tests.c
     socket/datagram/socket_datagram_create_tests.c
     $<$<NOT:$<PLATFORM_ID:Windows>>:socket/datagram/posix/socket_datagram_create_tests.c>
     socket/datagram/socket_datagram_bind_tests.c

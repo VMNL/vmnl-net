@@ -538,7 +538,7 @@ static inline bool vmnl_net_socket_system_check_views(const VmnlNetBufferView *v
  * \remark Windows reports a connection in progress with WSAEWOULDBLOCK. It gives #VMNL_NET_EINPROGRESS here, where vmnl_net_error_from_system() gives #VMNL_NET_EAGAIN.
  * \remark A stream socket becomes writable once the connection completes, and vmnl_net_socket_system_pending_error() then gives its result.
  * \remark Calls vmnl_net_socket_system_check_remote() first, and adds #VMNL_NET_SOCKET_SYSTEM_FLAG_CONNECTED on success.
- * \remark A refusal pending on a datagram socket, which macOS reports at the connect, goes to #VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED and the connect is done again, so the next receive reports it on every system, as Linux and Windows keep it across a connect.
+ * \remark A refusal pending on a datagram socket, which macOS reports at the connect, goes to #VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED and the connect succeeds, as macOS connects anyway, so the next receive reports it on every system, as Linux and Windows keep it across a connect.
  * \remark Sets SIO_UDP_CONNRESET again with vmnl_net_socket_system_report_unreachable() once a datagram socket is connected, on Windows.
  */
 bool vmnl_net_socket_system_connect(struct VmnlNetSocketSystem *netsock, const VmnlNetAddress *address, VmnlNetError *error);

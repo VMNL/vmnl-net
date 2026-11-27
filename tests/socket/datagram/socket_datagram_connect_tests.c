@@ -87,6 +87,8 @@ UTEST_I(vmnl_net_socket_datagram_connect, keeps_refusal_for_next_receive, NTYPES
     EXPECT_EQ(error, VMNL_NET_ECONNREFUSED);
     ASSERT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, NULL), (size_t) 2);
     EXPECT_TRUE(datagram_equals(utest_fixture->receiver, "hi"));
+    ASSERT_TRUE(send_to(utest_fixture->receiver, &utest_fixture->sender_address, "ok"));
+    EXPECT_TRUE(datagram_equals(utest_fixture->sender, "ok"));
 }
 
 UTEST_I(vmnl_net_socket_datagram_connect, accepts_null_error, NTYPES)

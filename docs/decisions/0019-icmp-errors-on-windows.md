@@ -37,4 +37,4 @@ The sources and the tests are in the [research log](../watch.md).
 
 - A send never reports a port unreachable. Windows only reports it at the receive, while macOS and Linux also report it at the next send of a connected socket, which then sends nothing.
 - On POSIX, a send that draws `ECONNREFUSED` sends the datagram again, and the system socket keeps the refusal in a flag for the next receive, which reports it first. A wait reports the socket ready at once while the flag is set.
-- A refusal pending before a connect to another peer stays for the next receive. Linux and Windows keep it across the connect, while macOS reports it at the connect, which is done again with the flag set. Clearing it was rejected, as Windows only drops it at a receive, which would also drop the datagrams waiting.
+- A refusal pending before a connect to another peer stays for the next receive. Linux and Windows keep it across the connect, while macOS reports it at the connect, which connects anyway and keeps it in the flag. Clearing it was rejected, as Windows only drops it at a receive, which would also drop the datagrams waiting.
