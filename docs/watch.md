@@ -75,6 +75,76 @@ The docs of Microsoft say that a socket from accept() has the same properties as
 - What it changes: An accepted socket is not inheritable when its listener was created with WSA_FLAG_NO_HANDLE_INHERIT. In a test on Windows 11, the IPv4 and IPv6 sockets accepted by such a listener kept its flag
 - What I did: Kept SetHandleInformation() after accept(), as [decision 0017](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md) explains, since Microsoft does not document the behavior and Wine differs
 
+## Broadcasts and connected sends on Linux, macOS and Windows
+
+> November 27, 2026
+
+- Status: Tested
+- Source: [connect(2)](https://man7.org/linux/man-pages/man2/connect.2.html) of Linux, the man pages connect(2) and send(2) of macOS, and [connect](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect) in the docs of Microsoft
+
+#### Subject
+
+The three docs say that connecting a datagram socket to a broadcast address without SO_BROADCAST fails with EACCES. A test on the three systems showed that only Linux refuses it. macOS accepts the connection and refuses the send, while Windows accepts both and sends to the broadcast address. A send to 255.255.255.255 without the option fails with EACCES everywhere, but an IPv6 socket of Windows sends to the mapped ::ffff:255.255.255.255 without it. On a connected socket, macOS refuses a send to an address with EISCONN, as its send(2) says, while Linux and Windows send to that address.
+
+- What it changes: The same program could broadcast on Windows and fail on Linux, and a send to an address on a connected socket worked on two systems out of three
+- What I did: The wrapper refuses 255.255.255.255, mapped or not, without the option, and an address on a connected socket, on every system, as decisions [0017](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md) and [0018](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0018-sends-and-receives.md) explain. Linux also refused the directed broadcast address 172.17.255.255 of a Docker network, at the connection and at the send, which the wrapper leaves to the system
+
+## Datagram inputs that the systems treat differently
+
+> November 27, 2026
+
+- Status: Tested
+- Source: tests on Linux, macOS and Windows, and [WSARecvFrom](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsarecvfrom) and [getsockname](https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-getsockname) in the docs of Microsoft
+
+#### Subject
+
+A test sent the same inputs through raw system calls on the three systems. A wildcard remote address connected on Linux and macOS and failed on Windows, and a send to it reached the host on Linux, failed with EHOSTUNREACH on macOS and with WSAEADDRNOTAVAIL on Windows. Port 0 failed on macOS only. A buffer size of 0 failed on macOS only. More than 1024 views failed on Linux and macOS only. A receive or getsockname() on an unbound socket failed with WSAEINVAL on Windows only. No connect failed with the same error on the three systems, the closest being a link-local address on an unknown interface, with EINVAL on macOS and ENETUNREACH on Linux and Windows.
+
+- What it changes: The same program behaved differently on each system for these inputs
+- What I did: The wrapper checks them itself and gives one result on every system, as decisions [0017](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md) and [0018](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0018-sends-and-receives.md) record
+
+## ECONNREFUSED on UDP sockets
+
+> November 27, 2026
+
+- Status: Tested
+- Source: [udp(7)](https://man7.org/linux/man-pages/man7/udp.7.html), [send(2)](https://man7.org/linux/man-pages/man2/send.2.html) and [recv(2)](https://man7.org/linux/man-pages/man2/recv.2.html) of Linux, `icmp_err_convert[]` in [net/ipv4/icmp.c](https://github.com/torvalds/linux/blob/master/net/ipv4/icmp.c) and `udp_err()` in [net/ipv4/udp.c](https://github.com/torvalds/linux/blob/master/net/ipv4/udp.c), the man pages send(2), recv(2), connect(2), udp(4) and ip(4) of macOS, and [connect](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-connect) and [getsockopt](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-getsockopt) in the docs of Microsoft
+
+#### Subject
+
+udp(7) lets a send or a receive of a UDP socket fail with ECONNREFUSED after an earlier datagram, while send(2) does not list it, and the pages of macOS never mention it. Linux turns an ICMP port unreachable into ECONNREFUSED, and only stores it in a connected socket, unless IP_RECVERR is set, which is why an unconnected socket never got it in a test, although udp(7) says errors reach a socket even when it is not connected. Tests on the three systems showed that macOS and Linux report a pending refusal at the next send or receive, the send then sending nothing, while Windows only reports it at the receive. After a connect to another peer, Linux and Windows keep the refusal for the next call, while macOS fails that connect with ECONNREFUSED. getsockopt() with SO_ERROR clears the refusal on macOS and Linux, while on Windows neither SO_ERROR, nor SIO_UDP_CONNRESET turned off and on, nor a disconnect, nor a peek clears it, only a receive.
+
+- What it changes: The same program saw a refusal at a send on POSIX and at a receive on Windows, and a reconnect after a refusal failed on macOS only
+- What I did: A send or a connect of POSIX that draws the refusal is done again, and the next receive reports it, as [decision 0019](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0019-icmp-errors-on-windows.md) explains
+
+## ICMP errors on UDP sockets in OpenJDK, libuv, ENet, Go and Rust
+
+> November 27, 2026
+
+- Status: Tested
+- Source: the POSIX code of [OpenJDK](https://github.com/openjdk/jdk/blob/master/src/java.base/unix/native/libnio/ch/DatagramDispatcher.c) and its [DatagramChannelImpl.c](https://github.com/openjdk/jdk/blob/master/src/java.base/unix/native/libnio/ch/DatagramChannelImpl.c), [libuv](https://github.com/libuv/libuv/blob/v1.x/src/unix/udp.c), [ENet](https://github.com/lsalzman/enet/blob/master/unix.c), [Go](https://github.com/golang/go/blob/master/src/internal/poll/fd_unix.go) and the [UDP socket of Rust](https://github.com/rust-lang/rust/blob/master/library/std/src/net/udp.rs)
+
+#### Subject
+
+Only OpenJDK handles ECONNREFUSED on its own. It throws PortUnreachableException at a send or a receive of a connected socket, and an unconnected socket retries its receive. libuv passes every error to its callbacks, folds ENOBUFS into EAGAIN, and only reads the ICMP errors of Linux through IP_RECVERR when the application asks for it. ENet turns every error into -1, Go only handles EINTR and EAGAIN, and the docs of Rust name neither ICMP nor ConnectionRefused. None of them sends a datagram again, or keeps an error for a later call.
+
+- What it changes: Every one of them lets a send of POSIX fail with a pending ICMP error that Windows only reports at the receive, and none handles the ICMP errors other than the port unreachable
+- What I did: Kept the port unreachable for the next receive, and left the other ICMP errors as they come, as [decision 0019](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0019-icmp-errors-on-windows.md) explains
+
+## Interrupting poll() and WSAPoll()
+
+> November 27, 2026
+
+- Status: Tested
+- Source: [WSAPoll](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsapoll) and [HandlerRoutine](https://learn.microsoft.com/en-us/windows/console/handlerroutine) in the docs of Microsoft, and [signal(7)](https://man7.org/linux/man-pages/man7/signal.7.html) of Linux
+
+#### Subject
+
+Linux never restarts poll() after a signal handler, even with SA_RESTART, and fails it with EINTR. WSAPoll() documents no such error, fails when POLLPRI is asked, and Windows runs a Ctrl-C handler in a new thread of the process.
+
+- What it changes: Returning EINTR from a wait would happen on POSIX only, and on every handled signal, not only Ctrl-C
+- What I did: The wait goes on for the time left after a signal, as [decision 0020](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0020-waiting-on-one-socket.md) explains, and a POSIX test sends a SIGALRM in the middle of a wait
+
 ## Apple App Review Guidelines, rule 2.5.5
 
 > November 19, 2026

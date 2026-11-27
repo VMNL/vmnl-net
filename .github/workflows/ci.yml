@@ -192,7 +192,7 @@ jobs:
         timeout-minutes: 5
 
       - name: Check that every mutant is caught
-        run: jq -e 'all(.files[].mutants[]; .status == "Killed" or .status == "Timeout")' build/mutation/report/html/mutation.json
+        run: jq -e --slurpfile equivalent tools/equivalent_mutants.json -f tools/check_mutants.jq build/mutation/report/html/mutation.json
         timeout-minutes: 5
 
   test:

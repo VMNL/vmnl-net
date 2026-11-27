@@ -8,8 +8,8 @@ The CI checks every pull request with the tools below, and a failure blocks the 
 - clang-tidy checks the library with the `tidy` preset, on Linux for its `posix` code and on Windows for its `win32` code.
 - The compilers treat warnings as errors in the CI, through `VMNL_NET_WARNINGS_AS_ERRORS`.
 - AddressSanitizer, UndefinedBehaviorSanitizer and MemorySanitizer run the tests.
-- gcovr fails below 100 % of the lines and branches covered by the tests.
-- Mull fails while a mutant survives on both Linux and macOS, as [decision 0013](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0013-mutation-testing.md) explains.
+- gcovr fails below 100 % of the lines and branches covered by the tests. A system failure that no test can cause, like fcntl() on an open socket, sits between `GCOVR_EXCL_START` and `GCOVR_EXCL_STOP`, or behind `GCOVR_EXCL_BR_LINE` for a branch, with its reason.
+- Mull fails while a mutant survives on both Linux and macOS, a mutant on a line that the coverage excludes aside, as [decision 0013](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0013-mutation-testing.md) explains.
 - Doxygen fails on any documentation warning (like undocumented function).
 - The benchmarks build and run once.
 

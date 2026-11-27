@@ -7,6 +7,9 @@ on:
 permissions:
   contents: read
 
+env:
+  DOXYGEN_VERSION: 1.18.0
+
 jobs:
   check-tag-version:
     name: Check tag version
@@ -24,10 +27,42 @@ jobs:
           grep -Fx "CMAKE_PROJECT_VERSION:STATIC=${GITHUB_REF_NAME#v}" build/release/CMakeCache.txt > /dev/null
         timeout-minutes: 5
 
+  man:
+    name: Generate the man pages
+    runs-on: ubuntu-latest
+    needs: check-tag-version
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+        timeout-minutes: 5
+
+      - name: Install Doxygen ${{ env.DOXYGEN_VERSION }}
+        run: |
+          curl -fsSL --connect-timeout 20 --max-time 60 --retry 3 --retry-delay 5 -o "$RUNNER_TEMP/doxygen.tar.gz" "https://github.com/doxygen/doxygen/releases/download/Release_${DOXYGEN_VERSION//./_}/doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz"
+          tar -xzf "$RUNNER_TEMP/doxygen.tar.gz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/doxygen-$DOXYGEN_VERSION/bin" >> "$GITHUB_PATH"
+        timeout-minutes: 5
+
+      - name: Generate the man pages
+        run: |
+          cmake --preset docs
+          cmake --build --preset man
+        timeout-minutes: 5
+
+      - name: Upload the man pages
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: man
+          path: build/docs/docs/man
+          if-no-files-found: error
+        timeout-minutes: 5
+
   build:
     name: Build (${{ matrix.target.platform }}, ${{ matrix.type }})
     runs-on: ${{ matrix.target.os }}
-    needs: check-tag-version
+    needs: [check-tag-version, man]
     defaults:
       run:
         shell: bash
@@ -56,6 +91,14 @@ jobs:
           cmake --build --preset release
         timeout-minutes: 30
 
+      - name: Download the man pages
+        if: runner.os != 'Windows'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: man
+          path: ${{ env.PACKAGE }}/share/man
+        timeout-minutes: 5
+
       - name: Package the library
         run: |
           cmake --install build/release --config Release --prefix "$PACKAGE"
@@ -82,6 +125,7 @@ jobs:
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           path: dist
+          pattern: vmnl_net-*
           merge-multiple: true
         timeout-minutes: 5
 

@@ -63,7 +63,7 @@ typedef uint32_t VmnlNetError;
 #define VMNL_NET_ECONNREFUSED  UINT32_C(22) /*!< Connection refused by the peer. */
 #define VMNL_NET_ECONNRESET    UINT32_C(23) /*!< Connection reset by the peer. */
 #define VMNL_NET_ECONNABORTED  UINT32_C(24) /*!< Connection aborted by this host. */
-#define VMNL_NET_ETIMEDOUT     UINT32_C(25) /*!< Connection timed out. */
+#define VMNL_NET_ETIMEDOUT     UINT32_C(25) /*!< Timed out, like a connection or a wait. */
 #define VMNL_NET_EPIPE         UINT32_C(26) /*!< Writing to a closed connection. */
 #define VMNL_NET_EMSGSIZE      UINT32_C(27) /*!< Message too large for the socket, e.g. a datagram. */
 #define VMNL_NET_EAI_NONAME    UINT32_C(28) /*!< Unknown host or service. */

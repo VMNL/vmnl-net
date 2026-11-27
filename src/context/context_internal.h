@@ -1,6 +1,9 @@
 /**
  * \file context_internal.h
  * \brief Internal definition of the context.
+ *
+ * On Windows, vmnl_net_context_create() starts Winsock with WSAStartup(), and vmnl_net_context_destroy() stops it with WSACleanup().
+ * Winsock counts these calls, so it runs while at least one context lives.
  */
 
 /**

@@ -30,6 +30,7 @@
 #include <stddef.h>
 
 #define VMNL_NET_ADDRESS_AS_STRING_SIZE 46 /*!< Size of a text that holds any address, null byte included. */
+#define VMNL_NET_ADDRESS_ANY_PORT       UINT16_C(0) /*!< Port that lets the system choose a free one at the bind. */
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,7 +67,7 @@ VMNL_NET_API bool vmnl_net_address_make(const char *ip_address, uint16_t port, V
  */
 typedef uint32_t VmnlNetAddressVersion;
 
-#define VMNL_NET_ADDRESS_IPV4 UINT32_C(4) /*!< IPv4, stored mapped as ::ffff:a.b.c.d. */
+#define VMNL_NET_ADDRESS_IPV4 UINT32_C(4) /*!< IPv4. */
 #define VMNL_NET_ADDRESS_IPV6 UINT32_C(6) /*!< IPv6. */
 
 /**

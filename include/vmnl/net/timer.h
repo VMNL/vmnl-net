@@ -80,7 +80,7 @@ VMNL_NET_API uint64_t vmnl_net_timer_interval(const VmnlNetTimer *timer);
  * \brief Gets the time left before the next deadline of a timer.
  * \param timer Timer to read.
  * \param now Current time, see vmnl_net_clock_now().
- * \return Nanoseconds before the next deadline of \p timer, 0 if it passed.
+ * \return Nanoseconds before the next deadline of \p timer, 0 if it passed, #VMNL_NET_CLOCK_INF if it stopped at #VMNL_NET_CLOCK_INF.
  * \attention \p timer **MUST** be active, as an inactive timer has no deadline.
  */
 VMNL_NET_API uint64_t vmnl_net_timer_remaining(const VmnlNetTimer *timer, uint64_t now);
@@ -104,7 +104,7 @@ VMNL_NET_API void vmnl_net_timer_set_interval(VmnlNetTimer *timer, uint64_t inte
  * \brief Starts a timer, or restarts it if it is active.
  * \param context Context that calls the timer, see vmnl_net_context_advance().
  * \param timer Timer to start.
- * \param timeout Nanoseconds before the first deadline, 0 for the next advance, the deadline stopping at UINT64_MAX.
+ * \param timeout Nanoseconds before the first deadline, 0 for the next advance, the deadline stopping at #VMNL_NET_CLOCK_INF.
  * \remark A timer active in another context moves to \p context.
  */
 VMNL_NET_API void vmnl_net_timer_start(VmnlNetContext *context, VmnlNetTimer *timer, uint64_t timeout);

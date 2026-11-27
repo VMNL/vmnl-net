@@ -36,3 +36,9 @@ UTEST_F(vmnl_net_timer_remaining, returns_zero_after_deadline)
     vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, TIMEOUT);
     EXPECT_EQ(vmnl_net_timer_remaining(utest_fixture->timer, START_TIME + TIMEOUT + 1), UINT64_C(0));
 }
+
+UTEST_F(vmnl_net_timer_remaining, returns_inf_with_deadline_at_inf)
+{
+    vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, VMNL_NET_CLOCK_INF);
+    EXPECT_EQ(vmnl_net_timer_remaining(utest_fixture->timer, START_TIME), VMNL_NET_CLOCK_INF);
+}

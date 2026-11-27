@@ -18,14 +18,15 @@ def original($lines): .location as $l
 | ($mutants | length) as $total
 | ($mutants | map(select(caught)) | length) as $caught
 | ($mutants | map(select(.status == "Timeout")) | length) as $timeouts
-| ($mutants | map(select(caught | not))) as $survived
+| ($mutants | map(select(.status == "NoCoverage")) | length) as $uncovered
+| ($mutants | map(select(.status == "Survived"))) as $survived
 | "## Mutation testing",
   "",
-  "Mull \(.framework.version) caught **\($caught) of \($total)** mutants on Linux and macOS, a score of **\(score($caught; $total))**, with \($timeouts) timeouts counted as caught. \($survived | length) mutants survived.",
+  "Mull \(.framework.version) caught **\($caught) of \($total)** mutants on Linux and macOS, a score of **\(score($caught; $total))**, with \($timeouts) timeouts counted as caught. \($survived | length) mutants survived, and no test runs \($uncovered) others, on lines that the coverage excludes.",
   "",
   "| Module | Mutants | Caught | Survived | Score |",
   "|---|--:|--:|--:|--:|",
-  ($mutants | group_by(.module) | sort_by(-length)[] | (map(select(caught)) | length) as $c | "| \(.[0].module) | \(length) | \($c) | \(length - $c) | \(score($c; length)) |"),
+  ($mutants | group_by(.module) | sort_by(-length)[] | (map(select(caught)) | length) as $c | "| \(.[0].module) | \(length) | \($c) | \(map(select(.status == "Survived")) | length) | \(score($c; length)) |"),
   if ($survived | length) == 0 then empty else
       "",
       "<details><summary>\($survived | length) surviving mutants</summary>",

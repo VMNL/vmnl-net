@@ -59,8 +59,8 @@ UTEST_F(vmnl_net_timer_start, moves_active_timer_to_other_context)
     ASSERT_NE(context, NULL);
     vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, TIMEOUT);
     vmnl_net_timer_start(context, utest_fixture->timer, TIMEOUT);
-    EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME), UINT64_MAX);
-    EXPECT_NE(vmnl_net_context_remaining(context, START_TIME), UINT64_MAX);
+    EXPECT_EQ(vmnl_net_context_remaining(utest_fixture->context, START_TIME), VMNL_NET_CLOCK_INF);
+    EXPECT_NE(vmnl_net_context_remaining(context, START_TIME), VMNL_NET_CLOCK_INF);
     vmnl_net_context_destroy(context);
 }
 
@@ -78,8 +78,14 @@ UTEST_F(vmnl_net_timer_start, expires_timer_at_next_advance_with_zero_timeout)
     EXPECT_EQ(utest_fixture->calls.count, 1);
 }
 
-UTEST_F(vmnl_net_timer_start, saturates_deadline_at_uint64_max)
+UTEST_F(vmnl_net_timer_start, saturates_deadline_at_inf)
 {
-    vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, UINT64_MAX);
-    EXPECT_EQ(vmnl_net_timer_remaining(utest_fixture->timer, START_TIME), UINT64_MAX - START_TIME);
+    vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, VMNL_NET_CLOCK_INF - START_TIME + 1);
+    EXPECT_EQ(vmnl_net_timer_remaining(utest_fixture->timer, START_TIME), VMNL_NET_CLOCK_INF);
+}
+
+UTEST_F(vmnl_net_timer_start, keeps_last_finite_deadline)
+{
+    vmnl_net_timer_start(utest_fixture->context, utest_fixture->timer, VMNL_NET_CLOCK_INF - START_TIME - 1);
+    EXPECT_EQ(vmnl_net_timer_remaining(utest_fixture->timer, START_TIME), VMNL_NET_CLOCK_INF - START_TIME - 1);
 }

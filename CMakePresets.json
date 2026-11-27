@@ -64,7 +64,8 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "VMNL_NET_BUILD_EXAMPLES": "OFF",
-        "CMAKE_C_FLAGS": "-fpass-plugin=$env{MULL_PLUGIN} -g -grecord-command-line"
+        "CMAKE_C_FLAGS": "-fpass-plugin=$env{MULL_PLUGIN} -g -grecord-command-line -fprofile-instr-generate -fcoverage-mapping",
+        "CMAKE_EXE_LINKER_FLAGS": "-fprofile-instr-generate"
       }
     },
     {
@@ -203,6 +204,12 @@
       "displayName": "Documentation (internal)",
       "configurePreset": "docs-internal",
       "targets": ["docs"]
+    },
+    {
+      "name": "man",
+      "displayName": "Man pages",
+      "configurePreset": "docs",
+      "targets": ["man"]
     },
     {
       "name": "format",

@@ -1,0 +1,30 @@
+#include "socket/system/socket_system_internal.h"
+
+#include <mswsock.h>
+
+bool vmnl_net_socket_system_open(int family, int type, struct VmnlNetSocketSystem *netsock, VmnlNetError *error)
+{
+    struct VmnlNetSocketSystem sock = {.handle = WSASocketW(family, type, 0, NULL, 0, WSA_FLAG_OVERLAPPED | WSA_FLAG_NO_HANDLE_INHERIT), .family = family, .type = type};
+
+    if (sock.handle == VMNL_NET_SOCKET_SYSTEM_INVALID) {
+        vmnl_net_error_set(error, vmnl_net_error_from_last_system());
+        return false;
+    }
+    if (vmnl_net_socket_system_non_blocking(&sock) == false) {
+        vmnl_net_error_set(error, vmnl_net_error_from_last_system());
+        vmnl_net_socket_system_close(&sock);
+        return false;
+    }
+    if (family == AF_INET6 && vmnl_net_socket_system_dual_stack(&sock, error) == false) {
+        vmnl_net_socket_system_close(&sock);
+        return false;
+    }
+    if (type == SOCK_DGRAM && (vmnl_net_socket_system_report_unreachable(&sock, SIO_UDP_CONNRESET, false) == false || vmnl_net_socket_system_report_unreachable(&sock, SIO_UDP_NETRESET, false) == false)) {
+        vmnl_net_error_set(error, vmnl_net_error_from_last_system());
+        vmnl_net_socket_system_close(&sock);
+        return false;
+    }
+    *netsock = sock;
+    vmnl_net_error_set(error, VMNL_NET_SUCCESS);
+    return true;
+}

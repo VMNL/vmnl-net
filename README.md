@@ -81,7 +81,7 @@ Its structuring decisions are recorded in [docs/decisions](https://github.com/VM
 ### From GitHub releases
 
 Each release ships with two prebuilt archives, static and shared libraries, for Windows, macOS and Linux, on x86_64 and arm64.
-Both contain the headers, the CMake package and the pkg-config file, and can be downloaded from the [releases page](https://github.com/VMNL/vmnl-net/releases).
+Both contain the headers, the CMake package and the pkg-config file, plus the man pages on macOS and Linux, and can be downloaded from the [releases page](https://github.com/VMNL/vmnl-net/releases).
 
 Extract the archive with `tar`, which ships with Windows, macOS and Linux:
 
@@ -89,7 +89,7 @@ Extract the archive with `tar`, which ships with Windows, macOS and Linux:
 tar -xzf vmnl_net-v0.2.0-linux-x86_64-static.tar.gz
 ```
 
-It creates a folder named after the archive, with `include/` and `lib/`, plus `bin/` for the Windows DLL.
+It creates a folder named after the archive, with `include/` and `lib/`, plus `bin/` for the Windows DLL and `share/man/` for the man pages on macOS and Linux, read with `man -M /absolute/path/to/<folder>/share/man vmnl_net_buffer_create` for example.
 Move it wherever you keep your dependencies, for example a `third_party` folder in your project.
 It is the prefix used in [Using the library](#using-the-library).
 

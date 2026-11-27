@@ -94,11 +94,32 @@ target_sources(vmnl_net_tests
     address/address_as_string_tests.c
     address/address_as_sockaddr_tests.c
     address/address_from_sockaddr_tests.c
+    socket/system/socket_system_poll_events_tests.c
+    socket/system/socket_system_ready_events_tests.c
+    socket/system/socket_system_poll_timeout_tests.c
+    socket/system/socket_system_check_views_tests.c
+    socket/datagram/socket_datagram_create_tests.c
+    $<$<NOT:$<PLATFORM_ID:Windows>>:socket/datagram/posix/socket_datagram_create_tests.c>
+    socket/datagram/socket_datagram_bind_tests.c
+    socket/datagram/socket_datagram_connect_tests.c
+    socket/datagram/socket_datagram_set_broadcast_tests.c
+    socket/datagram/socket_datagram_set_receive_buffer_size_tests.c
+    socket/datagram/socket_datagram_set_send_buffer_size_tests.c
+    socket/datagram/socket_datagram_local_address_tests.c
+    socket/datagram/socket_datagram_handle_tests.c
+    socket/datagram/socket_datagram_wait_for_tests.c
+    $<$<NOT:$<PLATFORM_ID:Windows>>:socket/datagram/posix/socket_datagram_wait_for_tests.c>
+    socket/datagram/socket_datagram_send_tests.c
+    socket/datagram/socket_datagram_send_to_tests.c
+    socket/datagram/socket_datagram_receive_tests.c
+    socket/datagram/socket_datagram_receive_from_tests.c
+    socket/datagram/socket_datagram_destroy_tests.c
 )
 
 if(NOT BUILD_SHARED_LIBS)
     target_sources(vmnl_net_tests
       PRIVATE
+        socket/system/socket_system_dual_stack_tests.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:
             error/posix/error_from_system_tests.c
             error/posix/error_from_last_system_tests.c
