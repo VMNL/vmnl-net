@@ -12,6 +12,7 @@ Tests use [utest.h](https://github.com/sheredom/utest.h), fetched by CMake.
 - the helpers of a module in `tests/<module>/<module>_tests.h`, and every file listed in `tests/CMakeLists.txt`
 - the containers, like the list, and the pure internal functions whose cases no public function can trigger, like the error translation, tested through their internal header, the other internal functions through the public ones
 - a test of an internal function that is not inline only builds with the static library, as the shared one hides the internal symbols
+- a mutant that no test can catch on Linux nor macOS, like a setting that both systems already apply, goes into `tools/equivalent_mutants.json` with its file, its original code, its replacement and the reason, which the review checks, as [decision 0013](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0013-mutation-testing.md) explains
 - no C library include, as `utest.h` brings it
 
 ### Names

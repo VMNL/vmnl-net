@@ -1,0 +1,20 @@
+[
+    {
+        "file": "src/socket/system/posix/socket_system_open.c",
+        "original": "vmnl_net_socket_system_dual_stack(&sock, error)",
+        "replacement": "((void)(&sock), (void)(error), true)",
+        "reason": "Linux and macOS start an IPv6 socket in dual stack already, unlike Windows, where Mull does not run."
+    },
+    {
+        "file": "src/socket/system/posix/socket_system_wait_for.c",
+        "original": "vmnl_net_socket_system_poll_timeout(timeout, vmnl_net_clock_elapsed(start))",
+        "replacement": "((void)(timeout), (void)(vmnl_net_clock_elapsed(start)), 0)",
+        "reason": "The loop polls again until the timeout, so a timeout of 0 only spends more time on the processor."
+    },
+    {
+        "file": "src/socket/system/socket_system_local_address.c",
+        "original": "sizeof storage",
+        "replacement": "129",
+        "reason": "getsockname() only writes the size of the address, so a larger size given changes nothing."
+    }
+]
