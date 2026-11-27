@@ -26,4 +26,4 @@ static inline VmnlNetAddress make(benchmark::State &state, const char *ip_addres
     return address;
 }
 
-#endif /* !VMNL_NET_ADDRESS_BENCHMARKS_HPP */
+#endif
