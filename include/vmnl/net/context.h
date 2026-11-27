@@ -6,6 +6,7 @@
  * \brief Per-thread state, such as the timers.
  *
  * A context holds the state shared by the objects of one thread, such as its timers.
+ * On Windows, it also starts the sockets, so a socket needs a context alive while it is open.
  *
  * \par Example
  * \snippet{trimleft} example_context_create.c create
@@ -40,7 +41,7 @@ typedef struct VmnlNetContext VmnlNetContext;
 VMNL_NET_API VMNL_NET_NODISCARD VmnlNetContext *vmnl_net_context_create(VmnlNetError *error);
 
 /**
- * \brief Gets the time left before the next deadline of the active timers of a context, to use as the timeout of a wait.
+ * \brief Gets the time left before a context's next timer deadline, to use as the timeout of a wait.
  * \param context Context of the timers.
  * \param now Current time, see vmnl_net_clock_now().
  * \return Number of nanoseconds left, 0 if the deadline passed, UINT64_MAX if no timer is active.
