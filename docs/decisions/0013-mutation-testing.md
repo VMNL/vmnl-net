@@ -39,4 +39,10 @@ On November 25, 2026, no test could catch 16 of the 47 boundary mutants on macOS
 - A comparison moved by one is no longer checked. Testing every limit at its value and one past it rests on the review again, although the boundary mutants found 5 gaps in the tests.
 - The `win32` code is not mutated, as Mull does not support Windows.
 
+**Completed on November 27, 2026**
+
+- Mull reads the coverage of the tests, built with `-fprofile-instr-generate -fcoverage-mapping`, and `--include-not-covered` reports a mutant that no test runs as `NoCoverage`.
+- The CI accepts these mutants. The coverage already fails below 100 % outside the `GCOVR_EXCL` regions, which hold system failures that no test can cause, like `fcntl()` on an open socket, each with its reason.
+- The merge prefers a surviving mutant to an uncovered one, so code that only macOS runs still counts.
+
 The sources are in the [research log](../watch.md).
