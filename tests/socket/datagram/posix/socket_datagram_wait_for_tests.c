@@ -25,6 +25,7 @@ UTEST_I(vmnl_net_socket_datagram_wait_for, keeps_waiting_after_signal, NTYPES)
     start = vmnl_net_clock_now();
     events = vmnl_net_socket_datagram_wait_for(utest_fixture->receiver, VMNL_NET_SOCKET_READABLE, 50 * MILLISECOND, &error);
     elapsed = vmnl_net_clock_elapsed(start);
+    setitimer(ITIMER_REAL, &(struct itimerval) {0}, NULL);
     sigaction(SIGALRM, &previous, NULL);
     EXPECT_EQ(events, (VmnlNetSocketEvents) 0);
     EXPECT_EQ(error, VMNL_NET_ETIMEDOUT);

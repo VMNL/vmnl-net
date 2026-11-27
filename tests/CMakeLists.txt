@@ -94,7 +94,6 @@ target_sources(vmnl_net_tests
     address/address_as_string_tests.c
     address/address_as_sockaddr_tests.c
     address/address_from_sockaddr_tests.c
-    socket/system/socket_system_dual_stack_tests.c
     socket/system/socket_system_poll_events_tests.c
     socket/system/socket_system_poll_timeout_tests.c
     socket/datagram/socket_datagram_create_tests.c
@@ -118,6 +117,7 @@ target_sources(vmnl_net_tests
 if(NOT BUILD_SHARED_LIBS)
     target_sources(vmnl_net_tests
       PRIVATE
+        socket/system/socket_system_dual_stack_tests.c
         $<$<NOT:$<PLATFORM_ID:Windows>>:
             error/posix/error_from_system_tests.c
             error/posix/error_from_last_system_tests.c
