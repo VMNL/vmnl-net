@@ -51,6 +51,18 @@ static inline bool vmnl_net_address_is_broadcast(const VmnlNetAddress *address)
 }
 
 /**
+ * \brief Checks whether an address is a wildcard, 0.0.0.0 or ::.
+ * \param address Address to check.
+ * \return true if \p address is 0.0.0.0, mapped or not, or ::, false otherwise.
+ */
+static inline bool vmnl_net_address_is_any(const VmnlNetAddress *address)
+{
+    static const uint8_t any[16] = {0};
+
+    return memcmp(address->ip, any, sizeof address->ip) == 0 || (vmnl_net_address_version(address) == VMNL_NET_ADDRESS_IPV4 && memcmp(&address->ip[VMNL_NET_ADDRESS_IPV4_OFFSET], any, sizeof address->ip - VMNL_NET_ADDRESS_IPV4_OFFSET) == 0);
+}
+
+/**
  * \brief Converts an address into the socket address of a socket family.
  *
  * An AF_INET6 socket takes the 16 bytes as they are, an IPv4 address staying mapped, so a dual-stack socket reaches IPv4 peers.

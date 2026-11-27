@@ -75,3 +75,15 @@ UTEST_I(vmnl_net_socket_datagram_create, accepts_null_error, NTYPES)
     utest_fixture->netsock = vmnl_net_socket_datagram_create(utest_fixture->type->type, utest_fixture->type->version, NULL);
     EXPECT_NE(utest_fixture->netsock, NULL);
 }
+
+UTEST(vmnl_net_socket_datagram_create, keeps_socket_out_of_child_processes)
+{
+    VmnlNetContext *context = vmnl_net_context_create(NULL);
+    VmnlNetSocketDatagram *netsock = create(&types[0]);
+
+    ASSERT_NE(context, NULL);
+    ASSERT_NE(netsock, NULL);
+    EXPECT_FALSE(is_inherited(vmnl_net_socket_datagram_handle(netsock)));
+    vmnl_net_socket_datagram_destroy(netsock);
+    vmnl_net_context_destroy(context);
+}

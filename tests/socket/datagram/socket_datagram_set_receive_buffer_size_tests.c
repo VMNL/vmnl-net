@@ -36,3 +36,11 @@ UTEST_I(vmnl_net_socket_datagram_set_receive_buffer_size, accepts_null_error, NT
 {
     EXPECT_TRUE(vmnl_net_socket_datagram_set_receive_buffer_size(utest_fixture->netsock, 65536, NULL));
 }
+
+UTEST_I(vmnl_net_socket_datagram_set_receive_buffer_size, rejects_zero_size, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+
+    EXPECT_FALSE(vmnl_net_socket_datagram_set_receive_buffer_size(utest_fixture->netsock, 0, &error));
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
+}

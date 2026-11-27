@@ -1,6 +1,10 @@
 #include "socket_datagram_tests.h"
 
+#include <limits.h>
+
 static uint8_t large[65536];
+
+static VmnlNetBufferView max_views[VMNL_NET_SOCKET_MAX_VIEWS + 1];
 
 DATAGRAM_PAIR_FIXTURE_I(vmnl_net_socket_datagram_send, types)
 
@@ -89,4 +93,35 @@ UTEST_I(vmnl_net_socket_datagram_send, accepts_null_error, NTYPES)
 
     ASSERT_TRUE(vmnl_net_socket_datagram_connect(utest_fixture->sender, &utest_fixture->receiver_address, NULL));
     EXPECT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, NULL), (size_t) 2);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send, sends_max_views, NTYPES)
+{
+    uint8_t byte = 'x';
+
+    views_on_byte(max_views, VMNL_NET_SOCKET_MAX_VIEWS, &byte);
+    ASSERT_TRUE(vmnl_net_socket_datagram_connect(utest_fixture->sender, &utest_fixture->receiver_address, NULL));
+    EXPECT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, max_views, VMNL_NET_SOCKET_MAX_VIEWS, NULL), (size_t) VMNL_NET_SOCKET_MAX_VIEWS);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send, fails_with_more_views_than_max, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    uint8_t byte = 'x';
+
+    views_on_byte(max_views, VMNL_NET_SOCKET_MAX_VIEWS + 1, &byte);
+    ASSERT_TRUE(vmnl_net_socket_datagram_connect(utest_fixture->sender, &utest_fixture->receiver_address, NULL));
+    EXPECT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, max_views, VMNL_NET_SOCKET_MAX_VIEWS + 1, &error), (size_t) 0);
+    EXPECT_EQ(error, VMNL_NET_EMSGSIZE);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send, rejects_views_above_int_max, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    uint8_t byte = 'x';
+    VmnlNetBufferView huge[2] = {{.data = &byte, .size = (size_t) INT_MAX / 2 + 1}, {.data = &byte, .size = (size_t) INT_MAX / 2 + 1}};
+
+    ASSERT_TRUE(vmnl_net_socket_datagram_connect(utest_fixture->sender, &utest_fixture->receiver_address, NULL));
+    EXPECT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, huge, 2, &error), (size_t) 0);
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
 }

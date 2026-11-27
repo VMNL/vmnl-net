@@ -3,7 +3,7 @@
  *
  * \defgroup Socket Socket
  * \addtogroup Socket
- * \brief Events shared by the socket families, to wait until a socket can receive or send.
+ * \brief Events and limits shared by the socket families.
  *
  * Events combine with `|`, like `VMNL_NET_SOCKET_READABLE | VMNL_NET_SOCKET_WRITABLE`, and a wait returns the ones that came.
  * @{
@@ -25,6 +25,8 @@ typedef uint32_t VmnlNetSocketEvents;
 
 #define VMNL_NET_SOCKET_READABLE UINT32_C(1) /*!< A receive would not fail with #VMNL_NET_EAGAIN. */
 #define VMNL_NET_SOCKET_WRITABLE UINT32_C(2) /*!< A send would not fail with #VMNL_NET_EAGAIN. */
+
+#define VMNL_NET_SOCKET_MAX_VIEWS 1024 /*!< Most views that a send or a receive takes, the IOV_MAX of Linux and macOS, on every system. */
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,8 @@ bool vmnl_net_socket_system_accept(struct VmnlNetSocketSystem *netsock, struct V
         vmnl_net_error_set(error, vmnl_net_error_from_last_system());
         return false;
     }
-    if (vmnl_net_socket_system_non_blocking(&sock, error) == false || vmnl_net_socket_system_no_inheritance(&sock, error) == false) {
+    if (vmnl_net_socket_system_non_blocking(&sock) == false || vmnl_net_socket_system_no_inheritance(&sock) == false) {
+        vmnl_net_error_set(error, vmnl_net_error_from_last_system());
         vmnl_net_socket_system_close(&sock);
         return false;
     }

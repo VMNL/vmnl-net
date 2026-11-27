@@ -51,6 +51,23 @@ UTEST(vmnl_net_socket_datagram_connect, fails_with_ipv6_address_on_ipv4_socket)
     vmnl_net_context_destroy(context);
 }
 
+UTEST(vmnl_net_socket_datagram_connect, fails_with_unknown_interface)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetContext *context = vmnl_net_context_create(NULL);
+    VmnlNetSocketDatagram *netsock = create(&types[1]);
+    VmnlNetAddress address;
+
+    ASSERT_NE(context, NULL);
+    ASSERT_NE(netsock, NULL);
+    ASSERT_TRUE(vmnl_net_address_make("fe80::1", 9, &address, NULL));
+    address.scope = 999999;
+    EXPECT_FALSE(vmnl_net_socket_datagram_connect(netsock, &address, &error));
+    EXPECT_TRUE(error == VMNL_NET_EINVAL || error == VMNL_NET_ENETUNREACH);
+    vmnl_net_socket_datagram_destroy(netsock);
+    vmnl_net_context_destroy(context);
+}
+
 UTEST_I(vmnl_net_socket_datagram_connect, keeps_refusal_for_next_receive, NTYPES)
 {
     VmnlNetError error = UINT32_MAX;
@@ -68,9 +85,31 @@ UTEST_I(vmnl_net_socket_datagram_connect, keeps_refusal_for_next_receive, NTYPES
     EXPECT_EQ(error, VMNL_NET_SUCCESS);
     EXPECT_EQ(vmnl_net_socket_datagram_receive(utest_fixture->sender, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, &error), (size_t) 0);
     EXPECT_EQ(error, VMNL_NET_ECONNREFUSED);
+    ASSERT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, NULL), (size_t) 2);
+    EXPECT_TRUE(datagram_equals(utest_fixture->receiver, "hi"));
 }
 
 UTEST_I(vmnl_net_socket_datagram_connect, accepts_null_error, NTYPES)
 {
     EXPECT_TRUE(vmnl_net_socket_datagram_connect(utest_fixture->sender, &utest_fixture->receiver_address, NULL));
+}
+
+UTEST_I(vmnl_net_socket_datagram_connect, fails_with_wildcard_address, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAddress address;
+
+    ASSERT_TRUE(vmnl_net_address_make(utest_fixture->type->wildcard, 9, &address, NULL));
+    EXPECT_FALSE(vmnl_net_socket_datagram_connect(utest_fixture->sender, &address, &error));
+    EXPECT_EQ(error, VMNL_NET_EADDRNOTAVAIL);
+}
+
+UTEST_I(vmnl_net_socket_datagram_connect, fails_with_port_zero, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAddress address;
+
+    ASSERT_TRUE(vmnl_net_address_make(utest_fixture->type->loopback, VMNL_NET_ADDRESS_ANY_PORT, &address, NULL));
+    EXPECT_FALSE(vmnl_net_socket_datagram_connect(utest_fixture->sender, &address, &error));
+    EXPECT_EQ(error, VMNL_NET_EADDRNOTAVAIL);
 }

@@ -38,3 +38,6 @@ A cut length with success everywhere was rejected, as the application could not 
 
 - A send to an address on a connected datagram socket fails with `VMNL_NET_EISCONN`. macOS refused it, while Linux and Windows sent the datagram to the address. The system socket remembers a successful connect, so the check costs no system call.
 - A send of an empty datagram returns 0 with success, and the receiver gets an empty datagram, on every system.
+- A send or a receive takes at most `VMNL_NET_SOCKET_MAX_VIEWS` views, 1024, the IOV_MAX of Linux and macOS, and fails with `VMNL_NET_EMSGSIZE` above it. Windows took more views.
+- Views of more than INT_MAX bytes fail with `VMNL_NET_EINVAL`, which only macOS checked. The check adds the view sizes before each call.
+- A receive on an unbound socket fails with `VMNL_NET_EAGAIN`, as on POSIX, where Windows failed with WSAEINVAL.

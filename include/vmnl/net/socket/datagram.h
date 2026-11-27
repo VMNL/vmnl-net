@@ -114,7 +114,7 @@ VMNL_NET_API bool vmnl_net_socket_datagram_bind(VmnlNetSocketDatagram *netsock, 
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EAFNOSUPPORT: \p address is IPv6 and \p netsock is IPv4.
  * - #VMNL_NET_EACCES: \p address is 255.255.255.255 without vmnl_net_socket_datagram_set_broadcast(), or a directed broadcast address like 192.168.1.255 without it on Linux.
- * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard like 0.0.0.0 on Windows, or is not available on macOS.
+ * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard like 0.0.0.0, or has port 0.
  * - #VMNL_NET_ENETUNREACH or #VMNL_NET_EHOSTUNREACH: no route reaches \p address.
  * - #VMNL_NET_ENETDOWN: the local interface is down on macOS, or the network subsystem failed on Windows.
  * - Any other translated system error.
@@ -142,7 +142,7 @@ VMNL_NET_API bool vmnl_net_socket_datagram_set_broadcast(VmnlNetSocketDatagram *
  * \param size Size of the buffer, in bytes.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOTSUP: the type of \p netsock has no system buffer.
- * - #VMNL_NET_EINVAL: \p size is greater than INT_MAX, or \p size is 0 on macOS.
+ * - #VMNL_NET_EINVAL: \p size is 0 or greater than INT_MAX.
  * - #VMNL_NET_ENOBUFS: the system lacks memory, on macOS.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
  * - Any other translated system error.
@@ -157,7 +157,7 @@ VMNL_NET_API bool vmnl_net_socket_datagram_set_receive_buffer_size(VmnlNetSocket
  * \param size Size of the buffer, in bytes.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOTSUP: the type of \p netsock has no system buffer.
- * - #VMNL_NET_EINVAL: \p size is greater than INT_MAX, or \p size is 0 on macOS.
+ * - #VMNL_NET_EINVAL: \p size is 0 or greater than INT_MAX.
  * - #VMNL_NET_ENOBUFS: the system lacks memory, on macOS.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
  * - Any other translated system error.
@@ -171,12 +171,11 @@ VMNL_NET_API bool vmnl_net_socket_datagram_set_send_buffer_size(VmnlNetSocketDat
  * \param netsock Socket to read.
  * \param address Local address, unchanged on failure.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p netsock is not bound, on Windows.
  * - #VMNL_NET_ENOBUFS: the system lacks resources, on POSIX.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
  * - Any other translated system error.
  * \return true on success, false otherwise.
- * \remark Gives the port the system chose after a bind to #VMNL_NET_ADDRESS_ANY_PORT.
+ * \remark Gives the port the system chose after a bind to #VMNL_NET_ADDRESS_ANY_PORT, and the wildcard address of the socket's version with port 0 before any bind.
  */
 VMNL_NET_API bool vmnl_net_socket_datagram_local_address(const VmnlNetSocketDatagram *netsock, VmnlNetAddress *address, VmnlNetError *error);
 
@@ -216,12 +215,12 @@ VMNL_NET_API VmnlNetSocketEvents vmnl_net_socket_datagram_wait_for(const VmnlNet
  * \param nviews Number of elements of \p views.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_ENOTCONN: \p netsock is not connected.
- * - #VMNL_NET_EMSGSIZE: the datagram is too large for the socket, or \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EMSGSIZE: the datagram is too large for the socket, or \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
  * - #VMNL_NET_EAGAIN: the system's send buffer is full.
  * - #VMNL_NET_ENETUNREACH or #VMNL_NET_EHOSTUNREACH: no route reaches the peer.
  * - #VMNL_NET_ENETDOWN: the local interface is down on macOS, or the network subsystem failed on Windows.
  * - #VMNL_NET_ENETRESET: the time to live expired, on Windows.
- * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes on macOS.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory.
  * - Any other translated system error.
  * \return Number of bytes sent, the whole datagram, 0 with #VMNL_NET_SUCCESS for an empty datagram, 0 on failure.
@@ -236,15 +235,15 @@ VMNL_NET_API size_t vmnl_net_socket_datagram_send(VmnlNetSocketDatagram *netsock
  * \param nviews Number of elements of \p views.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EAFNOSUPPORT: \p address is IPv6 and \p netsock is IPv4.
- * - #VMNL_NET_EMSGSIZE: the datagram is too large for the socket, or \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EMSGSIZE: the datagram is too large for the socket, or \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
  * - #VMNL_NET_EAGAIN: the system's send buffer is full, or no ephemeral port is left for an unbound socket on Linux.
  * - #VMNL_NET_EACCES: \p address is 255.255.255.255 without vmnl_net_socket_datagram_set_broadcast(), or a directed broadcast address like 192.168.1.255 without it or a prohibit route reaches it on Linux.
  * - #VMNL_NET_ENETUNREACH or #VMNL_NET_EHOSTUNREACH: no route reaches \p address.
  * - #VMNL_NET_ENETDOWN: the local interface is down on macOS, or the network subsystem failed on Windows.
  * - #VMNL_NET_ENETRESET: the time to live expired, on Windows.
- * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard like 0.0.0.0 on Windows, or the local address is no longer available on macOS.
+ * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard like 0.0.0.0 or has port 0, or the local address is no longer available on macOS.
  * - #VMNL_NET_EISCONN: \p netsock is connected.
- * - #VMNL_NET_EINVAL: \p nviews is 0, \p views hold more than INT_MAX bytes on macOS, or a blackhole route reaches \p address on Linux.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, \p views hold more than INT_MAX bytes, or a blackhole route reaches \p address on Linux.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory.
  * - Any other translated system error.
  * \return Number of bytes sent, the whole datagram, 0 with #VMNL_NET_SUCCESS for an empty datagram, 0 on failure.
@@ -257,11 +256,11 @@ VMNL_NET_API size_t vmnl_net_socket_datagram_send_to(VmnlNetSocketDatagram *nets
  * \param views Space to fill, in order.
  * \param nviews Number of elements of \p views.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EAGAIN: no datagram is waiting.
- * - #VMNL_NET_EMSGSIZE: the datagram was larger than \p views, and its end is lost, or \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EAGAIN: no datagram is waiting, an unbound socket included.
+ * - #VMNL_NET_EMSGSIZE: the datagram was larger than \p views, and its end is lost, or \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
  * - #VMNL_NET_ECONNREFUSED: an earlier datagram found no receiver, on a connected socket.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
- * - #VMNL_NET_EINVAL: \p nviews is 0, \p netsock is not bound on Windows, or \p views hold more than INT_MAX bytes on macOS.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on POSIX.
  * - Any other translated system error.
  * \return Number of bytes of the datagram, 0 with #VMNL_NET_SUCCESS for an empty datagram, 0 on failure.
@@ -275,11 +274,11 @@ VMNL_NET_API size_t vmnl_net_socket_datagram_receive(VmnlNetSocketDatagram *nets
  * \param nviews Number of elements of \p views.
  * \param address Address of the sender, unchanged on failure.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EAGAIN: no datagram is waiting.
- * - #VMNL_NET_EMSGSIZE: the datagram was larger than \p views, and its end is lost, or \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EAGAIN: no datagram is waiting, an unbound socket included.
+ * - #VMNL_NET_EMSGSIZE: the datagram was larger than \p views, and its end is lost, or \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
  * - #VMNL_NET_ECONNREFUSED: an earlier datagram found no receiver, on a connected socket.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
- * - #VMNL_NET_EINVAL: \p nviews is 0, \p netsock is not bound on Windows, or \p views hold more than INT_MAX bytes on macOS.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on POSIX.
  * - Any other translated system error.
  * \return Number of bytes of the datagram, 0 with #VMNL_NET_SUCCESS for an empty datagram, 0 on failure.

@@ -1,6 +1,10 @@
 #include "socket_datagram_tests.h"
 
+#include <limits.h>
+
 static uint8_t large[65536];
+
+static VmnlNetBufferView max_views[VMNL_NET_SOCKET_MAX_VIEWS + 1];
 
 DATAGRAM_PAIR_FIXTURE_I(vmnl_net_socket_datagram_send_to, types)
 
@@ -124,4 +128,54 @@ UTEST_I(vmnl_net_socket_datagram_send_to, accepts_null_error, NTYPES)
     uint8_t bytes[2] = {'h', 'i'};
 
     EXPECT_EQ(vmnl_net_socket_datagram_send_to(utest_fixture->sender, &utest_fixture->receiver_address, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, NULL), (size_t) 2);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send_to, sends_max_views, NTYPES)
+{
+    uint8_t byte = 'x';
+
+    views_on_byte(max_views, VMNL_NET_SOCKET_MAX_VIEWS, &byte);
+    EXPECT_EQ(vmnl_net_socket_datagram_send_to(utest_fixture->sender, &utest_fixture->receiver_address, max_views, VMNL_NET_SOCKET_MAX_VIEWS, NULL), (size_t) VMNL_NET_SOCKET_MAX_VIEWS);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send_to, fails_with_more_views_than_max, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    uint8_t byte = 'x';
+
+    views_on_byte(max_views, VMNL_NET_SOCKET_MAX_VIEWS + 1, &byte);
+    EXPECT_EQ(vmnl_net_socket_datagram_send_to(utest_fixture->sender, &utest_fixture->receiver_address, max_views, VMNL_NET_SOCKET_MAX_VIEWS + 1, &error), (size_t) 0);
+    EXPECT_EQ(error, VMNL_NET_EMSGSIZE);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send_to, rejects_views_above_int_max, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    uint8_t byte = 'x';
+    VmnlNetBufferView huge[2] = {{.data = &byte, .size = (size_t) INT_MAX / 2 + 1}, {.data = &byte, .size = (size_t) INT_MAX / 2 + 1}};
+
+    EXPECT_EQ(vmnl_net_socket_datagram_send_to(utest_fixture->sender, &utest_fixture->receiver_address, huge, 2, &error), (size_t) 0);
+    EXPECT_EQ(error, VMNL_NET_EINVAL);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send_to, fails_with_wildcard_address, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAddress address;
+    uint8_t bytes[2] = {'h', 'i'};
+
+    ASSERT_TRUE(vmnl_net_address_make(utest_fixture->type->wildcard, 9, &address, NULL));
+    EXPECT_EQ(vmnl_net_socket_datagram_send_to(utest_fixture->sender, &address, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, &error), (size_t) 0);
+    EXPECT_EQ(error, VMNL_NET_EADDRNOTAVAIL);
+}
+
+UTEST_I(vmnl_net_socket_datagram_send_to, fails_with_port_zero, NTYPES)
+{
+    VmnlNetError error = UINT32_MAX;
+    VmnlNetAddress address;
+    uint8_t bytes[2] = {'h', 'i'};
+
+    ASSERT_TRUE(vmnl_net_address_make(utest_fixture->type->loopback, VMNL_NET_ADDRESS_ANY_PORT, &address, NULL));
+    EXPECT_EQ(vmnl_net_socket_datagram_send_to(utest_fixture->sender, &address, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, &error), (size_t) 0);
+    EXPECT_EQ(error, VMNL_NET_EADDRNOTAVAIL);
 }

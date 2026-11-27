@@ -63,7 +63,7 @@ extern "C" {
 #endif
 
 #define VMNL_NET_SOCKET_SYSTEM_FLAG_CONNECTED UINT32_C(1) /*!< vmnl_net_socket_system_connect() succeeded, so that vmnl_net_socket_system_send_to() refuses an address on every system. */
-#define VMNL_NET_SOCKET_SYSTEM_FLAG_BROADCAST UINT32_C(2) /*!< vmnl_net_socket_system_set_broadcast() allowed the broadcast, which vmnl_net_socket_system_check_broadcast() reads without a system call. */
+#define VMNL_NET_SOCKET_SYSTEM_FLAG_BROADCAST UINT32_C(2) /*!< vmnl_net_socket_system_set_broadcast() allowed the broadcast, which vmnl_net_socket_system_check_remote() reads without a system call. */
 #define VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED   UINT32_C(4) /*!< A send or a connect of a datagram socket drew ECONNREFUSED on POSIX, which the next receive reports, as Windows only reports it at the receive. */
 
 /**
@@ -126,7 +126,7 @@ static inline bool vmnl_net_socket_system_set_option(struct VmnlNetSocketSystem 
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory.
  * - #VMNL_NET_EACCES: the system denies the creation, on POSIX.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
- * - An error of vmnl_net_socket_system_non_blocking() or vmnl_net_socket_system_dual_stack(), or of vmnl_net_socket_system_no_inheritance() on POSIX.
+ * - A translated error of vmnl_net_socket_system_non_blocking(), of vmnl_net_socket_system_no_inheritance() on POSIX, or an error of vmnl_net_socket_system_dual_stack().
  * - Any other translated system error.
  * \return true on success, false otherwise.
  * \remark Calls vmnl_net_socket_system_dual_stack() on an AF_INET6 socket.
@@ -142,24 +142,19 @@ bool vmnl_net_socket_system_open(int family, int type, struct VmnlNetSocketSyste
  *
  * A call that would wait then fails with #VMNL_NET_EAGAIN.
  * \param netsock Socket to set.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
- * - Any other translated system error.
- * \return true on success, false otherwise.
+ * \return true on success, false otherwise, with the error in errno, or WSAGetLastError() on Windows.
  * \remark Sets O_NONBLOCK with fcntl() on POSIX, and FIONBIO with ioctlsocket() on Windows.
+ * \attention \p netsock **MUST** be a socket just opened or accepted, as POSIX replaces its other status flags, which such a socket does not have.
  */
-bool vmnl_net_socket_system_non_blocking(struct VmnlNetSocketSystem *netsock, VmnlNetError *error);
+bool vmnl_net_socket_system_non_blocking(struct VmnlNetSocketSystem *netsock);
 
 /**
  * \brief Keeps a socket out of the child processes.
  * \param netsock Socket to set.
- * \param error Error code of the call, nullable:
- * - #VMNL_NET_FSYSTEM: SetHandleInformation() failed, on Windows.
- * - Any other translated system error.
- * \return true on success, false otherwise.
+ * \return true on success, false otherwise, with the error in errno, or GetLastError() on Windows.
  * \remark Sets FD_CLOEXEC with fcntl() on POSIX, and clears HANDLE_FLAG_INHERIT with SetHandleInformation() on Windows.
  */
-bool vmnl_net_socket_system_no_inheritance(struct VmnlNetSocketSystem *netsock, VmnlNetError *error);
+bool vmnl_net_socket_system_no_inheritance(struct VmnlNetSocketSystem *netsock);
 
 /**
  * \brief Lets a listener rebind a port still in TIME_WAIT.
@@ -251,7 +246,7 @@ bool vmnl_net_socket_system_set_linger(struct VmnlNetSocketSystem *netsock, bool
  * \param netsock Socket to set.
  * \param size Size of the buffer, in bytes.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p size is greater than INT_MAX, \p size is 0 on macOS, or the peer reset the connection on macOS.
+ * - #VMNL_NET_EINVAL: \p size is 0 or greater than INT_MAX, or the peer reset the connection on macOS.
  * - #VMNL_NET_ENETRESET: the connection timed out with keep-alive enabled, on Windows.
  * - #VMNL_NET_ENOTCONN: the connection was reset with keep-alive enabled, on Windows.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on macOS.
@@ -259,6 +254,7 @@ bool vmnl_net_socket_system_set_linger(struct VmnlNetSocketSystem *netsock, bool
  * - Any other translated system error.
  * \return true on success, false otherwise.
  * \remark Sets SO_RCVBUF. Linux doubles the size, for its own bookkeeping.
+ * \remark Refuses a \p size of 0 itself, as only macOS refuses it, while Linux takes its minimum and Windows no buffer.
  */
 bool vmnl_net_socket_system_set_receive_buffer_size(struct VmnlNetSocketSystem *netsock, size_t size, VmnlNetError *error);
 
@@ -267,7 +263,7 @@ bool vmnl_net_socket_system_set_receive_buffer_size(struct VmnlNetSocketSystem *
  * \param netsock Socket to set.
  * \param size Size of the buffer, in bytes.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p size is greater than INT_MAX, \p size is 0 on macOS, or the peer reset the connection on macOS.
+ * - #VMNL_NET_EINVAL: \p size is 0 or greater than INT_MAX, or the peer reset the connection on macOS.
  * - #VMNL_NET_ENETRESET: the connection timed out with keep-alive enabled, on Windows.
  * - #VMNL_NET_ENOTCONN: the connection was reset with keep-alive enabled, on Windows.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on macOS.
@@ -275,6 +271,7 @@ bool vmnl_net_socket_system_set_receive_buffer_size(struct VmnlNetSocketSystem *
  * - Any other translated system error.
  * \return true on success, false otherwise.
  * \remark Sets SO_SNDBUF. Linux doubles the size, for its own bookkeeping.
+ * \remark Refuses a \p size of 0 itself, as only macOS refuses it, while Linux takes its minimum and Windows no buffer.
  */
 bool vmnl_net_socket_system_set_send_buffer_size(struct VmnlNetSocketSystem *netsock, size_t size, VmnlNetError *error);
 
@@ -309,12 +306,12 @@ bool vmnl_net_socket_system_pending_error(struct VmnlNetSocketSystem *netsock, V
  * \param netsock Socket to read.
  * \param address Local address, unchanged on failure.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EINVAL: \p netsock is not bound, on Windows.
  * - #VMNL_NET_ENOBUFS: the system lacks resources, on POSIX.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
  * - Any other translated system error.
  * \return true on success, false otherwise.
  * \remark Calls getsockname(), which gives the port the system chose after a bind to #VMNL_NET_ADDRESS_ANY_PORT.
+ * \remark An unbound socket gives the wildcard address of its family with port 0, which Windows reports with WSAEINVAL.
  */
 bool vmnl_net_socket_system_local_address(const struct VmnlNetSocketSystem *netsock, VmnlNetAddress *address, VmnlNetError *error);
 
@@ -442,7 +439,7 @@ bool vmnl_net_socket_system_listen(struct VmnlNetSocketSystem *netsock, VmnlNetE
  * - #VMNL_NET_EPERM: a firewall rule forbids the connection, on Linux.
  * - #VMNL_NET_ENETDOWN, #VMNL_NET_ENETUNREACH, #VMNL_NET_EHOSTUNREACH, #VMNL_NET_ENOTSUP, #VMNL_NET_ETIMEDOUT or #VMNL_NET_FSYSTEM: a network error was pending on the new connection, on Linux, which advises a retry like #VMNL_NET_EAGAIN.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
- * - An error of vmnl_net_socket_system_non_blocking() or vmnl_net_socket_system_no_inheritance().
+ * - A translated error of vmnl_net_socket_system_non_blocking() or vmnl_net_socket_system_no_inheritance().
  * - Any other translated system error.
  * \return true on success, false otherwise.
  * \remark Makes the accepted socket non-blocking and not inherited, and closes it if one of them fails. Linux does not copy O_NONBLOCK from the listening socket.
@@ -452,23 +449,63 @@ bool vmnl_net_socket_system_listen(struct VmnlNetSocketSystem *netsock, VmnlNetE
 bool vmnl_net_socket_system_accept(struct VmnlNetSocketSystem *netsock, struct VmnlNetSocketSystem *peer, VmnlNetAddress *address, VmnlNetError *error);
 
 /**
- * \brief Refuses the limited broadcast address to a datagram socket without vmnl_net_socket_system_set_broadcast().
+ * \brief Refuses a remote address that the systems treat differently.
  *
- * Linux refuses the connection, while macOS and Windows accept it, and Windows then sends to the broadcast address without SO_BROADCAST.
+ * A wildcard address, like 0.0.0.0, connects to the host on Linux and macOS, while Windows refuses it, and a send to it reaches the host on Linux only.
+ * Port 0 fails on macOS, while Linux connects to it and Windows sends to it.
+ * Linux refuses the limited broadcast address without SO_BROADCAST, while macOS and Windows accept the connection, and Windows then sends to it.
  * An IPv6 socket of Windows also sends to the mapped ::ffff:255.255.255.255 without it, where macOS and Linux refuse the send.
  * Reads #VMNL_NET_SOCKET_SYSTEM_FLAG_BROADCAST when \p address is 255.255.255.255, mapped or not, so a SO_BROADCAST set on the system socket outside the library is not seen.
  * Leaves a directed broadcast address, like 192.168.1.255, to the system.
  * \param netsock Socket to connect or to send on.
  * \param address Remote address.
  * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard, or has port 0.
  * - #VMNL_NET_EACCES: \p netsock is a datagram socket without #VMNL_NET_SOCKET_SYSTEM_FLAG_BROADCAST, and \p address is 255.255.255.255.
  * \return true if \p netsock may reach \p address, false otherwise.
  */
-static inline bool vmnl_net_socket_system_check_broadcast(const struct VmnlNetSocketSystem *netsock, const VmnlNetAddress *address, VmnlNetError *error)
+static inline bool vmnl_net_socket_system_check_remote(const struct VmnlNetSocketSystem *netsock, const VmnlNetAddress *address, VmnlNetError *error)
 {
+    if (vmnl_net_address_is_any(address) == true || address->port == VMNL_NET_ADDRESS_ANY_PORT) {
+        vmnl_net_error_set(error, VMNL_NET_EADDRNOTAVAIL);
+        return false;
+    }
     if (netsock->type == SOCK_DGRAM && (netsock->flags & VMNL_NET_SOCKET_SYSTEM_FLAG_BROADCAST) == 0 && vmnl_net_address_is_broadcast(address) == true) {
         vmnl_net_error_set(error, VMNL_NET_EACCES);
         return false;
+    }
+    return true;
+}
+
+/**
+ * \brief Refuses views that the systems treat differently.
+ *
+ * macOS refuses more than INT_MAX bytes, Linux and macOS more than IOV_MAX views, while Windows takes both.
+ * \param views Views to send or to fill.
+ * \param nviews Number of elements of \p views.
+ * \param error Error code of the call, nullable:
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes.
+ * - #VMNL_NET_EMSGSIZE: \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
+ * \return true if a system call may take \p views, false otherwise.
+ */
+static inline bool vmnl_net_socket_system_check_views(const VmnlNetBufferView *views, size_t nviews, VmnlNetError *error)
+{
+    size_t size = 0;
+
+    if (nviews == 0) {
+        vmnl_net_error_set(error, VMNL_NET_EINVAL);
+        return false;
+    }
+    if (nviews > VMNL_NET_SOCKET_MAX_VIEWS) {
+        vmnl_net_error_set(error, VMNL_NET_EMSGSIZE);
+        return false;
+    }
+    for (size_t it = 0; it < nviews; it++) {
+        if (views[it].size > (size_t) INT_MAX - size) {
+            vmnl_net_error_set(error, VMNL_NET_EINVAL);
+            return false;
+        }
+        size += views[it].size;
     }
     return true;
 }
@@ -490,7 +527,7 @@ static inline bool vmnl_net_socket_system_check_broadcast(const struct VmnlNetSo
  * - #VMNL_NET_EACCES: \p address is 255.255.255.255 on a datagram socket without vmnl_net_socket_system_set_broadcast(), or a directed broadcast address or a firewall or security rule forbids the connection on Linux.
  * - #VMNL_NET_EPERM: the same cases as #VMNL_NET_EACCES, on Linux.
  * - #VMNL_NET_EADDRINUSE: the local address is already in use.
- * - #VMNL_NET_EADDRNOTAVAIL: no ephemeral port is left on Linux, \p address is not available on macOS, or \p address is a wildcard like 0.0.0.0 on Windows.
+ * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard like 0.0.0.0 or has port 0, or no ephemeral port is left on Linux.
  * - #VMNL_NET_EAGAIN: the routing cache lacks entries, on Linux.
  * - #VMNL_NET_EINVAL: \p netsock is listening, or a previous connection has not completed yet, on Windows.
  * - #VMNL_NET_ENOTSUP: \p netsock is listening, on macOS.
@@ -500,7 +537,7 @@ static inline bool vmnl_net_socket_system_check_broadcast(const struct VmnlNetSo
  * \return true if the connection completed at once, false otherwise.
  * \remark Windows reports a connection in progress with WSAEWOULDBLOCK. It gives #VMNL_NET_EINPROGRESS here, where vmnl_net_error_from_system() gives #VMNL_NET_EAGAIN.
  * \remark A stream socket becomes writable once the connection completes, and vmnl_net_socket_system_pending_error() then gives its result.
- * \remark Calls vmnl_net_socket_system_check_broadcast() first, and adds #VMNL_NET_SOCKET_SYSTEM_FLAG_CONNECTED on success.
+ * \remark Calls vmnl_net_socket_system_check_remote() first, and adds #VMNL_NET_SOCKET_SYSTEM_FLAG_CONNECTED on success.
  * \remark A refusal pending on a datagram socket, which macOS reports at the connect, goes to #VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED and the connect is done again, so the next receive reports it on every system, as Linux and Windows keep it across a connect.
  * \remark Sets SIO_UDP_CONNRESET again with vmnl_net_socket_system_report_unreachable() once a datagram socket is connected, on Windows.
  */
@@ -516,22 +553,22 @@ bool vmnl_net_socket_system_connect(struct VmnlNetSocketSystem *netsock, const V
  * \param nviews Number of elements of \p views.
  * \param error Error code of the call, nullable:
  * - #VMNL_NET_EAFNOSUPPORT: \p address is an IPv6 address and \p netsock an AF_INET socket.
- * - #VMNL_NET_EMSGSIZE: the datagram is too large for the socket, or \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EMSGSIZE: the datagram is too large for the socket, or \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
  * - #VMNL_NET_EAGAIN: the system's send buffer is full, or no ephemeral port is left for an unbound socket on Linux.
  * - #VMNL_NET_EACCES: \p address is 255.255.255.255 without vmnl_net_socket_system_set_broadcast(), or a directed broadcast address without it or a prohibit route reaches it on Linux.
  * - #VMNL_NET_ENETUNREACH or #VMNL_NET_EHOSTUNREACH: no route reaches \p address.
  * - #VMNL_NET_ENETDOWN: the local interface is down on macOS, or the network subsystem failed on Windows.
  * - #VMNL_NET_ENETRESET: the time to live expired, on Windows.
- * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard like 0.0.0.0 on Windows, or the local address is no longer available on macOS.
+ * - #VMNL_NET_EADDRNOTAVAIL: \p address is a wildcard like 0.0.0.0 or has port 0, or the local address is no longer available on macOS.
  * - #VMNL_NET_EISCONN: \p address is not NULL and \p netsock has #VMNL_NET_SOCKET_SYSTEM_FLAG_CONNECTED, as only macOS refuses it.
  * - #VMNL_NET_ENOTCONN: \p address is NULL and \p netsock is not connected.
  * - #VMNL_NET_EPIPE: vmnl_net_socket_system_shutdown() stopped sending on \p netsock.
- * - #VMNL_NET_EINVAL: \p nviews is 0, \p views hold more than INT_MAX bytes on macOS, or a blackhole route reaches \p address on Linux.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, \p views hold more than INT_MAX bytes, or a blackhole route reaches \p address on Linux.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory.
  * - Any other translated system error.
  * \return Number of bytes sent, the whole datagram on a datagram socket, 0 with #VMNL_NET_SUCCESS for an empty datagram, 0 on failure.
  * \remark With a NULL \p address on a stream socket, it behaves like vmnl_net_socket_system_send(), whose errors apply.
- * \remark Calls vmnl_net_socket_system_check_broadcast() when \p address is not NULL.
+ * \remark Calls vmnl_net_socket_system_check_views(), then vmnl_net_socket_system_check_remote() when \p address is not NULL.
  * \remark A datagram that draws ECONNREFUSED on POSIX is sent again, and #VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED keeps the refusal for the next receive, as Windows only reports it at the receive.
  */
 size_t vmnl_net_socket_system_send_to(struct VmnlNetSocketSystem *netsock, const VmnlNetAddress *address, const VmnlNetBufferView *views, size_t nviews, VmnlNetError *error);
@@ -543,16 +580,17 @@ size_t vmnl_net_socket_system_send_to(struct VmnlNetSocketSystem *netsock, const
  * \param nviews Number of elements of \p views.
  * \param address Address of the sender, NULL to skip it, unchanged on failure.
  * \param error Error code of the call, nullable:
- * - #VMNL_NET_EAGAIN: no datagram is waiting.
- * - #VMNL_NET_EMSGSIZE: the datagram was larger than \p views, and its end is lost, or \p nviews is more than IOV_MAX on POSIX.
+ * - #VMNL_NET_EAGAIN: no datagram is waiting, an unbound socket included.
+ * - #VMNL_NET_EMSGSIZE: the datagram was larger than \p views, and its end is lost, or \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
  * - #VMNL_NET_ECONNREFUSED: an earlier datagram found no receiver, on a connected socket.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
- * - #VMNL_NET_EINVAL: \p nviews is 0, \p netsock is not bound on Windows, or \p views hold more than INT_MAX bytes on macOS.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on POSIX.
  * - Any other translated system error.
  * \return Number of bytes of the datagram, 0 with #VMNL_NET_SUCCESS for an empty datagram, 0 on failure.
  * \remark With a NULL \p address on a stream socket, it behaves like vmnl_net_socket_system_receive(), whose errors apply.
- * \remark Reports #VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED first, as #VMNL_NET_ECONNREFUSED, and removes it.
+ * \remark Calls vmnl_net_socket_system_check_views(), then reports #VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED, as #VMNL_NET_ECONNREFUSED, and removes it.
+ * \remark Windows refuses a receive on an unbound datagram socket with WSAEINVAL, which gives #VMNL_NET_EAGAIN here, like POSIX.
  */
 size_t vmnl_net_socket_system_receive_from(struct VmnlNetSocketSystem *netsock, const VmnlNetBufferView *views, size_t nviews, VmnlNetAddress *address, VmnlNetError *error);
 
@@ -572,9 +610,9 @@ size_t vmnl_net_socket_system_receive_from(struct VmnlNetSocketSystem *netsock, 
  * - #VMNL_NET_ENETUNREACH or #VMNL_NET_EHOSTUNREACH: no route reaches the peer, on macOS.
  * - #VMNL_NET_ENETDOWN: the local interface is down on macOS, or the network subsystem failed on Windows.
  * - #VMNL_NET_EADDRNOTAVAIL: the local address is no longer available, on macOS.
- * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, or \p views are too large on Windows, like 2 GiB.
- * - #VMNL_NET_EMSGSIZE: \p nviews is more than IOV_MAX on POSIX.
- * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes on macOS.
+ * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory.
+ * - #VMNL_NET_EMSGSIZE: \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes.
  * - Any other translated system error.
  * \return Number of bytes sent, which can be less than \p views holds, 0 on failure.
  * \remark Never raises SIGPIPE.
@@ -599,8 +637,8 @@ static inline size_t vmnl_net_socket_system_send(struct VmnlNetSocketSystem *net
  * - #VMNL_NET_ENOTCONN: \p netsock is not connected.
  * - #VMNL_NET_ENETDOWN: the network subsystem failed, on Windows.
  * - #VMNL_NET_ENOBUFS or #VMNL_NET_ENOMEM: the system lacks memory, on POSIX.
- * - #VMNL_NET_EMSGSIZE: \p nviews is more than IOV_MAX on POSIX.
- * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes on macOS.
+ * - #VMNL_NET_EMSGSIZE: \p nviews is more than #VMNL_NET_SOCKET_MAX_VIEWS.
+ * - #VMNL_NET_EINVAL: \p nviews is 0, or \p views hold more than INT_MAX bytes.
  * - Any other translated system error.
  * \return Number of bytes received, 0 with #VMNL_NET_SUCCESS when the peer closed the connection, 0 on failure.
  */

@@ -9,15 +9,14 @@ size_t vmnl_net_socket_system_send_to(struct VmnlNetSocketSystem *netsock, const
     DWORD nbytes = 0;
     int wsa_error;
 
-    if (nviews == 0) {
-        vmnl_net_error_set(error, VMNL_NET_EINVAL);
+    if (vmnl_net_socket_system_check_views(views, nviews, error) == false) {
         return 0;
     }
     if (address != NULL && (netsock->flags & VMNL_NET_SOCKET_SYSTEM_FLAG_CONNECTED) != 0) {
         vmnl_net_error_set(error, VMNL_NET_EISCONN);
         return 0;
     }
-    if (address != NULL && vmnl_net_socket_system_check_broadcast(netsock, address, error) == false) {
+    if (address != NULL && vmnl_net_socket_system_check_remote(netsock, address, error) == false) {
         return 0;
     }
     if (address != NULL && vmnl_net_address_as_sockaddr(address, netsock->family, &storage, &socklen) == false) {

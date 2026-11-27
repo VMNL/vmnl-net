@@ -8,6 +8,11 @@ bool vmnl_net_socket_system_local_address(const struct VmnlNetSocketSystem *nets
 
     /* GCOVR_EXCL_START: on POSIX, where the coverage runs, getsockname() only fails on a socket that is not open. */
     if (getsockname(netsock->handle, (struct sockaddr *) &storage, &socklen) == -1) {
+#ifdef _WIN32
+        if (WSAGetLastError() == WSAEINVAL) {
+            return vmnl_net_address_make((netsock->family == AF_INET) ? "0.0.0.0" : "::", VMNL_NET_ADDRESS_ANY_PORT, address, error);
+        }
+#endif
         vmnl_net_error_set(error, vmnl_net_error_from_last_system());
         return false;
     }

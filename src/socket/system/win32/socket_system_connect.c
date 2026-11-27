@@ -13,7 +13,7 @@ bool vmnl_net_socket_system_connect(struct VmnlNetSocketSystem *netsock, const V
         vmnl_net_error_set(error, VMNL_NET_EAFNOSUPPORT);
         return false;
     }
-    if (vmnl_net_socket_system_check_broadcast(netsock, address, error) == false) {
+    if (vmnl_net_socket_system_check_remote(netsock, address, error) == false) {
         return false;
     }
     if (connect(netsock->handle, (const struct sockaddr *) &storage, socklen) == SOCKET_ERROR) {

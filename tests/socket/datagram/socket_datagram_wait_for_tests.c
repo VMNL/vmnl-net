@@ -50,6 +50,7 @@ UTEST_I(vmnl_net_socket_datagram_wait_for, returns_readable_when_error_waits, NT
 
 UTEST_I(vmnl_net_socket_datagram_wait_for, returns_readable_when_refusal_waits_after_send, NTYPES)
 {
+    VmnlNetError error = UINT32_MAX;
     VmnlNetSocketDatagram *closed = create(utest_fixture->type);
     VmnlNetAddress address;
     uint8_t bytes[2] = {'h', 'i'};
@@ -61,7 +62,8 @@ UTEST_I(vmnl_net_socket_datagram_wait_for, returns_readable_when_refusal_waits_a
     ASSERT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, NULL), (size_t) 2);
     ASSERT_EQ(vmnl_net_socket_datagram_wait_for(utest_fixture->sender, VMNL_NET_SOCKET_READABLE, RECEIVE_TIMEOUT, NULL), VMNL_NET_SOCKET_READABLE);
     ASSERT_EQ(vmnl_net_socket_datagram_send(utest_fixture->sender, &(VmnlNetBufferView) {.data = bytes, .size = 2}, 1, NULL), (size_t) 2);
-    EXPECT_EQ(vmnl_net_socket_datagram_wait_for(utest_fixture->sender, VMNL_NET_SOCKET_READABLE, 0, NULL), VMNL_NET_SOCKET_READABLE);
+    EXPECT_EQ(vmnl_net_socket_datagram_wait_for(utest_fixture->sender, VMNL_NET_SOCKET_READABLE, 0, &error), VMNL_NET_SOCKET_READABLE);
+    EXPECT_EQ(error, VMNL_NET_SUCCESS);
 }
 
 UTEST_I(vmnl_net_socket_datagram_wait_for, returns_readable_with_unlimited_timeout, NTYPES)

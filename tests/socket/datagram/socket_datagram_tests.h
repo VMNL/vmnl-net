@@ -14,6 +14,12 @@
 
 #include "utest.h"
 
+#ifdef _WIN32
+#include <winsock2.h>
+#else
+#include <fcntl.h>
+#endif
+
 #define NTYPES          2 /*!< Elements of #types, the count of UTEST_I. */
 #define RECEIVE_TIMEOUT VMNL_NET_NANOSECONDS_PER_SECOND /*!< Time a helper waits for a datagram, as the system may deliver it later. */
 #define MILLISECOND     (VMNL_NET_NANOSECONDS_PER_SECOND / VMNL_NET_MILLISECONDS_PER_SECOND) /*!< Nanoseconds in a millisecond. */
@@ -106,6 +112,23 @@ static const struct DatagramType types[NTYPES] = {
     {VMNL_NET_SOCKET_DATAGRAM_UDP, VMNL_NET_ADDRESS_IPV4, "127.0.0.1", "192.0.2.1", "0.0.0.0"},
     {VMNL_NET_SOCKET_DATAGRAM_UDP, VMNL_NET_ADDRESS_IPV6, "::1", "2001:db8::1", "::"},
 };
+
+/**
+ * \brief Checks whether the child processes inherit a socket, which each system reads its own way.
+ * \param handle Native handle of the socket.
+ * \return true if a child process inherits \p handle, false otherwise.
+ */
+static inline bool is_inherited(VmnlNetHandle handle)
+{
+#ifdef _WIN32
+    DWORD flags = 0;
+
+    /* NOLINTNEXTLINE(performance-no-int-to-ptr) */
+    return GetHandleInformation((HANDLE) handle, &flags) != false && (flags & HANDLE_FLAG_INHERIT) != 0;
+#else
+    return ((unsigned int) fcntl(handle, F_GETFD) & (unsigned int) FD_CLOEXEC) == 0;
+#endif
+}
 
 /**
  * \brief Operations of a type without broadcast nor system buffer, for the cases no real type triggers.

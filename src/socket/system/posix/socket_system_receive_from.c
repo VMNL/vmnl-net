@@ -8,8 +8,7 @@ size_t vmnl_net_socket_system_receive_from(struct VmnlNetSocketSystem *netsock, 
     struct msghdr message = {.msg_name = &storage, .msg_namelen = sizeof storage, .msg_iov = (struct iovec *) views, .msg_iovlen = (__typeof__(message.msg_iovlen)) nviews};
     ssize_t nbytes;
 
-    if (nviews == 0) {
-        vmnl_net_error_set(error, VMNL_NET_EINVAL);
+    if (vmnl_net_socket_system_check_views(views, nviews, error) == false) {
         return 0;
     }
     if ((netsock->flags & VMNL_NET_SOCKET_SYSTEM_FLAG_REFUSED) != 0) {

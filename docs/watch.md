@@ -89,6 +89,20 @@ The three docs say that connecting a datagram socket to a broadcast address with
 - What it changes: The same program could broadcast on Windows and fail on Linux, and a send to an address on a connected socket worked on two systems out of three
 - What I did: The wrapper refuses 255.255.255.255, mapped or not, without the option, and an address on a connected socket, on every system, as decisions [0017](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md) and [0018](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0018-sends-and-receives.md) explain. Linux also refused the directed broadcast address 172.17.255.255 of a Docker network, at the connection and at the send, which the wrapper leaves to the system
 
+## Datagram inputs that the systems treat differently
+
+> November 27, 2026
+
+- Status: Tested
+- Source: tests on Linux, macOS and Windows, and [WSARecvFrom](https://learn.microsoft.com/en-us/windows/win32/api/winsock2/nf-winsock2-wsarecvfrom) and [getsockname](https://learn.microsoft.com/en-us/windows/win32/api/winsock/nf-winsock-getsockname) in the docs of Microsoft
+
+#### Subject
+
+A test sent the same inputs through raw system calls on the three systems. A wildcard remote address connected on Linux and macOS and failed on Windows, and a send to it reached the host on Linux, failed with EHOSTUNREACH on macOS and with WSAEADDRNOTAVAIL on Windows. Port 0 failed on macOS only. A buffer size of 0 failed on macOS only. More than 1024 views failed on Linux and macOS only. A receive or getsockname() on an unbound socket failed with WSAEINVAL on Windows only. No connect failed with the same error on the three systems, the closest being a link-local address on an unknown interface, with EINVAL on macOS and ENETUNREACH on Linux and Windows.
+
+- What it changes: The same program behaved differently on each system for these inputs
+- What I did: The wrapper checks them itself and gives one result on every system, as decisions [0017](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0017-system-socket.md) and [0018](https://github.com/VMNL/vmnl-net/blob/main/docs/decisions/0018-sends-and-receives.md) record
+
 ## ECONNREFUSED on UDP sockets
 
 > November 27, 2026

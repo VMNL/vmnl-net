@@ -10,13 +10,18 @@ size_t vmnl_net_socket_system_receive_from(struct VmnlNetSocketSystem *netsock, 
     DWORD nbytes = 0;
     int wsa_error;
 
-    if (nviews == 0) {
-        vmnl_net_error_set(error, VMNL_NET_EINVAL);
+    if (vmnl_net_socket_system_check_views(views, nviews, error) == false) {
         return 0;
     }
     if (WSARecvFrom(netsock->handle, (LPWSABUF) views, (DWORD) nviews, &nbytes, &(DWORD) {0}, sender, sender_length, NULL, NULL) == SOCKET_ERROR) {
         wsa_error = WSAGetLastError();
-        vmnl_net_error_set(error, (netsock->type == SOCK_DGRAM && wsa_error == WSAECONNRESET) ? VMNL_NET_ECONNREFUSED : vmnl_net_error_from_system(wsa_error));
+        if (netsock->type == SOCK_DGRAM && wsa_error == WSAECONNRESET) {
+            vmnl_net_error_set(error, VMNL_NET_ECONNREFUSED);
+        } else if (netsock->type == SOCK_DGRAM && wsa_error == WSAEINVAL) {
+            vmnl_net_error_set(error, VMNL_NET_EAGAIN);
+        } else {
+            vmnl_net_error_set(error, vmnl_net_error_from_system(wsa_error));
+        }
         return 0;
     }
     if (address != NULL) {
